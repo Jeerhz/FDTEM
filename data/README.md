@@ -42,8 +42,11 @@ Since 2021 the WMT Metrics task decided to perform they own expert-based evaluat
 | 2020 | [🔗](https://unbabel-experimental-data-sets.s3.eu-west-1.amazonaws.com/comet/data/2020-mqm.tar.gz) | [A Large-Scale Study of Human Evaluation for Machine Translation](https://aclanthology.org/2021.tacl-1.87.pdf) |
 | 2021 | [🔗](https://unbabel-experimental-data-sets.s3.eu-west-1.amazonaws.com/comet/data/2021-mqm.tar.gz) | [Results of the WMT21 Metrics Shared Task](https://aclanthology.org/2021.wmt-1.73.pdf) |
 | 2022 | [🔗](https://unbabel-experimental-data-sets.s3.eu-west-1.amazonaws.com/comet/data/2022-mqm.tar.gz) | [Results of the WMT22 Metrics Shared Task](https://aclanthology.org/2022.wmt-1.2.pdf) |
+| 2023 | [🔗](https://github.com/google-research/mt-metrics-eval) | [Results of the WMT23 Metrics Shared Task](https://aclanthology.org/2023.wmt-1.51.pdf) |
+| 2024 | [🔗](https://github.com/google-research/mt-metrics-eval) | [Are LLMs Breaking MT Metrics? Results of the WMT24 Metrics Shared Task](https://aclanthology.org/2024.wmt-1.2.pdf) |
+| 2025 | [🔗](https://github.com/google-research/mt-metrics-eval) | [Findings of the WMT25 Shared Task on Automated Translation Evaluation Systems](https://aclanthology.org/2025.wmt-1.24.pdf) |
 
-**Note:** You can find the original MQM data [here](https://github.com/google/wmt-mqm-human-evaluation).
+**Note:** You can find the original MQM data (up to 2022) [here](https://github.com/google/wmt-mqm-human-evaluation). For 2023 onwards, MQM annotations are distributed via the [mt-metrics-eval](https://github.com/google-research/mt-metrics-eval) repository.
 
 # Direct Assessment + Scalar Quality Metric:
 
@@ -52,3 +55,38 @@ In 2022, several changes were made to the annotation procedure used in the WMT T
 | year | data | paper |
 |:---: | :--: | :---: |
 | 2022 | [🔗](https://unbabel-experimental-data-sets.s3.eu-west-1.amazonaws.com/comet/data/2022-sqm.tar.gz) | [Findings of the 2022 Conference on Machine Translation (WMT22)](https://aclanthology.org/2022.wmt-1.1.pdf) |
+| 2023 | [🔗](https://github.com/google-research/mt-metrics-eval) | [Findings of the 2023 Conference on Machine Translation (WMT23)](https://aclanthology.org/2023.wmt-1.1.pdf) |
+
+# Error Span Annotations:
+
+Starting with WMT24, the WMT human evaluation protocol switched from DA+SQM to _Error Span Annotations (ESA)_. ESA combines the continuous rating of DA with the high-level error severity span marking of MQM. ESA is faster than MQM, does not require expert annotators, and produces more stable assessments than standard DA. MQM continues to be used for a subset of language pairs.
+
+| year | data | paper |
+|:---: | :--: | :---: |
+| 2024 | [🔗](https://github.com/wmt-conference/ErrorSpanAnnotation) | [Findings of the WMT24 General Machine Translation Shared Task](https://aclanthology.org/2024.wmt-1.1.pdf) |
+| 2025 | [🔗](https://github.com/wmt-conference/ErrorSpanAnnotation) | [Findings of the WMT25 General Machine Translation Shared Task](https://aclanthology.org/2025.wmt-1.22.pdf) |
+
+# Document-Level Evaluation:
+
+Evaluating translations beyond the sentence level requires datasets that preserve document structure and capture discourse phenomena. The following resources are used to train and benchmark document-level metrics.
+
+## Document-Level Parallel Corpora
+
+Large-scale document-aligned parallel corpora for training and evaluating document-level MT systems and metrics.
+
+| dataset | coverage | data | paper |
+|:---: | :--: | :--: | :---: |
+| WMT24++ | 55 languages × English, 4 domains (news, literary, social, speech) | [🔗](https://huggingface.co/datasets/google/wmt24pp) | [WMT24++: Expanding the Language Coverage of WMT24 to 55 Languages & Dialects](https://aclanthology.org/2025.findings-acl.634.pdf) |
+| DocHPLT | 50 languages × English, 124M document pairs | [🔗](https://huggingface.co/datasets/HPLT/DocHPLT) | [DocHPLT: A Massively Multilingual Document-Level Translation Dataset](https://arxiv.org/pdf/2508.13079) |
+
+## Contrastive Challenge Sets
+
+Contrastive challenge sets inject controlled perturbations into MT outputs and test whether metrics assign higher scores to the original. The following datasets target discourse and document-level phenomena specifically.
+
+| dataset | phenomena | language pairs | data | paper |
+|:---: | :--: | :--: | :--: | :---: |
+| ACES | 68 accuracy error categories | 146 pairs | [🔗](https://github.com/EdinburghNLP/ACES) | [ACES: Translation Accuracy Challenge Sets for Evaluating MT Metrics](https://aclanthology.org/2022.wmt-1.44.pdf) |
+| DEMETR | 35 linguistic perturbations | 10 source languages → en | [🔗](https://github.com/marzenakrp/demetr) | [DEMETR: Diagnosing Evaluation Metrics for Translation](https://aclanthology.org/2022.emnlp-main.649.pdf) |
+| BlonDe | discourse-related spans (pronouns, tense, connectives) | ZH ↔ EN | [🔗](https://github.com/EleanorJiang/BlonDe) | [BlonDe: An Automatic Evaluation Metric for Document-level MT](https://aclanthology.org/2022.naacl-main.111.pdf) |
+| ContraPro | anaphoric pronoun gender agreement | EN–DE | [🔗](https://github.com/ZurichNLP/ContraPro) | [A Large-Scale Test Set for Context-Aware Pronoun Translation](https://aclanthology.org/W18-6307.pdf) |
+
