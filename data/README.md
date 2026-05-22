@@ -66,6 +66,33 @@ Starting with WMT24, the WMT human evaluation protocol switched from DA+SQM to _
 | 2024 | [🔗](https://github.com/wmt-conference/ErrorSpanAnnotation) | [Findings of the WMT24 General Machine Translation Shared Task](https://aclanthology.org/2024.wmt-1.1.pdf) |
 | 2025 | [🔗](https://github.com/wmt-conference/ErrorSpanAnnotation) | [Findings of the WMT25 General Machine Translation Shared Task](https://aclanthology.org/2025.wmt-1.22.pdf) |
 
+# Biomedical Translation Evaluation:
+
+General MT metrics trained on news-domain data tend to underperform in the biomedical domain, where terminology precision and register matter more than in general text. Finetuning COMET on biomedical-specific evaluation data requires `(src, mt, ref, score)` tuples where the score reflects expert human judgement over medical or clinical translations.
+
+## Biomedical MQM Annotations
+
+The following dataset provides expert MQM annotations over biomedical translations and is the primary resource for finetuning COMET in this domain.
+
+| dataset | language pairs | annotation type | data | paper |
+|:---: | :--: | :--: | :--: | :---: |
+| Amazon Bio-MQM | 11 pairs (DE↔EN, EN↔{ES,FR,RU,ZH}, ES↔EN, FR↔EN, RU↔EN, ZH↔EN) | MQM by expert medical translators | [🔗](https://github.com/amazon-science/bio-mqm-dataset) | [Fine-Tuned Machine Translation Metrics Struggle in Unseen Domains (ACL 2024)](https://aclanthology.org/2024.acl-short.45.pdf) |
+
+The dataset contains ~25,000 quality judgements (19,191 test + 6,069 dev) collected by professional translators with medical domain expertise. The accompanying paper demonstrates that standard COMET models trained on news MQM data degrade substantially on biomedical text, motivating domain-specific finetuning.
+
+## WMT Biomedical Translation Shared Task
+
+The WMT Biomedical Translation shared task has provided test sets of PubMed and Medline abstracts since 2016. While the task does not publish systematic DA or MQM scoring across all MT submissions (unlike the news translation task), the test sets and system outputs are useful as reference data or for constructing silver-label training sets via a stronger metric.
+
+| year | language pairs | data | paper |
+|:---: | :--: | :--: | :---: |
+| 2017 | EN↔{DE,FR,PT} | [🔗](https://github.com/biomedical-translation-corpora/corpora) | [Findings of the WMT 2017 Biomedical Translation Shared Task](https://aclanthology.org/W17-4719.pdf) |
+| 2018 | EN↔{DE,FR,PT,ES,RO} | [🔗](https://github.com/biomedical-translation-corpora/corpora) | [Findings of the WMT 2018 Biomedical Translation Shared Task](https://aclanthology.org/W18-6403.pdf) |
+| 2019 | EN↔{DE,FR,PT,ES,ZH} | [🔗](https://github.com/biomedical-translation-corpora/corpora) | [Findings of the WMT 2019 Biomedical Translation Shared Task](https://aclanthology.org/W19-5403.pdf) |
+| 2024 | EN↔{DE,ES,FR,IT,PT,RU} | [🔗](https://github.com/biomedical-translation-corpora/corpora) | [Findings of the WMT 2024 Biomedical Translation Shared Task](https://aclanthology.org/2024.wmt-1.6.pdf) |
+
+**Note:** To use WMT Biomedical test sets for COMET finetuning, silver quality scores can be obtained by scoring system outputs with a strong general-domain metric (e.g. COMET-22) and using those scores as training signal — a domain adaptation strategy described in the Bio-MQM paper above.
+
 # Document-Level Evaluation:
 
 Evaluating translations beyond the sentence level requires datasets that preserve document structure and capture discourse phenomena. The following resources are used to train and benchmark document-level metrics.

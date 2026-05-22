@@ -56,8 +56,17 @@ PYTHONPATH=. ./comet/cli/score.py
     4. [Scoring within Python](#scoring-within-python)
     5. [Explaining Translation Errors](#explaining-translation-errors)
 3. [Train your own Metric](#train-your-own-metric)
-4. [Unittest](#unittest)
-5. [Publications](#publications)
+4. [Finetuning on Biomedical MQM Data](#finetuning-on-biomedical-mqm-data)
+    1. [Prerequisites](#prerequisites)
+    2. [Step 1 — Prepare the Data](#step-1--prepare-the-data)
+    3. [Step 2 — Configure the Training](#step-2--configure-the-training)
+    4. [Step 3 — Run Finetuning](#step-3--run-finetuning)
+    5. [Monitoring with Weights & Biases](#monitoring-with-weights--biases)
+    6. [Managing Checkpoints](#managing-checkpoints)
+    7. [Step 4 — Upload to Hugging Face Hub](#step-4--upload-to-hugging-face-hub)
+    8. [Step 5 — Load and Score with the Finetuned Model](#step-5--load-and-score-with-the-finetuned-model)
+5. [Unittest](#unittest)
+6. [Publications](#publications)
 
 
 # Scoring MT outputs:
@@ -283,6 +292,244 @@ comet-score -s src.de -t hyp1.en -r ref.en --model PATH/TO/CHECKPOINT
 ```
 
 You can also upload your model to [Hugging Face Hub](https://huggingface.co/docs/hub/index). Use [`Unbabel/wmt22-comet-da`](https://huggingface.co/Unbabel/wmt22-comet-da) as example. Then you can use your model directly from the hub.
+
+# Finetuning on Biomedical MQM Data
+
+General-domain COMET models trained on WMT news data degrade substantially on biomedical text, where terminology precision matters far more than in general translation. This section explains how to finetune COMET on the [Amazon Bio-MQM dataset](https://github.com/amazon-science/bio-mqm-dataset) — ~25 k expert MQM judgements over 11 language pairs — using the scripts provided in this repository.
+
+> **Reference:** [Fine-Tuned Machine Translation Metrics Struggle in Unseen Domains (ACL 2024)](https://aclanthology.org/2024.acl-short.45.pdf)
+
+## Prerequisites
+
+**Python environment** (Python ≥ 3.8):
+
+```bash
+git clone https://github.com/Unbabel/COMET   # or your fork
+cd COMET
+pip install poetry
+poetry install
+# additional dependencies for finetuning
+pip install wandb huggingface_hub
+```
+
+**Authentication** (one-time setup per machine):
+
+```bash
+# Hugging Face — required to download gated models and upload your checkpoint
+huggingface-cli login
+
+# Weights & Biases — required for training monitoring
+wandb login
+```
+
+**Hardware:** A single GPU with ≥ 16 GB VRAM (e.g. A100 40 GB or V100 32 GB) is sufficient with the default `batch_size: 8` and `accumulate_grad_batches: 8` (effective batch size 64). Reduce `batch_size` to 4 and increase `accumulate_grad_batches` to 16 if you have less memory.
+
+## Step 1 — Prepare the Data
+
+The preparation script clones the Bio-MQM repository, converts span-level MQM annotations to per-segment scores using standard penalty weights (critical = −25, major = −5, minor = −1), z-score normalises the scores per language pair, and writes COMET-ready CSV files.
+
+```bash
+python scripts/prepare_bio_mqm_data.py \
+    --output_dir data/bio_mqm \
+    --write_combined
+```
+
+This produces one `<lang-pair>_train.csv` and `<lang-pair>_val.csv` per language pair under `data/bio_mqm/`, plus combined `all_train.csv` / `all_val.csv` if `--write_combined` is set.
+
+**Options:**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--output_dir` | `data/bio_mqm` | Directory for processed CSV files |
+| `--repo_dir` | `<output_dir>/bio-mqm-dataset` | Local path for the cloned dataset repo |
+| `--lang_pairs` | all 11 pairs | Space-separated list, e.g. `en-de de-en en-zh` |
+| `--no_ref` | off | Omit the `ref` column for QE-style (reference-free) training |
+| `--write_combined` | off | Also write merged CSVs across all language pairs |
+
+**CSV format** (COMET training input):
+
+```
+src,mt,ref,score
+"The patient was administered ...", "Der Patient erhielt ...", "Dem Patienten ...", 0.87
+```
+
+## Step 2 — Configure the Training
+
+The training configuration is in [`configs/models/bio_mqm_finetune.yaml`](configs/models/bio_mqm_finetune.yaml). The most important parameters to review before starting:
+
+```yaml
+regression_metric:
+  init_args:
+    # Base encoder — keep in sync with wmt22-comet-da
+    pretrained_model: xlm-roberta-large
+
+    # Conservative LRs to avoid catastrophic forgetting
+    encoder_learning_rate: 5.0e-07
+    learning_rate: 1.0e-05
+
+    # Reduce to 4 if OOM; compensate with accumulate_grad_batches in trainer
+    batch_size: 8
+
+    # Point to outputs of Step 1
+    train_data:
+      - data/bio_mqm/en-de_train.csv
+      - data/bio_mqm/de-en_train.csv
+      # ... add / remove language pairs as needed
+    validation_data:
+      - data/bio_mqm/en-de_val.csv
+      - data/bio_mqm/de-en_val.csv
+```
+
+The trainer config [`configs/trainer_wandb.yaml`](configs/trainer_wandb.yaml) controls GPU count, gradient accumulation, and the W&B logger. Edit `devices:` there or pass `--gpus` to the shell script below.
+
+## Step 3 — Run Finetuning
+
+The shell script orchestrates all steps: data preparation → base checkpoint download → `comet-train` → checkpoint summary.
+
+```bash
+# Single GPU, default run name
+bash scripts/finetune_bio_mqm.sh
+
+# Two GPUs with a custom run name
+bash scripts/finetune_bio_mqm.sh --gpus 2 --run_name bio_mqm_v1
+```
+
+**Available flags:**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--gpus` | `1` | Number of GPUs for training |
+| `--run_name` | `comet-bio-mqm-<timestamp>` | W&B run name and log file prefix |
+| `--output_dir` | `data/bio_mqm` | Where data CSVs are stored |
+| `--checkpoint_dir` | `checkpoints/bio_mqm` | Where `.ckpt` files and logs are saved |
+
+You can also call `comet-train` directly for full control:
+
+```bash
+# Download the base checkpoint once
+BASE_CKPT=$(python -c "
+from comet import download_model; import os
+p = download_model('Unbabel/wmt22-comet-da')
+for r,_,fs in os.walk(p):
+    for f in fs:
+        if f.endswith('.ckpt'): print(os.path.join(r,f)); raise SystemExit
+")
+
+comet-train \
+    --cfg configs/models/bio_mqm_finetune.yaml \
+    --load_from_checkpoint "$BASE_CKPT" \
+    --seed_everything 42
+```
+
+## Monitoring with Weights & Biases
+
+Training metrics stream automatically to W&B when `wandb login` has been run. The W&B project is controlled by the `WANDB_PROJECT` environment variable (default: `comet-bio-mqm`).
+
+```bash
+export WANDB_PROJECT=my-project
+bash scripts/finetune_bio_mqm.sh --run_name experiment_1
+```
+
+**Metrics logged per step / epoch:**
+
+| Metric | Description |
+|---|---|
+| `train_loss` | MSE loss on training batch |
+| `val_kendall` | Kendall τ on each validation set (one per language pair) |
+| `lr` / `encoder_lr` | Learning rate schedule for head and encoder |
+
+Each validation file listed in `validation_data` produces its own `val_kendall` curve, making it straightforward to track per-language-pair generalisation in the W&B dashboard.
+
+To disable W&B entirely:
+
+```bash
+WANDB_MODE=disabled bash scripts/finetune_bio_mqm.sh
+```
+
+## Managing Checkpoints
+
+The `ModelCheckpoint` callback (configured in [`configs/model_checkpoint.yaml`](configs/model_checkpoint.yaml)) saves the top-2 checkpoints ranked by `val_kendall` with filenames like:
+
+```
+epoch=3-step=2400-val_kendall=0.812.ckpt
+```
+
+The shell script writes the best checkpoint path to `checkpoints/bio_mqm/best_checkpoint.txt` at the end of each run, so you can retrieve it programmatically:
+
+```bash
+BEST=$(cat checkpoints/bio_mqm/best_checkpoint.txt)
+comet-score -s src.txt -t hyp1.txt -r ref.txt --model "$BEST"
+```
+
+To resume a run from a specific checkpoint (e.g. after a crash):
+
+```bash
+comet-train \
+    --cfg configs/models/bio_mqm_finetune.yaml \
+    --load_from_checkpoint path/to/epoch=2-step=1600-val_kendall=0.798.ckpt
+```
+
+## Step 4 — Upload to Hugging Face Hub
+
+Once training is complete, upload the best checkpoint to the Hugging Face Hub. The script validates the checkpoint, exports it to HF format, generates a model card, and optionally logs the model URL back to W&B.
+
+```bash
+python scripts/upload_to_huggingface.py \
+    --checkpoint  "$(cat checkpoints/bio_mqm/best_checkpoint.txt)" \
+    --repo_id     "your-username/comet-bio-mqm" \
+    --run_name    "bio_mqm_v1"
+```
+
+**Options:**
+
+| Flag | Description |
+|---|---|
+| `--checkpoint` | Path to the `.ckpt` file |
+| `--repo_id` | HF repo in `username/model-name` form (created if it doesn't exist) |
+| `--run_name` | Label added to the model card |
+| `--private` | Create a private HF repository |
+| `--wandb_run_id` | W&B run ID to attach the HF model URL to |
+| `--wandb_project` | W&B project (defaults to `$WANDB_PROJECT` or `comet-bio-mqm`) |
+
+The raw `.ckpt` file is included in the upload alongside the HF-format weights, so users can load via either `load_from_checkpoint` or `download_model`.
+
+## Step 5 — Load and Score with the Finetuned Model
+
+**From a local checkpoint:**
+
+```python
+from comet import load_from_checkpoint
+
+model = load_from_checkpoint("checkpoints/bio_mqm/epoch=4-step=3000-val_kendall=0.812.ckpt")
+
+data = [
+    {
+        "src": "The patient was administered 500 mg of amoxicillin.",
+        "mt":  "Der Patient erhielt 500 mg Amoxicillin.",
+        "ref": "Dem Patienten wurden 500 mg Amoxicillin verabreicht.",
+    }
+]
+output = model.predict(data, batch_size=8, gpus=1)
+print(output.scores)   # [0.91]
+```
+
+**From Hugging Face Hub** (after upload):
+
+```python
+from comet import download_model, load_from_checkpoint
+
+model_path = download_model("your-username/comet-bio-mqm")
+model = load_from_checkpoint(model_path)
+output = model.predict(data, batch_size=8, gpus=1)
+```
+
+**CLI scoring** with the finetuned model:
+
+```bash
+comet-score \
+    -s src.txt -t hyp.txt -r ref.txt \
+    --model your-username/comet-bio-mqm
+```
 
 # unittest:
 In order to run the toolkit tests you must run the following command:

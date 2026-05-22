@@ -1,0 +1,58 @@
+# trainer_wandb.yaml — extends trainer.yaml with W&B logger
+# Use this instead of trainer.yaml when running finetuning experiments.
+#
+# Requires:  pip install wandb
+#            wandb login
+#
+# The WANDB_PROJECT and WANDB_RUN_NAME env vars (set by finetune_bio_mqm.sh)
+# control which project / run the metrics appear under.
+
+class_path: pytorch_lightning.trainer.trainer.Trainer
+init_args:
+  accelerator: gpu
+  devices: 1                  # override with --gpus flag in finetune_bio_mqm.sh
+  strategy: auto              # "ddp" for multi-GPU
+  accumulate_grad_batches: 8  # effective batch = batch_size * 8 = 64
+  check_val_every_n_epoch: 1
+  deterministic: False
+  fast_dev_run: False
+  max_epochs: 10
+  min_epochs: 1
+  max_steps: -1
+  min_steps: null
+  max_time: null
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  limit_test_batches: 1.0
+  limit_predict_batches: 1.0
+  overfit_batches: 0
+  val_check_interval: 1.0
+  num_sanity_val_steps: 3
+  log_every_n_steps: 20
+  enable_progress_bar: true
+  enable_model_summary: true
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+  inference_mode: true
+  use_distributed_sampler: true
+  profiler: null
+  detect_anomaly: false
+  barebones: false
+  sync_batchnorm: false
+  reload_dataloaders_every_n_epochs: 0
+  default_root_dir: null
+
+  # ── Weights & Biases logger ───────────────────────────────────────────────
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      # project and name are read from WANDB_PROJECT / WANDB_RUN_NAME env vars
+      # when left as null; set them explicitly here to hard-code.
+      project: null
+      name: null
+      save_dir: wandb_logs
+      log_model: false          # set to "all" to upload all checkpoints to W&B
+      tags:
+        - bio-mqm
+        - comet
+        - finetuning
