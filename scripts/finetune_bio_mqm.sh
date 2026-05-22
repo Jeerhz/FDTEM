@@ -57,18 +57,19 @@ python scripts/prepare_bio_mqm_data.py \
 # ── 2. download base COMET checkpoint ────────────────────────────────────────
 echo ""
 echo "── Step 2: Downloading base model checkpoint ───────────────"
-BASE_CKPT=$(python - <<'EOF'
+# download_model() already returns the full .ckpt path directly — no walking needed.
+# Redirect stderr so tqdm/logging don't pollute the captured stdout.
+BASE_CKPT=$(python - 2>/dev/null <<'EOF'
 from comet import download_model
-import os
-path = download_model("Unbabel/wmt22-comet-da")
-# download_model returns the dir; find the actual .ckpt inside
-for root, _, files in os.walk(path):
-    for f in files:
-        if f.endswith(".ckpt"):
-            print(os.path.join(root, f))
-            raise SystemExit
+print(download_model("Unbabel/wmt22-comet-da"))
 EOF
 )
+
+if [[ -z "$BASE_CKPT" || ! -f "$BASE_CKPT" ]]; then
+  echo "ERROR: Could not resolve base checkpoint (got: '${BASE_CKPT}')."
+  echo "       Try: python -c \"from comet import download_model; print(download_model('Unbabel/wmt22-comet-da'))\""
+  exit 1
+fi
 echo "Base checkpoint: $BASE_CKPT"
 
 # ── 3. patch trainer.yaml for the requested GPU count ────────────────────────

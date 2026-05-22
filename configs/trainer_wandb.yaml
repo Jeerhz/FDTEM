@@ -43,6 +43,8 @@ init_args:
   default_root_dir: null
 
   # ── Weights & Biases logger ───────────────────────────────────────────────
+  # Tags are set via WANDB_TAGS env var in finetune_bio_mqm.sh — do not add
+  # them here as jsonargparse cannot resolve **kwargs parameters.
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
@@ -52,7 +54,3 @@ init_args:
       name: null
       save_dir: wandb_logs
       log_model: false          # set to "all" to upload all checkpoints to W&B
-      tags:
-        - bio-mqm
-        - comet
-        - finetuning
