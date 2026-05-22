@@ -330,17 +330,17 @@ The preparation script clones the Bio-MQM repository, converts span-level MQM an
 
 ```bash
 python scripts/prepare_bio_mqm_data.py \
-    --output_dir data/bio_mqm \
+    --output_dir ~/scratch/bio_mqm \
     --write_combined
 ```
 
-This produces one `<lang-pair>_train.csv` and `<lang-pair>_val.csv` per language pair under `data/bio_mqm/`, plus combined `all_train.csv` / `all_val.csv` if `--write_combined` is set.
+This produces one `<lang-pair>_train.csv` and `<lang-pair>_val.csv` per language pair under `~/scratch/bio_mqm/`, plus combined `all_train.csv` / `all_val.csv` if `--write_combined` is set.
 
 **Options:**
 
 | Flag | Default | Description |
 |---|---|---|
-| `--output_dir` | `data/bio_mqm` | Directory for processed CSV files |
+| `--output_dir` | `~/scratch/bio_mqm` | Directory for processed CSV files |
 | `--repo_dir` | `<output_dir>/bio-mqm-dataset` | Local path for the cloned dataset repo |
 | `--lang_pairs` | all 11 pairs | Space-separated list, e.g. `en-de de-en en-zh` |
 | `--no_ref` | off | Omit the `ref` column for QE-style (reference-free) training |
@@ -372,12 +372,12 @@ regression_metric:
 
     # Point to outputs of Step 1
     train_data:
-      - data/bio_mqm/en-de_train.csv
-      - data/bio_mqm/de-en_train.csv
+      - ~/scratch/bio_mqm/en-de_train.csv
+      - ~/scratch/bio_mqm/de-en_train.csv
       # ... add / remove language pairs as needed
     validation_data:
-      - data/bio_mqm/en-de_val.csv
-      - data/bio_mqm/de-en_val.csv
+      - ~/scratch/bio_mqm/en-de_val.csv
+      - ~/scratch/bio_mqm/de-en_val.csv
 ```
 
 The trainer config [`configs/trainer_wandb.yaml`](configs/trainer_wandb.yaml) controls GPU count, gradient accumulation, and the W&B logger. Edit `devices:` there or pass `--gpus` to the shell script below.
@@ -400,7 +400,7 @@ bash scripts/finetune_bio_mqm.sh --gpus 2 --run_name bio_mqm_v1
 |---|---|---|
 | `--gpus` | `1` | Number of GPUs for training |
 | `--run_name` | `comet-bio-mqm-<timestamp>` | W&B run name and log file prefix |
-| `--output_dir` | `data/bio_mqm` | Where data CSVs are stored |
+| `--output_dir` | `~/scratch/bio_mqm` | Where data CSVs are stored |
 | `--checkpoint_dir` | `checkpoints/bio_mqm` | Where `.ckpt` files and logs are saved |
 
 You can also call `comet-train` directly for full control:

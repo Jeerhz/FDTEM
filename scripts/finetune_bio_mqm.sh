@@ -22,8 +22,8 @@ set -euo pipefail
 GPUS=1
 RUN_NAME="comet-bio-mqm-$(date +%Y%m%d-%H%M)"
 SEED=42
-OUTPUT_DIR="data/bio_mqm"
-CHECKPOINT_DIR="checkpoints/bio_mqm"
+OUTPUT_DIR="$HOME/scratch/bio_mqm"
+CHECKPOINT_DIR="$HOME/checkpoints/bio_mqm"
 
 while [[ $# -gt 0 ]]; do
   case $1 in

@@ -9,7 +9,7 @@ homepage = "https://github.com/Unbabel/COMET"
 repository = "https://github.com/Unbabel/COMET"
 documentation = "https://unbabel.github.io/COMET/html/index.html"
 keywords = [
-    "Machine Translation", 
+    "Machine Translation",
     "Evaluation",
     "Unbabel",
     "COMET"
@@ -49,9 +49,11 @@ sacrebleu = "^2.0.0"
 scipy = "^1.5.4"
 entmax = "^1.1"
 huggingface-hub = ">=0.19.3,<1.0"
+filelock = {version = ">=3.24.2,<4", python = ">=3.10"}
+wandb = {version = ">=0.27.0", python = ">=3.10"}
 protobuf = "^4.24.4"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 sphinx-markdown-tables = "0.0.15"
 coverage = "^5.5"
 scikit-learn = "^1.0"

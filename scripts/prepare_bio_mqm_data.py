@@ -8,19 +8,19 @@ CSV files (columns: src, mt, ref, score).
 
 Usage:
     python scripts/prepare_bio_mqm_data.py \
-        --output_dir data/bio_mqm \
+        --output_dir /scratch/bio_mqm \
         [--lang_pairs en-de de-en en-es ...]  \
         [--no_ref]   # omit ref column for QE-style training
 """
+from __future__ import annotations
 
 import argparse
 import os
 import subprocess
-import sys
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
+import numpy as np  # type: ignore[import-untyped,import-not-found]
+import pandas as pd  # type: ignore[import-untyped,import-not-found]
 
 # ── MQM penalty weights (standard WMT convention) ────────────────────────────
 MQM_WEIGHTS = {
@@ -217,8 +217,8 @@ def main():
         description="Download Bio-MQM and convert to COMET CSV format."
     )
     parser.add_argument(
-        "--output_dir", default="data/bio_mqm",
-        help="Where to save processed CSV files (default: data/bio_mqm).",
+        "--output_dir", default="~/scratch/bio_mqm",
+        help="Where to save processed CSV files (default: ~/scratch/bio_mqm).",
     )
     parser.add_argument(
         "--repo_dir", default=None,
