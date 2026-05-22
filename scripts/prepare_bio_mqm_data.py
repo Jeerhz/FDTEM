@@ -2,49 +2,45 @@
 """
 Prepare Amazon Bio-MQM dataset for COMET finetuning.
 
-Downloads the Bio-MQM dataset from GitHub, aggregates MQM error annotations
-into per-segment scores, normalises them to [0, 1], and writes COMET-ready
-CSV files (columns: src, mt, ref, score).
+Reads the JSON annotation files from the cloned Bio-MQM repository,
+aggregates MQM error penalties into per-segment scores, splits into
+train (dev docs) / val (test docs) using doc_id_splits.json, and
+writes COMET-ready CSV files (columns: src, mt, ref, score).
 
 Usage:
     python scripts/prepare_bio_mqm_data.py \
-        --output_dir /scratch/bio_mqm \
-        [--lang_pairs en-de de-en en-es ...]  \
-        [--no_ref]   # omit ref column for QE-style training
+        --output_dir ~/scratch/bio_mqm \
+        --lang_pairs en-fr fr-en \
+        [--write_combined]
 """
 from __future__ import annotations
 
 import argparse
-import os
+import json
 import subprocess
 from pathlib import Path
 
 import numpy as np  # type: ignore[import-untyped,import-not-found]
 import pandas as pd  # type: ignore[import-untyped,import-not-found]
 
-# ── MQM penalty weights (standard WMT convention) ────────────────────────────
-MQM_WEIGHTS = {
-    "no-error": 0,
-    "neutral":  0,
-    "minor":   -1,
-    "major":   -5,
-    "critical": -25,
-}
-
-# All language pairs present in the Bio-MQM release
-ALL_LANG_PAIRS = [
-    "de-en", "en-de",
-    "en-es", "es-en",
-    "en-fr", "fr-en",
-    "en-ru", "ru-en",
-    "en-zh", "zh-en",
-    "en-pt",
-]
-
 REPO_URL = "https://github.com/amazon-science/bio-mqm-dataset"
 
+MQM_WEIGHTS: dict[str, float] = {
+    "minor":    -1.0,
+    "major":    -5.0,
+    "critical": -25.0,
+    "no-error":  0.0,
+    "neutral":   0.0,
+}
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+ALL_LANG_PAIRS = [
+    "en-de", "de-en", "en-es", "es-en",
+    "en-fr", "fr-en", "en-ru", "ru-en",
+    "en-zh", "zh-en",
+]
+
+
+# ── repo management ───────────────────────────────────────────────────────────
 
 def clone_or_pull(repo_url: str, local_dir: Path) -> None:
     if (local_dir / ".git").exists():
@@ -55,232 +51,236 @@ def clone_or_pull(repo_url: str, local_dir: Path) -> None:
         subprocess.run(["git", "clone", "--quiet", repo_url, str(local_dir)], check=True)
 
 
-def mqm_penalty(severity: str) -> float:
-    """Return numeric penalty for an MQM severity label."""
-    severity = str(severity).lower().strip()
-    return MQM_WEIGHTS.get(severity, MQM_WEIGHTS["minor"])
+# ── file discovery ────────────────────────────────────────────────────────────
+
+def _dir_name(lang_pair: str) -> str:
+    """'en-fr'  →  'en2fr'"""
+    src, tgt = lang_pair.split("-")
+    return f"{src}2{tgt}"
 
 
-def load_mqm_tsv(path: Path) -> pd.DataFrame:
+def find_system_files(repo_dir: Path, lang_pair: str) -> list[Path]:
     """
-    Load a Bio-MQM TSV file.
-
-    Expected columns (Bio-MQM v1 schema):
-        system  doc  docID  seg_id  rater  source  target  category  severity
-    Returns a DataFrame with those columns.
+    Return all non-reference MT-system JSON files for a language pair,
+    searching both data/v2 (preferred) and data/v1.
     """
-    df = pd.read_csv(path, sep="\t", low_memory=False)
-    df.columns = [c.strip().lower() for c in df.columns]
+    dp = _dir_name(lang_pair)
+    files: list[Path] = []
 
-    required = {"system", "seg_id", "rater", "source", "target", "severity"}
-    missing = required - set(df.columns)
-    if missing:
-        raise ValueError(f"{path}: missing columns {missing}. Got: {list(df.columns)}")
+    # v2: flat directory per language pair
+    v2 = repo_dir / "data" / "v2" / "target" / "main_phase" / "round_two" / dp
+    if v2.exists():
+        files += [f for f in v2.glob("*.json") if not f.stem.startswith("reference")]
 
-    return df
+    # v1: nested batch/medline_<lp>* directories
+    v1_root = repo_dir / "data" / "v1" / "target" / "main_phase" / "round_one"
+    for batch in v1_root.glob("batch*"):
+        for lp_dir in batch.glob(f"medline_{dp}*"):
+            files += [
+                f for f in lp_dir.rglob("*.json")
+                if not f.stem.startswith("reference") and not f.name.startswith(".")
+            ]
+
+    return files
 
 
-def aggregate_mqm_scores(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Collapse span-level annotations to one row per (system, seg_id, rater).
+def find_reference_file(repo_dir: Path, lang_pair: str) -> Path | None:
+    """Return path to reference.json (v2 preferred over v1)."""
+    dp = _dir_name(lang_pair)
 
-    Returns a DataFrame with columns:
-        system, seg_id, source, target, mqm_score
-    where mqm_score is the sum of MQM penalties across all annotated spans
-    (0 = perfect, more negative = worse).
-    """
-    df = df.copy()
-    df["penalty"] = df["severity"].apply(mqm_penalty)
+    ref = repo_dir / "data" / "v2" / "target" / "main_phase" / "round_two" / dp / "reference.json"
+    if ref.exists():
+        return ref
 
-    agg = (
-        df.groupby(["system", "seg_id", "rater"], sort=False)
-        .agg(
-            source=("source", "first"),
-            target=("target", "first"),
-            mqm_score=("penalty", "sum"),
-        )
+    v1_root = repo_dir / "data" / "v1" / "target" / "main_phase" / "round_one"
+    for batch in v1_root.glob("batch*"):
+        for lp_dir in batch.glob(f"medline_{dp}*"):
+            for ref in lp_dir.rglob("reference.json"):
+                return ref
+    return None
+
+
+# ── data loading & scoring ────────────────────────────────────────────────────
+
+def _penalty(errors: list[dict]) -> float:
+    return sum(MQM_WEIGHTS.get(e.get("severity", "minor").lower(), -1.0) for e in errors)
+
+
+def load_annotations(files: list[Path]) -> pd.DataFrame:
+    records = []
+    for f in files:
+        try:
+            segs = json.loads(f.read_text(encoding="utf-8"))
+        except Exception as exc:
+            print(f"  Warning: skipping {f.name}: {exc}")
+            continue
+        if not isinstance(segs, list):
+            continue
+        for seg in segs:
+            records.append({
+                "system":    seg.get("MT_Engine", f.stem),
+                "doc_id":    seg.get("DOC_ID", ""),
+                "seg_id":    str(seg.get("SEG_ID", "")),
+                "annotator": seg.get("Annotator_ID", ""),
+                "source":    seg.get("source", ""),
+                "target":    seg.get("target", ""),
+                "penalty":   _penalty(seg.get("target_errors", [])),
+            })
+    return pd.DataFrame(records)
+
+
+def aggregate(df: pd.DataFrame) -> pd.DataFrame:
+    """Average MQM penalties across annotators per (system, doc_id, seg_id)."""
+    return (
+        df.groupby(["system", "doc_id", "seg_id"], sort=False)
+        .agg(source=("source", "first"),
+             target=("target", "first"),
+             mqm_score=("penalty", "mean"))
         .reset_index()
     )
 
-    # Average across raters for the same (system, seg_id)
-    agg = (
-        agg.groupby(["system", "seg_id"], sort=False)
-        .agg(
-            source=("source", "first"),
-            target=("target", "first"),
-            mqm_score=("mqm_score", "mean"),
-        )
-        .reset_index()
-    )
 
-    return agg
-
-
-def normalise_scores(scores: pd.Series) -> pd.Series:
-    """
-    Z-score normalise MQM scores, then apply a sigmoid so values land in (0, 1).
-    A segment with no errors (score=0) maps to ~0.88; lower is worse.
-    """
+def normalise(scores: pd.Series) -> pd.Series:
+    """Z-score then sigmoid → (0, 1). Score=0 (no errors) maps to ~0.88."""
     mu, sigma = scores.mean(), scores.std()
     if sigma == 0:
         return pd.Series(np.full(len(scores), 0.5), index=scores.index)
-    z = (scores - mu) / sigma
-    return 1.0 / (1.0 + np.exp(-z))
+    return 1.0 / (1.0 + np.exp(-(scores - mu) / sigma))
 
 
-def build_comet_df(
-    mqm_df: pd.DataFrame,
-    ref_df: pd.DataFrame | None = None,
-) -> pd.DataFrame:
-    """
-    Convert aggregated MQM data to COMET training format.
-
-    Args:
-        mqm_df:  Output of aggregate_mqm_scores().
-        ref_df:  Optional DataFrame with columns (seg_id, reference) for
-                 reference-based training.  Pass None for QE-style training.
-    Returns:
-        DataFrame with columns: src, mt, [ref,] score
-    """
-    comet = pd.DataFrame(
-        {
-            "src":   mqm_df["source"],
-            "mt":    mqm_df["target"],
-            "score": normalise_scores(mqm_df["mqm_score"]),
-        }
-    )
-
-    if ref_df is not None:
-        id_to_ref = ref_df.set_index("seg_id")["reference"].to_dict()
-        comet["ref"] = mqm_df["seg_id"].map(id_to_ref)
-        comet = comet[["src", "mt", "ref", "score"]]
-    else:
-        comet = comet[["src", "mt", "score"]]
-
-    comet = comet.dropna().reset_index(drop=True)
-    return comet
+def build_ref_map(ref_file: Path | None) -> dict[tuple[str, str], str]:
+    if ref_file is None:
+        return {}
+    segs = json.loads(ref_file.read_text(encoding="utf-8"))
+    return {(s["DOC_ID"], str(s["SEG_ID"])): s["target"] for s in segs}
 
 
-def find_split_files(repo_dir: Path, lang_pair: str, split: str):
-    """
-    Locate TSV annotation files for a given language pair and split.
-
-    The Bio-MQM repo uses a structure like:
-        data/<lang_pair>/<split>/mqm_<lang_pair>_<split>.tsv
-    or flat files directly under data/.
-    """
-    candidates = list(repo_dir.rglob(f"*{lang_pair}*{split}*.tsv")) + \
-                 list(repo_dir.rglob(f"*{split}*{lang_pair}*.tsv"))
-    return candidates
-
+# ── per-language-pair pipeline ────────────────────────────────────────────────
 
 def process_lang_pair(
     repo_dir: Path,
     lang_pair: str,
+    doc_splits: dict,
     output_dir: Path,
-    include_ref: bool,
 ) -> tuple[int, int]:
-    """
-    Process one language pair.  Returns (n_train, n_val).
-    """
-    train_files = find_split_files(repo_dir, lang_pair, "dev")
-    val_files   = find_split_files(repo_dir, lang_pair, "test")
 
-    if not train_files and not val_files:
+    system_files = find_system_files(repo_dir, lang_pair)
+    if not system_files:
         print(f"  [{lang_pair}] No annotation files found — skipping.")
         return 0, 0
 
-    def load_and_aggregate(files):
-        frames = [load_mqm_tsv(f) for f in files]
-        combined = pd.concat(frames, ignore_index=True)
-        return aggregate_mqm_scores(combined)
+    print(f"  [{lang_pair}] Found {len(system_files)} system file(s).")
+    df = load_annotations(system_files)
+    if df.empty:
+        print(f"  [{lang_pair}] No records — skipping.")
+        return 0, 0
 
-    results = {}
-    for split_name, files in [("train", train_files), ("val", val_files)]:
-        if not files:
-            print(f"  [{lang_pair}] No {split_name} files.")
+    agg = aggregate(df)
+    agg["score"] = normalise(agg["mqm_score"])
+    ref_map = build_ref_map(find_reference_file(repo_dir, lang_pair))
+
+    # doc_id_splits.json: dev docs → train split, test docs → val split
+    splits = doc_splits.get(lang_pair, {})
+    split_map = {"train": set(splits.get("dev", [])),
+                 "val":   set(splits.get("test", []))}
+
+    counts: dict[str, int] = {}
+    for split_name, doc_set in split_map.items():
+        if not doc_set:
             continue
-        agg = load_and_aggregate(files)
-        comet_df = build_comet_df(agg, ref_df=None if not include_ref else None)
-        out_path = output_dir / f"{lang_pair}_{split_name}.csv"
-        comet_df.to_csv(out_path, index=False)
-        results[split_name] = len(comet_df)
-        print(f"  [{lang_pair}] {split_name}: {len(comet_df):,} rows → {out_path}")
+        subset = agg[agg["doc_id"].isin(doc_set)].copy().reset_index(drop=True)
+        if subset.empty:
+            print(f"  [{lang_pair}] {split_name}: 0 rows.")
+            continue
 
-    return results.get("train", 0), results.get("val", 0)
+        subset["ref"] = subset.apply(
+            lambda r: ref_map.get((r["doc_id"], r["seg_id"]), ""), axis=1
+        )
+        comet_df = (
+            subset.rename(columns={"source": "src", "target": "mt"})
+                  [["src", "mt", "ref", "score"]]
+                  .query("ref != ''")
+                  .reset_index(drop=True)
+        )
+        out = output_dir / f"{lang_pair}_{split_name}.csv"
+        comet_df.to_csv(out, index=False)
+        counts[split_name] = len(comet_df)
+        print(f"  [{lang_pair}] {split_name}: {len(comet_df):,} rows → {out}")
+
+    return counts.get("train", 0), counts.get("val", 0)
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Download Bio-MQM and convert to COMET CSV format."
+        description="Convert Bio-MQM JSON annotations to COMET CSV format."
     )
     parser.add_argument(
         "--output_dir", default="~/scratch/bio_mqm",
-        help="Where to save processed CSV files (default: ~/scratch/bio_mqm).",
+        help="Directory for processed CSV files (default: ~/scratch/bio_mqm).",
     )
     parser.add_argument(
         "--repo_dir", default=None,
-        help="Local path for the Bio-MQM repo clone.  "
+        help="Local path for the Bio-MQM repo clone. "
              "Defaults to <output_dir>/bio-mqm-dataset.",
     )
     parser.add_argument(
         "--lang_pairs", nargs="+", default=ALL_LANG_PAIRS,
-        help="Language pairs to process.  Defaults to all available pairs.",
-    )
-    parser.add_argument(
-        "--no_ref", action="store_true",
-        help="Omit the 'ref' column (QE-style training).",
+        help="Language pairs to process, e.g. --lang_pairs en-fr fr-en",
     )
     parser.add_argument(
         "--write_combined", action="store_true",
-        help="Also write combined train/val CSVs that pool all language pairs.",
+        help="Also write merged all_train.csv / all_val.csv.",
     )
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.output_dir).expanduser()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    repo_dir = Path(args.repo_dir) if args.repo_dir else output_dir / "bio-mqm-dataset"
+    repo_dir = (
+        Path(args.repo_dir).expanduser() if args.repo_dir
+        else output_dir / "bio-mqm-dataset"
+    )
     clone_or_pull(REPO_URL, repo_dir)
 
+    doc_splits: dict = json.loads(
+        (repo_dir / "data" / "doc_id_splits.json").read_text()
+    )
+
     total_train, total_val = 0, 0
-    all_train_paths, all_val_paths = [], []
+    train_paths: list[Path] = []
+    val_paths:   list[Path] = []
 
     for lp in args.lang_pairs:
-        n_tr, n_va = process_lang_pair(
-            repo_dir, lp, output_dir, include_ref=not args.no_ref
-        )
+        n_tr, n_va = process_lang_pair(repo_dir, lp, doc_splits, output_dir)
         total_train += n_tr
         total_val   += n_va
-        if n_tr:
-            all_train_paths.append(output_dir / f"{lp}_train.csv")
-        if n_va:
-            all_val_paths.append(output_dir / f"{lp}_val.csv")
+        if n_tr: train_paths.append(output_dir / f"{lp}_train.csv")
+        if n_va: val_paths.append(output_dir / f"{lp}_val.csv")
 
-    if args.write_combined and all_train_paths:
-        combined_train = pd.concat(
-            [pd.read_csv(p) for p in all_train_paths], ignore_index=True
-        )
-        combined_train.to_csv(output_dir / "all_train.csv", index=False)
-        print(f"\nCombined train: {len(combined_train):,} rows → {output_dir}/all_train.csv")
-
-    if args.write_combined and all_val_paths:
-        combined_val = pd.concat(
-            [pd.read_csv(p) for p in all_val_paths], ignore_index=True
-        )
-        combined_val.to_csv(output_dir / "all_val.csv", index=False)
-        print(f"Combined val:   {len(combined_val):,} rows → {output_dir}/all_val.csv")
+    if args.write_combined:
+        if train_paths:
+            combined = pd.concat([pd.read_csv(p) for p in train_paths], ignore_index=True)
+            combined.to_csv(output_dir / "all_train.csv", index=False)
+            print(f"\nCombined train: {len(combined):,} rows → {output_dir}/all_train.csv")
+        if val_paths:
+            combined = pd.concat([pd.read_csv(p) for p in val_paths], ignore_index=True)
+            combined.to_csv(output_dir / "all_val.csv", index=False)
+            print(f"Combined val:   {len(combined):,} rows → {output_dir}/all_val.csv")
 
     print(f"\nDone.  Total train={total_train:,}  val={total_val:,}")
 
-    # Print a ready-to-use YAML snippet for the training config
-    train_list = "\n      - ".join(str(p) for p in all_train_paths)
-    val_list   = "\n      - ".join(str(p) for p in all_val_paths)
+    # Print ready-to-use YAML snippet
     print("\n── Paste into your training YAML ──────────────────────────")
-    print(f"    train_data:\n      - {train_list}")
-    print(f"    validation_data:\n      - {val_list}")
+    if train_paths:
+        print("    train_data:")
+        for p in train_paths:
+            print(f"      - {p}")
+    if val_paths:
+        print("    validation_data:")
+        for p in val_paths:
+            print(f"      - {p}")
 
 
 if __name__ == "__main__":

@@ -52,21 +52,11 @@ regression_metric:
     # Replace / extend these paths after running prepare_bio_mqm_data.py.
     # One file per language pair keeps per-LP validation metrics visible in W&B.
     train_data:
-      - ~/scratch/bio_mqm/en-de_train.csv
-      - ~/scratch/bio_mqm/de-en_train.csv
-      - ~/scratch/bio_mqm/en-es_train.csv
-      - ~/scratch/bio_mqm/es-en_train.csv
       - ~/scratch/bio_mqm/en-fr_train.csv
       - ~/scratch/bio_mqm/fr-en_train.csv
-      - ~/scratch/bio_mqm/en-ru_train.csv
-      - ~/scratch/bio_mqm/ru-en_train.csv
-      - ~/scratch/bio_mqm/en-zh_train.csv
-      - ~/scratch/bio_mqm/zh-en_train.csv
     validation_data:
-      - ~/scratch/bio_mqm/en-de_val.csv
-      - ~/scratch/bio_mqm/de-en_val.csv
-      - ~/scratch/bio_mqm/en-es_val.csv
-      - ~/scratch/bio_mqm/es-en_val.csv
+      - ~/scratch/bio_mqm/en-fr_val.csv
+      - ~/scratch/bio_mqm/fr-en_val.csv
 
 trainer: ../trainer_wandb.yaml
 early_stopping: ../early_stopping.yaml
