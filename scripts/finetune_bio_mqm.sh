@@ -23,14 +23,18 @@ GPUS=1
 RUN_NAME="comet-bio-mqm-$(date +%Y%m%d-%H%M)"
 SEED=42
 OUTPUT_DIR="$HOME/scratch/bio_mqm"
-CHECKPOINT_DIR="$HOME/checkpoints/bio_mqm"
+CHECKPOINT_DIR="$HOME/scratch/checkpoints/bio_mqm"
+RESUME_CKPT=""      # set via --resume <path>
+WANDB_RUN_ID_ARG="" # set via --wandb_run_id <id>
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --gpus)        GPUS="$2";     shift 2 ;;
-    --run_name)    RUN_NAME="$2"; shift 2 ;;
-    --output_dir)  OUTPUT_DIR="$2"; shift 2 ;;
+    --gpus)          GPUS="$2";             shift 2 ;;
+    --run_name)      RUN_NAME="$2";         shift 2 ;;
+    --output_dir)    OUTPUT_DIR="$2";       shift 2 ;;
     --checkpoint_dir) CHECKPOINT_DIR="$2"; shift 2 ;;
+    --resume)        RESUME_CKPT="$2";     shift 2 ;;
+    --wandb_run_id)  WANDB_RUN_ID_ARG="$2"; shift 2 ;;
     *) echo "Unknown flag: $1"; exit 1 ;;
   esac
 done
@@ -94,11 +98,24 @@ if ! wandb status &>/dev/null; then
 fi
 
 # ── 6. run training ───────────────────────────────────────────────────────────
+# We use scripts/train_wandb.py instead of comet-train because jsonargparse
+# 3.13.1 cannot instantiate WandbLogger from YAML (Union[Logger,bool,None] bug).
+export WANDB_SAVE_DIR="$CHECKPOINT_DIR"
+[[ -n "$WANDB_RUN_ID_ARG" ]] && export WANDB_RUN_ID="$WANDB_RUN_ID_ARG"
+
+RESUME_ARGS=()
+if [[ -n "$RESUME_CKPT" ]]; then
+  echo "Resuming from checkpoint: $RESUME_CKPT"
+  RESUME_ARGS+=(--load_from_checkpoint "$RESUME_CKPT" --resume_from_checkpoint "$RESUME_CKPT")
+else
+  RESUME_ARGS+=(--load_from_checkpoint "$BASE_CKPT")
+fi
+
 echo ""
-echo "── Step 3: Running comet-train ─────────────────────────────"
-comet-train \
+echo "── Step 3: Running training with W&B logging ───────────────"
+python scripts/train_wandb.py \
     --cfg configs/models/bio_mqm_finetune.yaml \
-    --load_from_checkpoint "$BASE_CKPT" \
+    "${RESUME_ARGS[@]}" \
     --seed_everything "$SEED" \
     2>&1 | tee "$CHECKPOINT_DIR/${RUN_NAME}.log"
 

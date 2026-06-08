@@ -43,6 +43,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import matplotlib
+matplotlib.use("Agg")  # non-interactive backend — safe in nohup/headless
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from tqdm import tqdm
@@ -150,7 +153,8 @@ def eval_xnli(
     from datasets import load_dataset
 
     logger.info("── XNLI ─────────────────────────────────────────────")
-    train_ds = load_dataset("xglue", "xnli", split="train")
+    # Native HuggingFace XNLI dataset (parquet) — same data as xglue/xnli but no Azure dependency.
+    train_ds = load_dataset("xnli", "en", split="train")
     if max_train:
         train_ds = train_ds.select(range(min(max_train, len(train_ds))))
 
@@ -164,9 +168,9 @@ def eval_xnli(
     for lang in languages:
         logger.info(f"  [{lang}]")
         try:
-            test_ds = load_dataset("xglue", "xnli", split=f"test.{lang}")
+            test_ds = load_dataset("xnli", lang, split="test")
         except Exception as exc:
-            logger.warning(f"    Skipping — could not load test.{lang}: {exc}")
+            logger.warning(f"    Skipping — could not load {lang}: {exc}")
             continue
         u_te = encode_texts(encoder, test_ds["premise"],    batch_size, device, "premise test")
         v_te = encode_texts(encoder, test_ds["hypothesis"], batch_size, device, "hypo  test")
@@ -192,7 +196,8 @@ def eval_paws_x(
     from datasets import load_dataset
 
     logger.info("── PAWS-X ────────────────────────────────────────────")
-    train_ds = load_dataset("xglue", "paws-x", split="train")
+    # Native HuggingFace PAWS-X dataset (parquet) — same data as xglue/paws-x but no Azure dependency.
+    train_ds = load_dataset("google-research-datasets/paws-x", "en", split="train")
     if max_train:
         train_ds = train_ds.select(range(min(max_train, len(train_ds))))
 
@@ -206,9 +211,9 @@ def eval_paws_x(
     for lang in languages:
         logger.info(f"  [{lang}]")
         try:
-            test_ds = load_dataset("xglue", "paws-x", split=f"test.{lang}")
+            test_ds = load_dataset("google-research-datasets/paws-x", lang, split="test")
         except Exception as exc:
-            logger.warning(f"    Skipping — could not load test.{lang}: {exc}")
+            logger.warning(f"    Skipping — could not load {lang}: {exc}")
             continue
         u_te = encode_texts(encoder, test_ds["sentence1"], batch_size, device, "s1 test")
         v_te = encode_texts(encoder, test_ds["sentence2"], batch_size, device, "s2 test")
@@ -231,35 +236,14 @@ def eval_nc(
     languages: List[str],
     max_train: Optional[int],
 ) -> Dict[str, Dict]:
-    from datasets import load_dataset
-
     logger.info("── NC (News Classification) ─────────────────────────")
-    results: Dict[str, Dict] = {}
-    for lang in languages:
-        logger.info(f"  [{lang}]")
-        try:
-            train_ds = load_dataset("xglue", "nc", split=f"train.{lang}")
-            test_ds  = load_dataset("xglue", "nc", split=f"test.{lang}")
-        except Exception as exc:
-            logger.warning(f"    Skipping — could not load {lang}: {exc}")
-            continue
-        if max_train:
-            train_ds = train_ds.select(range(min(max_train, len(train_ds))))
-        # Title + body gives richer signal; encoder handles truncation internally.
-        train_texts = [f"{t} {b}" for t, b in zip(train_ds["news_title"], train_ds["news_body"])]
-        test_texts  = [f"{t} {b}" for t, b in zip(test_ds["news_title"],  test_ds["news_body"])]
-        X_train = encode_texts(encoder, train_texts, batch_size, device, "train")
-        X_test  = encode_texts(encoder, test_texts,  batch_size, device, "test")
-        y_train = np.array(train_ds["news_category"])
-        y_test  = np.array(test_ds["news_category"])
-        m = linear_probe(X_train, y_train, X_test, y_test)
-        results[lang] = m
-        logger.info(f"    acc={m['accuracy']:.4f}  f1={m['f1_macro']:.4f}")
-
-    if results:
-        results["avg"] = _avg_results(results)
-        logger.info(f"  [avg] acc={results['avg']['accuracy']:.4f}  f1={results['avg']['f1_macro']:.4f}")
-    return results
+    logger.warning(
+        "  NC skipped: the original XGlue NC data source "
+        "(xglue.blob.core.windows.net/xglue/xglue_full_dataset.tar.gz) "
+        "is no longer accessible (HTTP 409). "
+        "Run with --tasks xnli paws-x to skip NC entirely."
+    )
+    return {}
 
 
 TASK_REGISTRY = {
@@ -267,6 +251,87 @@ TASK_REGISTRY = {
     "paws-x": (eval_paws_x, PAWS_LANGS),
     "nc":     (eval_nc,     NC_LANGS),
 }
+
+
+# ── intermediate persistence & visualisation ──────────────────────────────────
+
+def save_intermediate(results: Dict, out_path: Path) -> None:
+    """Overwrite the output JSON with whatever results are available so far."""
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(results, fh, indent=2, ensure_ascii=False)
+    logger.info(f"  [checkpoint] intermediate results → {out_path}")
+
+
+def plot_task(task: str, task_res: Dict, out_dir: Path, run_name: str) -> None:
+    """Save a horizontal bar chart of per-language accuracy for a single task."""
+    if not task_res:
+        return
+
+    langs = [l for l in task_res if l != "avg"]
+    accs  = [task_res[l]["accuracy"] for l in langs]
+    f1s   = [task_res[l]["f1_macro"] for l in langs]
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, max(4, len(langs) * 0.55 + 1.5)))
+    fig.suptitle(f"{run_name}  —  {task.upper()}", fontsize=13, fontweight="bold")
+
+    for ax, values, label, color in zip(
+        axes,
+        [accs, f1s],
+        ["Accuracy", "F1-macro"],
+        ["#4C72B0", "#DD8452"],
+    ):
+        bars = ax.barh(langs, values, color=color, alpha=0.85)
+        if "avg" in task_res:
+            avg_val = task_res["avg"][label.lower().replace("-", "_").replace("accuracy", "accuracy").replace("f1_macro", "f1_macro")]
+            ax.axvline(avg_val, color="black", linestyle="--", linewidth=1.2, label=f"avg={avg_val:.3f}")
+            ax.legend(fontsize=8)
+        ax.bar_label(bars, fmt="%.3f", padding=3, fontsize=8)
+        ax.set_xlabel(label)
+        ax.set_xlim(0, 1.05)
+        ax.set_title(label)
+        ax.invert_yaxis()
+
+    plt.tight_layout()
+    out_path = out_dir / f"{run_name}_{task}.png"
+    plt.savefig(out_path, dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    logger.info(f"  [plot] {out_path}")
+
+
+def plot_summary(results: Dict, out_dir: Path) -> None:
+    """Save a summary bar chart comparing avg accuracy across tasks."""
+    tasks, accs, f1s = [], [], []
+    for task, task_res in results["tasks"].items():
+        if "avg" in task_res:
+            tasks.append(task)
+            accs.append(task_res["avg"]["accuracy"])
+            f1s.append(task_res["avg"]["f1_macro"])
+
+    if not tasks:
+        return
+
+    run_name = results["run_name"]
+    x = np.arange(len(tasks))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(max(6, len(tasks) * 2.2), 5))
+    bars1 = ax.bar(x - width / 2, accs, width, label="Accuracy", color="#4C72B0", alpha=0.85)
+    bars2 = ax.bar(x + width / 2, f1s,  width, label="F1-macro",  color="#DD8452", alpha=0.85)
+    ax.bar_label(bars1, fmt="%.3f", padding=3, fontsize=9)
+    ax.bar_label(bars2, fmt="%.3f", padding=3, fontsize=9)
+    ax.set_xticks(x)
+    ax.set_xticklabels(tasks, fontsize=11)
+    ax.set_ylim(0, 1.1)
+    ax.set_ylabel("Score")
+    ax.set_title(f"XGlue summary — {run_name}", fontsize=13, fontweight="bold")
+    ax.legend()
+    plt.tight_layout()
+
+    out_path = out_dir / f"{run_name}_summary.png"
+    plt.savefig(out_path, dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    logger.info(f"  [plot] {out_path}")
 
 
 # ── W&B logging ───────────────────────────────────────────────────────────────
@@ -369,23 +434,28 @@ def main() -> None:
         "tasks": {},
     }
 
+    out_path = Path(args.output)
+    plot_dir = out_path.parent / "plots"
+    plot_dir.mkdir(parents=True, exist_ok=True)
+
     for task in args.tasks:
         eval_fn, default_langs = TASK_REGISTRY[task]
         langs = args.languages or default_langs
-        results["tasks"][task] = eval_fn(
+        task_res = eval_fn(
             encoder=encoder,
             batch_size=args.batch_size,
             device=device,
             languages=langs,
             max_train=args.max_train_samples,
         )
+        results["tasks"][task] = task_res
+        # persist progress immediately after each task
+        save_intermediate(results, out_path)
+        plot_task(task, task_res, plot_dir, run_name)
 
-    # ── save JSON ──
-    out_path = Path(args.output)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as fh:
-        json.dump(results, fh, indent=2, ensure_ascii=False)
+    plot_summary(results, plot_dir)
     logger.info(f"\nResults saved → {out_path}")
+    logger.info(f"Plots saved  → {plot_dir}/")
 
     # ── W&B ──
     if args.wandb_project:

@@ -384,7 +384,7 @@ The trainer config [`configs/trainer_wandb.yaml`](configs/trainer_wandb.yaml) co
 
 ## Step 3 — Run Finetuning
 
-The shell script orchestrates all steps: data preparation → base checkpoint download → `comet-train` → checkpoint summary.
+The shell script orchestrates all steps: data preparation → base checkpoint download → training with W&B logging → checkpoint summary.
 
 ```bash
 # Single GPU, default run name
@@ -398,24 +398,19 @@ bash scripts/finetune_bio_mqm.sh --gpus 2 --run_name bio_mqm_v1
 
 | Flag | Default | Description |
 |---|---|---|
-| `--gpus` | `1` | Number of GPUs for training |
+| `--gpus` | `1` | Number of GPUs |
 | `--run_name` | `comet-bio-mqm-<timestamp>` | W&B run name and log file prefix |
 | `--output_dir` | `~/scratch/bio_mqm` | Where data CSVs are stored |
-| `--checkpoint_dir` | `checkpoints/bio_mqm` | Where `.ckpt` files and logs are saved |
+| `--checkpoint_dir` | `~/checkpoints/bio_mqm` | Where `.ckpt` files and logs are saved |
+| `--resume` | _(none)_ | Path to a `.ckpt` to resume from (see [Resuming a Run](#resuming-a-run)) |
+| `--wandb_run_id` | _(none)_ | W&B run ID to continue metrics on the same chart |
 
-You can also call `comet-train` directly for full control:
+You can also invoke the training script directly for full control:
 
 ```bash
-# Download the base checkpoint once
-BASE_CKPT=$(python -c "
-from comet import download_model; import os
-p = download_model('Unbabel/wmt22-comet-da')
-for r,_,fs in os.walk(p):
-    for f in fs:
-        if f.endswith('.ckpt'): print(os.path.join(r,f)); raise SystemExit
-")
+BASE_CKPT=$(python -c "from comet import download_model; print(download_model('Unbabel/wmt22-comet-da'))")
 
-comet-train \
+python scripts/train_wandb.py \
     --cfg configs/models/bio_mqm_finetune.yaml \
     --load_from_checkpoint "$BASE_CKPT" \
     --seed_everything 42
@@ -454,20 +449,114 @@ The `ModelCheckpoint` callback (configured in [`configs/model_checkpoint.yaml`](
 epoch=3-step=2400-val_kendall=0.812.ckpt
 ```
 
-The shell script writes the best checkpoint path to `checkpoints/bio_mqm/best_checkpoint.txt` at the end of each run, so you can retrieve it programmatically:
+The shell script writes the best checkpoint path to `~/checkpoints/bio_mqm/best_checkpoint.txt` at the end of each completed run:
 
 ```bash
-BEST=$(cat checkpoints/bio_mqm/best_checkpoint.txt)
+BEST=$(cat ~/checkpoints/bio_mqm/best_checkpoint.txt)
 comet-score -s src.txt -t hyp1.txt -r ref.txt --model "$BEST"
 ```
 
-To resume a run from a specific checkpoint (e.g. after a crash):
+Checkpoints for a given W&B run are saved under:
+```
+~/checkpoints/bio_mqm/comet-bio-mqm/<wandb-run-id>/checkpoints/
+```
+
+---
+
+## Resuming a Run
+
+Use this when the job was killed by a time limit, power cut, or manual `Ctrl+C`. The resume path restores the **full training state**: epoch counter, optimizer, learning rate scheduler — not just the model weights.
+
+**Step 1 — Find the best saved checkpoint:**
 
 ```bash
-comet-train \
-    --cfg configs/models/bio_mqm_finetune.yaml \
-    --load_from_checkpoint path/to/epoch=2-step=1600-val_kendall=0.798.ckpt
+ls ~/checkpoints/bio_mqm/comet-bio-mqm/<wandb-run-id>/checkpoints/
+# epoch=0-step=10-val_kendall=0.366.ckpt
+# epoch=1-step=20-val_kendall=0.371.ckpt   ← pick the latest/best
 ```
+
+**Step 2 — Find the W&B run ID** (printed at the start of training, or visible in the W&B URL):
+```
+https://wandb.ai/<entity>/comet-bio-mqm/runs/<run-id>
+#                                                ^^^^^^^^
+```
+
+**Step 3 — Resume:**
+
+```bash
+bash scripts/finetune_bio_mqm.sh \
+  --resume ~/checkpoints/bio_mqm/comet-bio-mqm/<run-id>/checkpoints/epoch=1-step=20-val_kendall=0.371.ckpt \
+  --wandb_run_id <run-id> \
+  --run_name <original-run-name>
+```
+
+- `--resume` loads weights **and** restores optimizer/scheduler state; training continues from the next epoch.
+- `--wandb_run_id` appends new metrics to the existing W&B chart instead of creating a new run.
+- Omit `--wandb_run_id` if you want a fresh W&B run while still resuming from the checkpoint.
+
+> **Note:** The data preparation step (Step 1) always re-runs but is fast if the CSV files already exist.
+
+---
+
+## Running Multiple Experiments
+
+### Vary hyperparameters across runs
+
+Each run gets its own `--run_name`, which becomes both the W&B run name and the log file prefix. Checkpoints are stored under separate W&B run ID subdirectories, so runs never overwrite each other.
+
+```bash
+# Baseline — default LR
+bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_baseline
+
+# Higher encoder LR
+# Edit configs/models/bio_mqm_finetune.yaml: encoder_learning_rate: 1.0e-06
+bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_enc_lr_1e6
+
+# More epochs
+# Edit configs/trainer_wandb.yaml: max_epochs: 20
+bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_20ep
+```
+
+Compare all runs side-by-side at:
+```
+https://wandb.ai/<entity>/comet-bio-mqm
+```
+Select multiple runs → **Compare** to overlay `val_kendall` curves.
+
+### Start fresh from a different base model
+
+Change `--load_from_checkpoint` to point at any COMET `.ckpt` (e.g. a previously finetuned checkpoint):
+
+```bash
+BASE_CKPT=$(python -c "from comet import download_model; print(download_model('Unbabel/wmt22-comet-da'))")
+
+python scripts/train_wandb.py \
+    --cfg configs/models/bio_mqm_finetune.yaml \
+    --load_from_checkpoint "$BASE_CKPT" \
+    --seed_everything 42
+```
+
+### Keep a job alive on SLURM / after terminal close
+
+Run inside `tmux` so the process survives SSH disconnection:
+
+```bash
+tmux new -s bio_mqm
+bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_v1
+# detach with Ctrl+B then D — reattach later with: tmux attach -t bio_mqm
+```
+
+If training is already running in a plain terminal, you can detach it without stopping:
+
+```bash
+# 1. Suspend the foreground process
+Ctrl+Z
+
+# 2. Resume it in the background and detach from the terminal
+bg && disown
+```
+
+The training process survives terminal close. Check progress at any time on the W&B dashboard.
 
 ## Step 4 — Upload to Hugging Face Hub
 

@@ -4,12 +4,12 @@ init_args:
   filename: '{epoch}-{step}-{val_kendall:.3f}'
   monitor: val_kendall
   verbose: True
-  save_last: False
+  save_last: True
   save_top_k: 2
   mode: max
   auto_insert_metric_name: True
-  save_weights_only: True
-  every_n_train_steps: null
+  save_weights_only: False
+  every_n_train_steps: 50
   train_time_interval: null
-  every_n_epochs: 1
+  every_n_epochs: null
   save_on_train_epoch_end: null

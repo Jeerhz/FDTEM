@@ -16,7 +16,7 @@ init_args:
   check_val_every_n_epoch: 1
   deterministic: False
   fast_dev_run: False
-  max_epochs: 10
+  max_epochs: 200
   min_epochs: 1
   max_steps: -1
   min_steps: null
@@ -28,7 +28,7 @@ init_args:
   overfit_batches: 0
   val_check_interval: 1.0
   num_sanity_val_steps: 3
-  log_every_n_steps: 20
+  log_every_n_steps: 5
   enable_progress_bar: true
   enable_model_summary: true
   gradient_clip_val: 1.0
@@ -42,15 +42,6 @@ init_args:
   reload_dataloaders_every_n_epochs: 0
   default_root_dir: null
 
-  # ── Weights & Biases logger ───────────────────────────────────────────────
-  # Tags are set via WANDB_TAGS env var in finetune_bio_mqm.sh — do not add
-  # them here as jsonargparse cannot resolve **kwargs parameters.
-  logger:
-    class_path: pytorch_lightning.loggers.WandbLogger
-    init_args:
-      # project and name are read from WANDB_PROJECT / WANDB_RUN_NAME env vars
-      # when left as null; set them explicitly here to hard-code.
-      project: null
-      name: null
-      save_dir: wandb_logs
-      log_model: false          # set to "all" to upload all checkpoints to W&B
+  # logger is intentionally omitted here — jsonargparse 3.13.1 cannot resolve
+  # class_path/init_args for Union[Logger, bool, None].
+  # WandbLogger is injected via --trainer.logger JSON flag in finetune_bio_mqm.sh.
