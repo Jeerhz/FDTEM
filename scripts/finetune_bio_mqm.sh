@@ -8,11 +8,6 @@
 #   3. Finetune via comet-train with W&B logging
 #   4. Save the best checkpoint path for upload
 #
-# Requirements:
-#   pip install unbabel-comet wandb huggingface_hub
-#   wandb login        (once per machine)
-#   huggingface-cli login  (once per machine, for gated models)
-#
 # Usage:
 #   bash scripts/finetune_bio_mqm.sh [--gpus 2] [--run_name my_run]
 # ──────────────────────────────────────────────────────────────────────────────
