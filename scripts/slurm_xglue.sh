@@ -23,24 +23,21 @@
 
 set -euo pipefail
 
-# ── project root (this script lives in scripts/) ──────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/.."
+# ── project root — use SLURM_SUBMIT_DIR so this works even when SLURM copies
+#    the script to a tmp location on the compute node
+cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is not set}"
 mkdir -p logs
 
 # ── environment ───────────────────────────────────────────────────────────────
-# Adjust to however your env is set up on Cleps (conda or venv).
-# Example for conda:
-#   source "$HOME/miniconda3/etc/profile.d/conda.sh"
-#   conda activate fdtem
-# Example for a module + venv:
-#   module load cuda/12.1
-#   source "$HOME/envs/fdtem/bin/activate"
-if [[ -n "${CONDA_ENV:-}" ]]; then
-  source "$(conda info --base)/etc/profile.d/conda.sh"
-  conda activate "$CONDA_ENV"
-elif [[ -n "${VENV_PATH:-}" ]]; then
+# Default conda env is comet-bio (has numpy, torch, comet, datasets, wandb, sklearn).
+# Override at submit time: CONDA_ENV=other_env sbatch ...
+# Or use a venv: VENV_PATH=/path/to/venv sbatch ...
+CONDA_BASE="$HOME/miniconda3"
+if [[ -n "${VENV_PATH:-}" ]]; then
   source "$VENV_PATH/bin/activate"
+else
+  source "$CONDA_BASE/etc/profile.d/conda.sh"
+  conda activate "${CONDA_ENV:-comet-bio}"
 fi
 
 # ── W&B ───────────────────────────────────────────────────────────────────────
