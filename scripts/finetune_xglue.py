@@ -150,6 +150,21 @@ def train_and_eval(args) -> Dict:
         for p in model.encoder.parameters():
             p.requires_grad_(False)
         logger.info("  Encoder FROZEN (head-only training — use probe_xglue.py for the standard probe)")
+    else:
+        # COMET loads its encoder frozen (nr_frozen_epochs>0 → freeze_encoder() at
+        # load time), and it only ever unfreezes inside COMET's own Lightning loop.
+        # Without this, full fine-tuning would silently train the head only.
+        n_unfrozen = 0
+        for p in model.encoder.parameters():
+            if not p.requires_grad:
+                p.requires_grad_(True)
+                n_unfrozen += 1
+        if n_unfrozen:
+            logger.info(f"  Encoder unfrozen for full fine-tuning ({n_unfrozen} param tensors re-enabled)")
+
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6
+    total = sum(p.numel() for p in model.parameters()) / 1e6
+    logger.info(f"  Trainable params: {trainable:.1f}M / {total:.1f}M")
 
     collate = make_collate(tokenizer, max_len)
     train_loader = DataLoader(

@@ -65,18 +65,38 @@ def parse_args():
 
 def load_and_export(ckpt_path: str, export_dir: Path) -> dict:
     """
-    Load the COMET checkpoint and export it to `export_dir` in HF format.
-    Returns the hparams dict for model-card generation.
+    Load the COMET checkpoint and export it to `export_dir`.
+
+    Layout written to export_dir:
+      model.ckpt          — raw Lightning checkpoint (for load_from_checkpoint)
+      hparams.yaml        — hyperparameters (required by load_from_checkpoint)
+      encoder/            — HF-format XLM-R encoder + tokenizer (for from_pretrained)
     """
+    import shutil
     from comet import load_from_checkpoint
 
+    ckpt_path = Path(ckpt_path)
     print(f"Loading checkpoint: {ckpt_path}")
-    model = load_from_checkpoint(ckpt_path)
-
-    print(f"Saving HF-compatible model to: {export_dir}")
-    model.save_pretrained(str(export_dir))
+    model = load_from_checkpoint(str(ckpt_path))
 
     hparams = dict(model.hparams) if hasattr(model, "hparams") else {}
+
+    # -- HF encoder + tokenizer (enables encoder-only use via from_pretrained) --
+    encoder_dir = export_dir / "encoder"
+    encoder_dir.mkdir()
+    print(f"Saving HF encoder to: {encoder_dir}")
+    model.encoder.model.save_pretrained(str(encoder_dir))
+    model.encoder.tokenizer.save_pretrained(str(encoder_dir))
+
+    # -- hparams.yaml next to the checkpoint (required by load_from_checkpoint) --
+    hparams_src = ckpt_path.parents[1] / "hparams.yaml"
+    if hparams_src.is_file():
+        shutil.copy(hparams_src, export_dir / "hparams.yaml")
+    else:
+        import yaml
+        with open(export_dir / "hparams.yaml", "w") as fh:
+            yaml.dump(hparams, fh)
+
     return hparams
 
 
@@ -198,10 +218,13 @@ def main():
         export_dir = Path(tmp) / "hf_export"
         export_dir.mkdir()
 
-        hparams = load_and_export(str(ckpt_path), export_dir)
+        hparams = load_and_export(ckpt_path, export_dir)
 
-        # also copy the raw .ckpt so users can load_from_checkpoint directly
-        shutil.copy(ckpt_path, export_dir / "model.ckpt")
+        # Place the .ckpt in checkpoints/ so load_from_checkpoint finds hparams.yaml
+        # two levels up (export_dir/hparams.yaml, export_dir/checkpoints/model.ckpt)
+        ckpt_dest = export_dir / "checkpoints"
+        ckpt_dest.mkdir()
+        shutil.copy(ckpt_path, ckpt_dest / "model.ckpt")
 
         write_model_card(export_dir, args.repo_id, args.run_name, hparams)
 

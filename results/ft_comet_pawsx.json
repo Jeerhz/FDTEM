@@ -1,0 +1,57 @@
+{
+  "run_name": "wmt22-comet-da_paws-x_ft",
+  "encoder": "comet:Unbabel/wmt22-comet-da",
+  "task": "paws-x",
+  "procedure": "finetune",
+  "pool": "cls",
+  "timestamp": "2026-06-19T11:15:21.097993+00:00",
+  "device": "cuda",
+  "config": {
+    "max_len": 128,
+    "epochs": 5,
+    "batch_size": 32,
+    "lr": 2e-05,
+    "grad_accum": 1,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_train_samples": null
+  },
+  "label_names": [
+    "not_paraphrase",
+    "paraphrase"
+  ],
+  "results": {
+    "de": {
+      "accuracy": 0.9205,
+      "f1_macro": 0.9198866320264525
+    },
+    "en": {
+      "accuracy": 0.953,
+      "f1_macro": 0.9526660113762709
+    },
+    "es": {
+      "accuracy": 0.918,
+      "f1_macro": 0.9174448995042668
+    },
+    "fr": {
+      "accuracy": 0.921,
+      "f1_macro": 0.920411362436581
+    },
+    "ja": {
+      "accuracy": 0.8295,
+      "f1_macro": 0.8265919028589197
+    },
+    "ko": {
+      "accuracy": 0.8195,
+      "f1_macro": 0.8159698883915998
+    },
+    "zh": {
+      "accuracy": 0.8545,
+      "f1_macro": 0.8532984778582788
+    },
+    "avg": {
+      "accuracy": 0.888,
+      "f1_macro": 0.8866098820646241
+    }
+  }
+}

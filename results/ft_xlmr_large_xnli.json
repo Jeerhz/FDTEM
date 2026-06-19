@@ -1,0 +1,90 @@
+{
+  "run_name": "xlm-roberta-large_xnli_ft",
+  "encoder": "hf:xlm-roberta-large",
+  "task": "xnli",
+  "procedure": "finetune",
+  "pool": "cls",
+  "timestamp": "2026-06-19T00:18:16.309849+00:00",
+  "device": "cuda",
+  "config": {
+    "max_len": 128,
+    "epochs": 3,
+    "batch_size": 32,
+    "lr": 2e-05,
+    "grad_accum": 1,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_train_samples": null
+  },
+  "label_names": [
+    "entailment",
+    "neutral",
+    "contradiction"
+  ],
+  "results": {
+    "ar": {
+      "accuracy": 0.7798403193612774,
+      "f1_macro": 0.7788417129464494
+    },
+    "bg": {
+      "accuracy": 0.8267465069860279,
+      "f1_macro": 0.8268321775478507
+    },
+    "de": {
+      "accuracy": 0.8203592814371258,
+      "f1_macro": 0.820066412109628
+    },
+    "el": {
+      "accuracy": 0.8153692614770459,
+      "f1_macro": 0.8151165502498449
+    },
+    "en": {
+      "accuracy": 0.8842315369261478,
+      "f1_macro": 0.884515031299946
+    },
+    "es": {
+      "accuracy": 0.8367265469061876,
+      "f1_macro": 0.8370524289844964
+    },
+    "fr": {
+      "accuracy": 0.8221556886227545,
+      "f1_macro": 0.8218623217026453
+    },
+    "hi": {
+      "accuracy": 0.7536926147704591,
+      "f1_macro": 0.751788967765735
+    },
+    "ru": {
+      "accuracy": 0.7974051896207585,
+      "f1_macro": 0.7968381096274219
+    },
+    "sw": {
+      "accuracy": 0.6994011976047905,
+      "f1_macro": 0.697838598217806
+    },
+    "th": {
+      "accuracy": 0.7704590818363274,
+      "f1_macro": 0.7689034371605853
+    },
+    "tr": {
+      "accuracy": 0.7830339321357286,
+      "f1_macro": 0.7817814796518823
+    },
+    "ur": {
+      "accuracy": 0.7083832335329341,
+      "f1_macro": 0.7039060618452285
+    },
+    "vi": {
+      "accuracy": 0.7874251497005988,
+      "f1_macro": 0.7864627763327644
+    },
+    "zh": {
+      "accuracy": 0.7796407185628742,
+      "f1_macro": 0.7778378943636991
+    },
+    "avg": {
+      "accuracy": 0.7909913506320692,
+      "f1_macro": 0.7899762639870657
+    }
+  }
+}

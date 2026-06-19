@@ -142,17 +142,12 @@ def pool(hidden: torch.Tensor, attention_mask: torch.Tensor, mode: str) -> torch
 # Every example is a dict {"a": str, "b": Optional[str], "label": int}.
 # Training data is always English; test data spans the requested languages.
 
-def _load_nc_split(tar: tarfile.TarFile, lang: str, split: str):
-    member = f"xglue_full_dataset/NC/xglue.nc.{lang}.{split}"
-    try:
-        f = tar.extractfile(member)
-    except KeyError:
-        return None
-    if f is None:
-        return None
+def _parse_nc_rows(fileobj):
+    # Read the whole member as bytes — a streaming tar's ExFileObject isn't
+    # seekable, so io.TextIOWrapper can't wrap it.
     rows = []
-    for line in io.TextIOWrapper(f, encoding="utf-8"):
-        parts = line.rstrip("\n").split("\t")
+    for line in fileobj.read().decode("utf-8").splitlines():
+        parts = line.split("\t")
         if len(parts) < 3:
             continue
         title, body, category = parts[0], parts[1], parts[2]
@@ -206,23 +201,44 @@ def build_data(
     if task == "nc":
         if not xglue_tar or not os.path.isfile(xglue_tar):
             raise FileNotFoundError("NC requires --xglue_tar path/to/xglue_full_dataset.tar.gz")
-        with tarfile.open(xglue_tar, "r:gz") as tar:
-            train_rows = _load_nc_split(tar, "en", "train")
-            if train_rows is None:
-                raise RuntimeError("Could not read English NC training data from the tar.")
-            label_names = sorted({c for _, c in train_rows})
-            label2id = {c: i for i, c in enumerate(label_names)}
-            if max_train:
-                train_rows = train_rows[:max_train]
-            train_ex = [{"a": a, "b": None, "label": label2id[c]} for a, c in train_rows]
-            test_by_lang = {}
-            for lang in languages:
-                rows = _load_nc_split(tar, lang, "test")
-                if rows is None:
-                    logger.warning(f"  Skipping {lang}: no test file")
-                    continue
-                test_by_lang[lang] = [{"a": a, "b": None, "label": label2id[c]}
-                                      for a, c in rows if c in label2id]
+        # Stream the archive (r|gz, never seeks) and pull the NC splits in a single
+        # forward pass, stopping as soon as we have them. The NC directory sits near
+        # the front of the tar, so this stays robust even if the archive is truncated
+        # — a random-access "r:gz" open would scan to the end and choke on a bad tail.
+        train_member = "xglue_full_dataset/NC/xglue.nc.en.train"
+        test_members = {f"xglue_full_dataset/NC/xglue.nc.{lang}.test": lang for lang in languages}
+        train_rows = None
+        test_raw: Dict[str, list] = {}
+        try:
+            with tarfile.open(xglue_tar, "r|gz") as tar:
+                for member in tar:
+                    if member.name == train_member:
+                        f = tar.extractfile(member)
+                        if f is not None:
+                            train_rows = _parse_nc_rows(f)
+                    elif member.name in test_members:
+                        f = tar.extractfile(member)
+                        if f is not None:
+                            test_raw[test_members[member.name]] = _parse_nc_rows(f)
+                    if train_rows is not None and len(test_raw) == len(test_members):
+                        break
+        except (tarfile.ReadError, EOFError) as exc:
+            logger.warning(f"  NC tar ended early ({exc}); using the splits read so far.")
+        if train_rows is None:
+            raise RuntimeError("Could not read English NC training data from the tar.")
+        label_names = sorted({c for _, c in train_rows})
+        label2id = {c: i for i, c in enumerate(label_names)}
+        if max_train:
+            train_rows = train_rows[:max_train]
+        train_ex = [{"a": a, "b": None, "label": label2id[c]} for a, c in train_rows]
+        test_by_lang = {}
+        for lang in languages:
+            rows = test_raw.get(lang)
+            if rows is None:
+                logger.warning(f"  Skipping {lang}: no test file")
+                continue
+            test_by_lang[lang] = [{"a": a, "b": None, "label": label2id[c]}
+                                  for a, c in rows if c in label2id]
         return train_ex, test_by_lang, label_names
 
     raise ValueError(f"Unknown task {task!r}")
