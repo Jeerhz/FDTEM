@@ -1,0 +1,57 @@
+{
+  "run_name": "bio-mqm-4yeqp7cn-ep12_nc_ft",
+  "encoder": "comet:/home/abensale/scratch/checkpoints/bio_mqm/comet-bio-mqm/4yeqp7cn/checkpoints/last.ckpt",
+  "task": "nc",
+  "procedure": "finetune",
+  "pool": "cls",
+  "timestamp": "2026-06-20T10:32:13.832060+00:00",
+  "device": "cuda",
+  "config": {
+    "max_len": 256,
+    "epochs": 3,
+    "batch_size": 32,
+    "lr": 2e-05,
+    "grad_accum": 1,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_train_samples": null
+  },
+  "label_names": [
+    "autos",
+    "entertainment",
+    "finance",
+    "foodanddrink",
+    "health",
+    "lifestyle",
+    "news",
+    "sports",
+    "travel",
+    "video"
+  ],
+  "results": {
+    "de": {
+      "accuracy": 0.8382,
+      "f1_macro": 0.7110993011474511
+    },
+    "en": {
+      "accuracy": 0.9323,
+      "f1_macro": 0.8101791896747894
+    },
+    "es": {
+      "accuracy": 0.8283,
+      "f1_macro": 0.7962186847454186
+    },
+    "fr": {
+      "accuracy": 0.7815,
+      "f1_macro": 0.6667651172945771
+    },
+    "ru": {
+      "accuracy": 0.7989,
+      "f1_macro": 0.6621116290674663
+    },
+    "avg": {
+      "accuracy": 0.8358399999999999,
+      "f1_macro": 0.7292747843859405
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "run_name": "bio-mqm-4yeqp7cn-ep12_paws-x_ft",
+  "encoder": "comet:/home/abensale/scratch/checkpoints/bio_mqm/comet-bio-mqm/4yeqp7cn/checkpoints/last.ckpt",
+  "task": "paws-x",
+  "procedure": "finetune",
+  "pool": "cls",
+  "timestamp": "2026-06-20T03:15:14.729967+00:00",
+  "device": "cuda",
+  "config": {
+    "max_len": 128,
+    "epochs": 5,
+    "batch_size": 32,
+    "lr": 2e-05,
+    "grad_accum": 1,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_train_samples": null
+  },
+  "label_names": [
+    "not_paraphrase",
+    "paraphrase"
+  ],
+  "results": {
+    "de": {
+      "accuracy": 0.9125,
+      "f1_macro": 0.9119574598570039
+    },
+    "en": {
+      "accuracy": 0.9525,
+      "f1_macro": 0.9522203817289734
+    },
+    "es": {
+      "accuracy": 0.9065,
+      "f1_macro": 0.9059639711264132
+    },
+    "fr": {
+      "accuracy": 0.9155,
+      "f1_macro": 0.9148480554243426
+    },
+    "ja": {
+      "accuracy": 0.824,
+      "f1_macro": 0.8209269269941466
+    },
+    "ko": {
+      "accuracy": 0.8255,
+      "f1_macro": 0.8218831139833239
+    },
+    "zh": {
+      "accuracy": 0.8495,
+      "f1_macro": 0.8479951136236525
+    },
+    "avg": {
+      "accuracy": 0.8837142857142857,
+      "f1_macro": 0.8822564318196937
+    }
+  }
+}
