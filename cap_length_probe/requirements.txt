@@ -1,0 +1,18 @@
+# cap_length_probe requirements
+#
+# Real (cluster, GPU) run needs the full stack. The local logic smoke test
+# (features.backend: mock) needs only the lightweight stack below the divider.
+#
+# ── frozen-encoder extraction (GPU run) ───────────────────────────────────────
+torch>=2.0
+transformers>=4.34
+unbabel-comet>=2.2.0        # provides `from comet import download_model, load_from_checkpoint`
+datasets>=2.14             # only for HF-dataset fallbacks
+# ── probing / analysis / plots (also enough for the mock logic smoke test) ────
+scikit-learn>=1.3
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pyyaml>=6.0
+tqdm>=4.65

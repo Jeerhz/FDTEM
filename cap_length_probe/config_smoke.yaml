@@ -1,0 +1,82 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# config_smoke.yaml — local LOGIC smoke test (no GPU, no model downloads).
+#
+# Uses the torch-free `mock` feature backend + a seeded `synthetic` multilingual
+# corpus to exercise every code path (data → features → probe → analyze → plots
+# → SUMMARY) end-to-end. Numbers are NOT scientific — see SUMMARY disclaimer.
+#
+#   python run.py --config config_smoke.yaml --results_dir results_smoke
+# ══════════════════════════════════════════════════════════════════════════════
+experiment_name: cap_length_probe_smoke
+
+encoders:
+  active_pair: default
+  pairs:
+    default:
+      comet: { kind: comet, ref: "Unbabel/wmt22-comet-da" }
+      raw:   { kind: hf,    ref: "FacebookAI/xlm-roberta-large" }
+    alt:
+      comet: { kind: comet, ref: "Unbabel/wmt22-cometkiwi-da" }
+      raw:   { kind: hf,    ref: "microsoft/infoxlm-large" }
+
+features:
+  backend: mock                # torch-free fabricated features (LOGIC TEST ONLY)
+  pooling: mean
+  normalize_l2: false
+  fp16: false
+  batch_size: 64
+  device: cpu
+
+length_buckets: [16, 32, 64, 128, 256, 512]
+min_tokens: 512
+
+data:
+  source: synthetic            # seeded generator (no network)
+  btl_dir: "${BTL_DIR:-~/scratch/cap_btl}"
+  pooled_csv: null
+  languages: [en, hu, nl, fr, it]
+  text_col: text
+  label_col: label
+  label_is_zero_indexed: true
+  label_cap_col: label_cap
+  lang_col: language
+  token_count_col: token_count_xlm_roberta_large
+  drop_no_policy_content: true
+  min_chars: 20
+  dedup: true
+  max_per_class_lang: null
+  test_size: 0.25
+
+split:
+  seed: 42
+  stratify_by: [language, label]
+
+probe:
+  classifier: logreg
+  seeds: [0, 1, 2]             # fewer seeds for speed
+  max_iter: 200               # low — convergence not needed for a logic test
+  C: 1.0
+  standardize: true
+  mlp_hidden: 256
+  train_short_L: 16
+  train_subsample_frac: 0.9
+
+bootstrap:
+  n_resamples: 300
+  ci: 0.95
+  seed: 12345
+
+geometry:
+  enabled: true
+
+paths:
+  results_dir: results_smoke
+  data_dir: results_smoke/data
+  feature_cache: results_smoke/feature_cache
+  analysis_dir: results_smoke/analysis
+  figures_dir: results_smoke/figures
+
+smoke:
+  languages: [en]
+  n_docs: 200
+  length_buckets: [32, 128]
