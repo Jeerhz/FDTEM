@@ -2,26 +2,6 @@
 """
 repana_common.py — shared building blocks for the *representation-analysis* suite.
 
-Motivation
-----------
-COMET's encoder (XLM-R-large) is trained to *predict translation quality*. That
-objective has two faces that pull in opposite directions:
-
-  (a) it must place genuinely parallel (src, mt) pairs close together, and
-  (b) it must place *near*-parallel pairs that contain errors far enough apart
-      that the regression head can tell good from bad.
-
-Pure cross-lingual aligners (LaBSE, LASER, E5, SONAR) only ever optimise (a):
-pull parallel sentences together with a contrastive / distance loss. The whole
-point of this suite is to characterise how COMET's extra "push apart the
-near-misses" pressure reshapes the multilingual representation space — and what
-happens once the text is longer than the short segments COMET was trained on.
-
-Everything downstream (E1–E5) imports from here so that **every encoder goes
-through one identical embedding interface**. The only thing that varies between
-runs is the encoder weights — which is exactly what makes "what did COMET change"
-a fair question.
-
 Encoder zoo (all pure `transformers`, no sentence-transformers needed)
 ----------------------------------------------------------------------
   comet:<id-or-ckpt>     COMET full pipeline (layerwise attention + avg pool).
@@ -32,8 +12,6 @@ Encoder zoo (all pure `transformers`, no sentence-transformers needed)
   labse                  LaBSE (contrastive parallel-sentence aligner; CLS+dense).
   e5[:<hf_id>]           multilingual-E5 (contrastive text embedder; mean pool,
                          "query:" prefix). Default intfloat/multilingual-e5-base.
-
-All embeddings are L2-normalised by default (cosine geometry for retrieval).
 """
 from __future__ import annotations
 
@@ -65,7 +43,6 @@ FLORES_CODE = {
     "ur": "urd_Arab",
 }
 CORE_LANGS = ["en", "de", "es", "fr", "ru", "zh"]
-EXT_LANGS = CORE_LANGS + ["ar", "hi", "ja", "ko", "tr", "vi", "sw"]
 
 # Languages with no whitespace word segmentation — perturbations operate on
 # characters instead of space-delimited tokens for these.
