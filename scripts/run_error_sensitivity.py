@@ -17,7 +17,7 @@ reordering / mistranslation — xsim++ style), and measure, per encoder:
 
   align_acc   P[ cos(src, tgt⁺) > cos(src, tgt_random) ]   (pull-together)
   err_acc     P[ cos(src, tgt⁺) > cos(src, tgt⁻) ]         (push-apart)
-  err_margin  mean( cos(src,tgt⁺) − cos(src,tgt⁻) )
+  err_margin  mean( cos(src,tgt⁺) - cos(src,tgt⁻) )
 
 Plotting err_acc against align_acc gives the money plot: aligners cluster top-left
 (great alignment, weak error sensitivity); COMET should sit higher on err_acc.
