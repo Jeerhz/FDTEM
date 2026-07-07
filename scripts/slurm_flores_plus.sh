@@ -109,14 +109,14 @@ PY
 # lengths 1 2 4: FLORES+ articles are short (no article spans 8 sentences, so k=8
 # yields 0 parallel pseudo-docs). The runner skips any length with <2 docs anyway.
 echo; echo "### E1 + E3 — xSIM alignment & length scaling on FLORES+ ###"
-srun python scripts/run_e1_e3_retrieval.py \
+srun python scripts/run_retrieval.py \
   --flores_source plus --split "$SPLIT" \
   --encoders "${ENCODERS[@]}" --langs $LANGS --lengths 1 2 4 \
   --output "$OUT/e1_e3_retrieval.json" --wandb_project "$WANDB_PROJECT"
 
 # ── E2 — xSIM++ error-sensitivity trade-off ────────────────────────────────────
 echo; echo "### E2 — xSIM++ error-sensitivity on FLORES+ ###"
-srun python scripts/run_e2_error_sensitivity.py \
+srun python scripts/run_error_sensitivity.py \
   --flores_source plus --split "$SPLIT" \
   --encoders "${ENCODERS[@]}" --langs $LANGS \
   --output "$OUT/e2_error_sensitivity.json" --wandb_project "$WANDB_PROJECT"

@@ -2,7 +2,7 @@
 """
 plot_alignment_bar.py — per-model bar plot of cross-lingual alignment (xSIM).
 
-Reads an E1/E3 retrieval JSON (produced by run_e1_e3_retrieval.py) and draws one
+Reads an E1/E3 retrieval JSON (produced by run_retrieval.py) and draws one
 bar per encoder = its xSIM retrieval accuracy at sentence level (k=1, en↔xx), the
 headline "how well does this encoder align translations?" number. Pure json +
 matplotlib (no torch), so it regenerates the figure without re-running the GPU job:
@@ -90,7 +90,7 @@ def alignment_barplot(results: Dict, plot_dir: Path, length: Optional[int] = Non
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("json", help="E1/E3 retrieval JSON (run_e1_e3_retrieval.py output).")
+    p.add_argument("json", help="E1/E3 retrieval JSON (run_retrieval.py output).")
     p.add_argument("--length", type=int, default=None,
                    help="Pseudo-doc length k to plot (default: shortest available).")
     p.add_argument("--plot_dir", default=None,

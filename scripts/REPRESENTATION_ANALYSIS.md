@@ -1,0 +1,87 @@
+# Representation-analysis suite
+
+How does training XLM-R to **predict translation quality** (COMET) reshape its
+multilingual representation space — and what happens when the text is longer than
+the short segments COMET was trained on? This suite answers that by putting COMET
+side-by-side with the encoders it is *not*: a raw XLM-R, and two pure
+parallel-sentence aligners (LaBSE, multilingual-E5).
+
+## The central question
+
+> COMET is trained from an old multilingual encoder (XLM-R) but produces
+> embeddings used to predict quality. One could also use those embeddings
+> directly for cross-lingual similarity. The interesting tension: aligners
+> (LaBSE/LASER/SONAR/E5) only **pull parallel sentences together**, whereas a
+> quality metric must *also* **push apart pairs that are nearly parallel but
+> contain errors**. How does COMET's encoder differ from the aligners?
+
+Every experiment is framed around that pull-together / push-apart contrast.
+
+## The encoder zoo (one identical interface — `representation_analysis_common.py`)
+
+| spec | what it is | role |
+|------|-----------|------|
+| `comet:Unbabel/wmt22-comet-da` | COMET full pipeline (layerwise-attn + avg pool) | the subject |
+| `comet:<bio.ckpt>` | your Bio-MQM-finetuned COMET | domain-adapted subject |
+| `hf-mean:xlm-roberta-large` | raw XLM-R, mean pooled | the untrained control / COMET's backbone |
+| `labse` | LaBSE (`setu4993/LaBSE`) | contrastive aligner |
+| `e5` | `intfloat/multilingual-e5-base` | modern contrastive aligner |
+
+All embeddings L2-normalised. Data = **FLORES-200 devtest** (multi-parallel, 1012
+sentences/language), so every metric is computed on identical content across
+languages and encoders.
+
+## Experiments
+
+| script | metric | reads on |
+|--------|--------|----------|
+| `run_retrieval.py` | xsim retrieval error (en↔xx); also vs pseudo-doc length k=1,2,4,8 | pull-together / alignment + behaviour past sentence scale |
+| `run_error_sensitivity.py` | P[cos(src,tgt⁺)>cos(src,tgt⁻)] on injected errors | **push-apart** + the trade-off plot |
+
+**Length scaling** (in `run_retrieval.py`): consecutive same-article FLORES
+sentences are concatenated (FLORES rows are in document order with a `URL` column
+marking articles), keeping them parallel across languages. All encoders truncate
+at 512 tokens identically, so the question is how well each *uses* multi-sentence
+context.
+
+**Error-sensitivity hard negatives** (xsim++ style, language-agnostic): `number`
+(digit swap), `delete` (omission), `swap` (adjacent reorder), `replace`
+(mistranslation). For no-space languages (zh/ja/th) perturbations are
+character-level.
+
+## Running on Cleps
+
+Full suite (auto-discovers the Bio-MQM checkpoint under `~/scratch/checkpoints/bio_mqm`):
+
+```bash
+sbatch scripts/slurm_representation_analysis.sh
+```
+
+Single experiment (pass-through mode):
+
+```bash
+sbatch scripts/slurm_representation_analysis.sh python scripts/run_error_sensitivity.py \
+    --encoders comet:Unbabel/wmt22-comet-da labse e5 --langs en de fr ru zh
+```
+
+Useful env vars: `BIO_CKPT=/path/model.ckpt`, `LANGS="en de es fr ru zh ar hi"`,
+`CONDA_ENV=comet-bio`, `WANDB_PROJECT=comet-repana`, `WANDB_MODE=offline`.
+
+Outputs: `results/representation_analysis/*.json` + `results/representation_analysis/plots/*.png`. Sentence
+embeddings are cached under `results/representation_analysis/emb_cache/` and shared across the two
+experiments, so reruns are cheap.
+
+## What each result would mean
+
+- **retrieval high error, error-sensitivity ~0.5** → a pure aligner: parallel
+  sentences nearest, but blind to errors. Expected for LaBSE/E5.
+- **retrieval lower error, error-sensitivity high** → COMET's signature: it
+  sacrifices some raw alignment to encode error structure. This is the hypothesis
+  the supervisor flagged.
+- **length scaling** → if COMET's curve falls off faster than the aligners' as k
+  grows, that quantifies the "trained on short segments" limitation.
+
+## Notes / extensions
+- LASER3 & SONAR were left out (fragile fairseq2 installs on the cluster). The
+  zoo is one `build_embedder` branch away from adding them.
+- To add languages, extend `--langs` (FLORES codes live in `FLORES_CODE`).

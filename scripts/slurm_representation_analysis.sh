@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
-# slurm_repana.sh — run the representation-analysis suite (E1–E5) on Cleps.
+# slurm_representation_analysis.sh — run the representation-analysis suite on Cleps.
 #
 # Two modes:
-#   (1) Full suite, no args — runs E1/E3, E2, E4, E5 over the default encoder zoo
-#       (COMET, COMET-bio, XLM-R-large, LaBSE, E5) and core languages:
+#   (1) Full suite, no args — runs retrieval and error-sensitivity over the
+#       default encoder zoo (COMET, COMET-bio, XLM-R-large, LaBSE, E5) and core
+#       languages:
 #
-#         sbatch scripts/slurm_repana.sh
+#         sbatch scripts/slurm_representation_analysis.sh
 #
 #   (2) Pass-through — give it a full python command and it just runs that
 #       (same convention as slurm_xglue.sh), e.g. to run a single experiment:
 #
-#         sbatch scripts/slurm_repana.sh python scripts/run_e2_error_sensitivity.py \
+#         sbatch scripts/slurm_representation_analysis.sh python scripts/run_error_sensitivity.py \
 #             --encoders comet:Unbabel/wmt22-comet-da labse --langs en de fr
 #
 # Tunables (env at submit time):
@@ -81,28 +82,17 @@ else
 fi
 
 LANGS="${LANGS:-en de es fr ru zh}"
-OUT=results/repana
+OUT=results/representation_analysis
 mkdir -p "$OUT"
 
-echo; echo "### E1 + E3 — alignment & length scaling ###"
-srun python scripts/run_e1_e3_retrieval.py \
+echo; echo "### retrieval — alignment & length scaling ###"
+srun python scripts/run_retrieval.py \
   --encoders "${ENCODERS[@]}" --langs $LANGS --lengths 1 2 4 8 \
-  --output "$OUT/e1_e3_retrieval.json" --wandb_project "$WANDB_PROJECT"
+  --output "$OUT/retrieval.json" --wandb_project "$WANDB_PROJECT"
 
-echo; echo "### E2 — error-sensitivity trade-off ###"
-srun python scripts/run_e2_error_sensitivity.py \
+echo; echo "### error sensitivity — alignment vs error-discrimination trade-off ###"
+srun python scripts/run_error_sensitivity.py \
   --encoders "${ENCODERS[@]}" --langs $LANGS \
-  --output "$OUT/e2_error_sensitivity.json" --wandb_project "$WANDB_PROJECT"
-
-echo; echo "### E4 — geometry ###"
-srun python scripts/run_e4_geometry.py \
-  --encoders "${ENCODERS[@]}" --langs $LANGS \
-  --output "$OUT/e4_geometry.json" --wandb_project "$WANDB_PROJECT"
-
-echo; echo "### E5 — layer-wise CKA ###"
-srun python scripts/run_e5_cka.py \
-  --encoders "${ENCODERS[@]}" --reference hf-mean:xlm-roberta-large \
-  --langs en de zh --n_per_lang 400 \
-  --output "$OUT/e5_cka.json" --wandb_project "$WANDB_PROJECT"
+  --output "$OUT/error_sensitivity.json" --wandb_project "$WANDB_PROJECT"
 
 echo; echo "All experiments done → $OUT/"

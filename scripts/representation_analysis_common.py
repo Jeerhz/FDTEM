@@ -1,26 +1,6 @@
 #!/usr/bin/env python3
 """
-repana_common.py — shared building blocks for the *representation-analysis* suite.
-
-Motivation
-----------
-COMET's encoder (XLM-R-large) is trained to *predict translation quality*. That
-objective has two faces that pull in opposite directions:
-
-  (a) it must place genuinely parallel (src, mt) pairs close together, and
-  (b) it must place *near*-parallel pairs that contain errors far enough apart
-      that the regression head can tell good from bad.
-
-Pure cross-lingual aligners (LaBSE, LASER, E5, SONAR) only ever optimise (a):
-pull parallel sentences together with a contrastive / distance loss. The whole
-point of this suite is to characterise how COMET's extra "push apart the
-near-misses" pressure reshapes the multilingual representation space — and what
-happens once the text is longer than the short segments COMET was trained on.
-
-Everything downstream (E1–E5) imports from here so that **every encoder goes
-through one identical embedding interface**. The only thing that varies between
-runs is the encoder weights — which is exactly what makes "what did COMET change"
-a fair question.
+representation_analysis_common.py — shared building blocks for the *representation-analysis* suite.
 
 Encoder zoo (all pure `transformers`, no sentence-transformers needed)
 ----------------------------------------------------------------------
@@ -32,8 +12,6 @@ Encoder zoo (all pure `transformers`, no sentence-transformers needed)
   labse                  LaBSE (contrastive parallel-sentence aligner; CLS+dense).
   e5[:<hf_id>]           multilingual-E5 (contrastive text embedder; mean pool,
                          "query:" prefix). Default intfloat/multilingual-e5-base.
-
-All embeddings are L2-normalised by default (cosine geometry for retrieval).
 """
 from __future__ import annotations
 
@@ -65,7 +43,6 @@ FLORES_CODE = {
     "ur": "urd_Arab",
 }
 CORE_LANGS = ["en", "de", "es", "fr", "ru", "zh"]
-EXT_LANGS = CORE_LANGS + ["ar", "hi", "ja", "ko", "tr", "vi", "sw"]
 
 # Languages with no whitespace word segmentation — perturbations operate on
 # characters instead of space-delimited tokens for these.
@@ -92,16 +69,11 @@ def _l2norm(x: np.ndarray) -> np.ndarray:
 # Embedder zoo
 # ════════════════════════════════════════════════════════════════════════════
 class Embedder:
-    """Unified embedding interface.
-
-    Sub-classes implement ``_embed_raw`` (sentence embeddings, un-normalised) and,
-    where meaningful, ``layer_reps`` (per-layer masked-mean reps for CKA) and
-    ``layer_weights`` (COMET's learned layer mixture).
-    """
+    """Unified embedding interface. Sub-classes implement ``_embed_raw``
+    (sentence embeddings, un-normalised); ``embed`` adds optional L2-norm."""
 
     name: str = "embedder"
     hidden_size: int = 0
-    is_xlmr_large: bool = False  # True for the 3 XLM-R-large variants (CKA group)
 
     def embed(self, texts: Sequence[str], batch_size: int = 64,
               normalize: bool = True) -> np.ndarray:
@@ -112,17 +84,9 @@ class Embedder:
     def _embed_raw(self, texts: List[str], batch_size: int) -> np.ndarray:
         raise NotImplementedError
 
-    def layer_reps(self, texts: Sequence[str], batch_size: int = 64
-                   ) -> np.ndarray:
-        """Return (n_layers, N, D) masked-mean-pooled hidden states per layer."""
-        raise NotImplementedError(f"{self.name} has no per-layer reps")
-
-    def layer_weights(self) -> Optional[np.ndarray]:
-        """COMET's learned (sparse)softmax layer-mixture weights, else None."""
-        return None
-
 
 def _masked_mean(hidden: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Compute masked mean pooling over sequence dimension."""
     m = mask.unsqueeze(-1).to(hidden.dtype)
     return (hidden * m).sum(1) / m.sum(1).clamp(min=1e-9)
 
@@ -161,29 +125,6 @@ class CometEmbedder(Embedder):
             out.append(emb.cpu().float().numpy())
         return np.concatenate(out, 0)
 
-    @torch.no_grad()
-    def layer_reps(self, texts, batch_size=64):
-        per_layer: Optional[List[List[np.ndarray]]] = None
-        for s in tqdm(range(0, len(texts), batch_size), desc=f"  {self.name}[layers]", leave=False):
-            enc = self.model.encoder.prepare_sample(texts[s:s + batch_size])
-            ids = enc["input_ids"].to(self.device)
-            am = enc["attention_mask"].to(self.device)
-            hs = self.model.encoder.model(
-                input_ids=ids, attention_mask=am,
-                output_hidden_states=True, return_dict=True).hidden_states
-            if per_layer is None:
-                per_layer = [[] for _ in hs]
-            for li, h in enumerate(hs):
-                per_layer[li].append(_masked_mean(h, am).cpu().float().numpy())
-        return np.stack([np.concatenate(c, 0) for c in per_layer], 0)
-
-    def layer_weights(self):
-        la = getattr(self.model, "layerwise_attention", None)
-        if la is None:
-            return None
-        w = torch.cat([p for p in la.scalar_parameters])
-        return la.transform_fn(w, dim=0).detach().cpu().float().numpy()
-
 
 class HFMeanEmbedder(Embedder):
     """Raw HuggingFace encoder, masked-mean pooled. The untrained control."""
@@ -197,8 +138,6 @@ class HFMeanEmbedder(Embedder):
             p.requires_grad_(False)
         self.device = device
         self.hidden_size = self.model.config.hidden_size
-        self.is_xlmr_large = (self.model.config.hidden_size == 1024
-                              and "roberta" in self.model.config.model_type.lower())
         self.name = "xlmr:" + hf_id.split("/")[-1]
 
     def _encode(self, batch):
@@ -213,18 +152,6 @@ class HFMeanEmbedder(Embedder):
             h = self.model(**enc).last_hidden_state
             out.append(_masked_mean(h, enc["attention_mask"]).cpu().float().numpy())
         return np.concatenate(out, 0)
-
-    @torch.no_grad()
-    def layer_reps(self, texts, batch_size=64):
-        per_layer = None
-        for s in tqdm(range(0, len(texts), batch_size), desc=f"  {self.name}[layers]", leave=False):
-            enc = self._encode(texts[s:s + batch_size]).to(self.device)
-            hs = self.model(**enc, output_hidden_states=True).hidden_states
-            if per_layer is None:
-                per_layer = [[] for _ in hs]
-            for li, h in enumerate(hs):
-                per_layer[li].append(_masked_mean(h, enc["attention_mask"]).cpu().float().numpy())
-        return np.stack([np.concatenate(c, 0) for c in per_layer], 0)
 
 
 class LaBSEEmbedder(Embedder):
@@ -250,19 +177,6 @@ class LaBSEEmbedder(Embedder):
                            truncation=True, max_length=512).to(self.device)
             out.append(self.model(**enc).pooler_output.cpu().float().numpy())
         return np.concatenate(out, 0)
-
-    @torch.no_grad()
-    def layer_reps(self, texts, batch_size=64):
-        per_layer = None
-        for s in tqdm(range(0, len(texts), batch_size), desc="  labse[layers]", leave=False):
-            enc = self.tok(texts[s:s + batch_size], return_tensors="pt", padding=True,
-                           truncation=True, max_length=512).to(self.device)
-            hs = self.model(**enc, output_hidden_states=True).hidden_states
-            if per_layer is None:
-                per_layer = [[] for _ in hs]
-            for li, h in enumerate(hs):
-                per_layer[li].append(_masked_mean(h, enc["attention_mask"]).cpu().float().numpy())
-        return np.stack([np.concatenate(c, 0) for c in per_layer], 0)
 
 
 class E5Embedder(Embedder):
@@ -292,19 +206,6 @@ class E5Embedder(Embedder):
             h = self.model(**enc).last_hidden_state
             out.append(_masked_mean(h, enc["attention_mask"]).cpu().float().numpy())
         return np.concatenate(out, 0)
-
-    @torch.no_grad()
-    def layer_reps(self, texts, batch_size=64):
-        per_layer = None
-        for s in tqdm(range(0, len(texts), batch_size), desc="  e5[layers]", leave=False):
-            enc = self.tok(self._prep(texts[s:s + batch_size]), return_tensors="pt",
-                           padding=True, truncation=True, max_length=512).to(self.device)
-            hs = self.model(**enc, output_hidden_states=True).hidden_states
-            if per_layer is None:
-                per_layer = [[] for _ in hs]
-            for li, h in enumerate(hs):
-                per_layer[li].append(_masked_mean(h, enc["attention_mask"]).cpu().float().numpy())
-        return np.stack([np.concatenate(c, 0) for c in per_layer], 0)
 
 
 def enc_tag(spec: str) -> str:
@@ -423,7 +324,7 @@ def load_flores(langs: Sequence[str], split: str = "devtest",
     if root is None or not (root / split).is_dir():
         raise FileNotFoundError(
             "Could not find an extracted flores200_dataset directory. Set "
-            "$FLORES_DIR to it (see repana_common.py header for the download "
+            "$FLORES_DIR to it (see representation_analysis_common.py header for the download "
             "command).")
     logger.info(f"  FLORES root: {root}")
 
@@ -692,7 +593,7 @@ PERTURBATIONS = ["number", "delete", "swap", "replace"]
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Metrics — cross-lingual retrieval (xsim) and CKA
+# Metrics — cross-lingual retrieval (xsim)
 # ════════════════════════════════════════════════════════════════════════════
 def cosine_matrix(A: np.ndarray, B: np.ndarray) -> np.ndarray:
     """A,B assumed L2-normalised → cosine = dot product."""
@@ -723,20 +624,3 @@ def xsim_error(src: np.ndarray, tgt: np.ndarray, margin: str = "ratio",
         raise ValueError(margin)
     err = float((pred != np.arange(len(pred))).mean())
     return err, pred
-
-
-def linear_cka(X: np.ndarray, Y: np.ndarray) -> float:
-    """Linear CKA between two representation matrices (N×D1, N×D2).
-
-    Permutation/-isotropy-robust similarity of two representation spaces; 1 =
-    identical up to rotation/scale, 0 = unrelated. Uses the HSIC formulation,
-    centring features over the N examples.
-    """
-    X = X - X.mean(0, keepdims=True)
-    Y = Y - Y.mean(0, keepdims=True)
-    xtx = X.T @ X
-    yty = Y.T @ Y
-    xty = X.T @ Y
-    hsic = float((xty ** 2).sum())
-    denom = float(np.sqrt((xtx ** 2).sum()) * np.sqrt((yty ** 2).sum()))
-    return hsic / denom if denom > 0 else 0.0

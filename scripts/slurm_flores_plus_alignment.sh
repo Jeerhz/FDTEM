@@ -97,7 +97,7 @@ PY
 
 # ── E1 + E3 — cross-lingual alignment (xSIM) ───────────────────────────────────
 echo; echo "### E1 + E3 — xSIM alignment on FLORES+ (bar plot + length scaling) ###"
-srun python scripts/run_e1_e3_retrieval.py \
+srun python scripts/run_retrieval.py \
   --flores_source plus --split "$SPLIT" \
   --encoders "${ENCODERS[@]}" --langs $LANGS --lengths 1 2 4 \
   --output "$OUT/e1_e3_retrieval.json" --wandb_project "$WANDB_PROJECT"

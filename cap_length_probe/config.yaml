@@ -1,0 +1,98 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# cap_length_probe — config
+#
+# Measures how the COMET encoder's representations behave vs input length,
+# relative to the raw XLM-R backbone it was fine-tuned from, on CAP major-topic
+# classification. Both encoders frozen; probed with a linear classifier. The
+# single independent variable is input length (token-prefix buckets).
+#
+# Env vars are expanded with ${VAR} and ${VAR:-default}.
+# ══════════════════════════════════════════════════════════════════════════════
+
+experiment_name: cap_length_probe
+
+# ── Encoder pair (frozen, same backbone family, identical tokenizer) ───────────
+encoders:
+  active_pair: default                 # default | alt
+  pairs:
+    default:                           # XLM-R-large backbone
+      comet: { kind: comet, ref: "Unbabel/wmt22-comet-da" }       # extract .model + .tokenizer
+      raw:   { kind: hf,    ref: "FacebookAI/xlm-roberta-large" }
+    alt:                               # InfoXLM-large backbone (reference-free QE)
+      comet: { kind: comet, ref: "Unbabel/wmt22-cometkiwi-da" }
+      raw:   { kind: hf,    ref: "microsoft/infoxlm-large" }
+
+# ── Representation extraction (identical for both encoders) ────────────────────
+features:
+  backend: hf                          # hf = real frozen encoders | mock = logic test only (NO torch)
+  pooling: mean                        # mean (primary) | cls | all_layers_mean
+  normalize_l2: false                  # L2-normalise features (report both; probe also z-scores)
+  fp16: true                           # fp16 on GPU
+  batch_size: 32
+  device: auto                         # auto | cuda | cpu
+
+# ── Length control (paired, in-domain prefixes) ───────────────────────────────
+length_buckets: [16, 32, 64, 128, 256, 512]   # 512 = XLM-R context limit
+min_tokens: 512                        # keep only docs with >= this many XLM-R tokens (paired design)
+
+# ── Dataset: CAP major-topic classification ───────────────────────────────────
+data:
+  source: btl_local                    # btl_local | btl_csv | poltextlab_hf | synthetic
+  # Primary: Beyond Token Limits (Sebok et al. 2025) long-doc CAP data on the cluster.
+  # Expects either train/train_long.csv + test/test_long.csv, or a pooled csv, with
+  # columns: text, label (0-indexed BTL code), optionally label_cap, language,
+  # token_count_xlm_roberta_large.
+  btl_dir: "${BTL_DIR:-~/scratch/cap_btl}"
+  pooled_csv: null                     # optional explicit single CSV path (overrides btl_dir)
+  languages: [en, hu, nl, fr, it]      # ISO codes to keep
+  text_col: text
+  label_col: label
+  label_is_zero_indexed: true          # BTL label is 0-indexed; we map back to CAP codes
+  label_cap_col: label_cap             # original CAP code column if present (preferred)
+  lang_col: language                   # full-name language column (english/hungarian/...)
+  token_count_col: token_count_xlm_roberta_large   # used to pre-filter >=512 if present
+  drop_no_policy_content: true         # drop CAP 999 (the non-topic class)
+  min_chars: 20                        # drop empty / trivially short docs
+  dedup: true
+  max_per_class_lang: null             # down-cap dominant (lang x label) cells if set (int)
+  test_size: 0.25
+
+# ── Train/test split ──────────────────────────────────────────────────────────
+split:
+  seed: 42
+  stratify_by: [language, label]       # stratified by (language x label)
+
+# ── Probing protocol ──────────────────────────────────────────────────────────
+probe:
+  classifier: logreg                   # logreg (primary) | mlp
+  seeds: [0, 1, 2, 3, 4]               # >= 5 seeds; report mean +/- std
+  max_iter: 3000                       # enough to converge
+  C: 1.0
+  standardize: true                    # z-score using TRAIN statistics only
+  mlp_hidden: 256                      # 1-hidden-layer MLP (behind classifier: mlp)
+  train_short_L: 32                    # regime-2: train short, test across length
+  train_subsample_frac: 0.9            # per-seed train sub-sample (1.0 = deterministic LR)
+
+# ── Bootstrap CIs ─────────────────────────────────────────────────────────────
+bootstrap:
+  n_resamples: 1000
+  ci: 0.95
+  seed: 12345
+
+# ── Optional geometry diagnostics (no probe) ──────────────────────────────────
+geometry:
+  enabled: true                        # mean norm, anisotropy, dist vs length-32
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+paths:
+  results_dir: results
+  data_dir: results/data
+  feature_cache: results/feature_cache
+  analysis_dir: results/analysis
+  figures_dir: results/figures
+
+# ── Smoke test (1 language, ~200 docs, 2 buckets) ─────────────────────────────
+smoke:
+  languages: [en]
+  n_docs: 200
+  length_buckets: [32, 128]

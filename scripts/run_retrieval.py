@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-run_e1_e3_retrieval.py — E1 cross-lingual alignment + E3 length scaling.
+run_retrieval.py — cross-lingual retrieval (pull-together alignment) + length scaling.
 
-E1 (alignment).  How well does each encoder place *parallel* sentences nearest
+Alignment.  How well does each encoder place *parallel* sentences nearest
 to each other across languages? We embed FLORES-200 devtest in every language
 and run LASER-style xsim retrieval (en↔xx, both directions). Low error = the
 encoder pulls parallel sentences together. This is the objective LaBSE/LASER/E5
 optimise directly; COMET only ever sees it as a by-product of quality
 prediction, so the gap here is informative.
 
-E3 (length).  COMET is trained on short segments. We rebuild the *same*
+Length scaling.  COMET is trained on short segments. We rebuild the *same*
 retrieval at increasing text lengths by concatenating k consecutive same-article
 FLORES sentences (k = 1,2,4,8) into parallel pseudo-paragraphs, and watch how
 each encoder's alignment degrades as text grows past sentence scale.
@@ -18,13 +18,13 @@ Outputs JSON + (optionally) W&B + a length-scaling plot.
 
 Usage
 -----
-  python scripts/run_e1_e3_retrieval.py \
+  python scripts/run_retrieval.py \
       --encoders comet:Unbabel/wmt22-comet-da \
                  "comet:$HOME/scratch/checkpoints/bio_mqm/.../epoch=1-step=20-val_kendall=0.366.ckpt" \
                  hf-mean:xlm-roberta-large labse e5 \
       --langs en de es fr ru zh \
       --lengths 1 2 4 8 \
-      --output results/repana/e1_e3_retrieval.json
+      --output results/representation_analysis/retrieval.json
 """
 import argparse
 import json
@@ -35,7 +35,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from repana_common import (
+from representation_analysis_common import (
     CORE_LANGS, build_embedder, build_pseudo_docs, cached_embed, enc_tag as _enc_tag,
     load_flores_source, pick_device, xsim_error,
 )
@@ -79,8 +79,8 @@ def main():
     p.add_argument("--max_sents", type=int, default=None)
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--device", default=None)
-    p.add_argument("--cache_dir", default="results/repana/emb_cache")
-    p.add_argument("--output", default="results/repana/e1_e3_retrieval.json")
+    p.add_argument("--cache_dir", default="results/representation_analysis/emb_cache")
+    p.add_argument("--output", default="results/representation_analysis/retrieval.json")
     p.add_argument("--wandb_project", default=None)
     p.add_argument("--run_name", default=None,
                    help="W&B run name. Default: '<source>_<split>_xsim_alignment'.")
@@ -168,13 +168,13 @@ def _plot(results: Dict, plot_dir: Path):
         ax.plot(lengths, ys, marker="o", label=name)
     ax.set_xlabel("pseudo-doc length (k consecutive sentences)")
     ax.set_ylabel("xsim retrieval accuracy (en↔xx)")
-    ax.set_title("E1/E3 — cross-lingual alignment vs text length")
+    ax.set_title("Cross-lingual retrieval vs text length")
     ax.set_xticks(lengths)
     ax.set_ylim(0, 1.02)
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
     plt.tight_layout()
-    out = plot_dir / "e1_e3_length_scaling.png"
+    out = plot_dir / "retrieval_length_scaling.png"
     plt.savefig(out, dpi=130, bbox_inches="tight")
     plt.close(fig)
     logger.info(f"  [plot] {out}")

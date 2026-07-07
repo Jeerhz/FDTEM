@@ -1,0 +1,5 @@
+# feature cache (large .npy; regenerated, content-hash keyed)
+**/feature_cache/
+__pycache__/
+*.pyc
+.venv*/

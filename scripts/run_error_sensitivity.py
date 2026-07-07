@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_e2_error_sensitivity.py — E2: alignment vs error-discrimination trade-off.
+run_error_sensitivity.py — error sensitivity: alignment vs error-discrimination trade-off.
 
 This is the experiment that targets the supervisor's question head-on. A
 translation-quality encoder has to do two things at once:
@@ -17,18 +17,18 @@ reordering / mistranslation — xsim++ style), and measure, per encoder:
 
   align_acc   P[ cos(src, tgt⁺) > cos(src, tgt_random) ]   (pull-together)
   err_acc     P[ cos(src, tgt⁺) > cos(src, tgt⁻) ]         (push-apart)
-  err_margin  mean( cos(src,tgt⁺) − cos(src,tgt⁻) )
+  err_margin  mean( cos(src,tgt⁺) - cos(src,tgt⁻) )
 
 Plotting err_acc against align_acc gives the money plot: aligners cluster top-left
 (great alignment, weak error sensitivity); COMET should sit higher on err_acc.
 
 Usage
 -----
-  python scripts/run_e2_error_sensitivity.py \
+  python scripts/run_error_sensitivity.py \
       --encoders comet:Unbabel/wmt22-comet-da "comet:$BIO_CKPT" \
                  hf-mean:xlm-roberta-large labse e5 \
       --langs en de es fr ru zh --pivot en \
-      --output results/repana/e2_error_sensitivity.json
+      --output results/representation_analysis/error_sensitivity.json
 """
 import argparse
 import json
@@ -40,7 +40,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from repana_common import (
+from representation_analysis_common import (
     CORE_LANGS, PERTURBATIONS, build_embedder, cached_embed, enc_tag as _enc_tag,
     load_flores_source, perturb, pick_device,
 )
@@ -88,8 +88,8 @@ def main():
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--device", default=None)
-    p.add_argument("--cache_dir", default="results/repana/emb_cache")
-    p.add_argument("--output", default="results/repana/e2_error_sensitivity.json")
+    p.add_argument("--cache_dir", default="results/representation_analysis/emb_cache")
+    p.add_argument("--output", default="results/representation_analysis/error_sensitivity.json")
     p.add_argument("--wandb_project", default=None)
     p.add_argument("--run_name", default=None,
                    help="W&B run name. Default: '<source>_<split>_xsimpp_error_sensitivity'.")
@@ -213,10 +213,10 @@ def _plot(results: Dict, plot_dir: Path):
     ax.axhline(0.5, color="grey", ls=":", lw=1)
     ax.set_xlabel("alignment: P[cos(src,tgt⁺) > cos(src,random)]  (pull parallel together)")
     ax.set_ylabel("error sensitivity: P[cos(src,tgt⁺) > cos(src,tgt⁻)]  (push errors apart)")
-    ax.set_title("E2 — alignment vs error-discrimination trade-off")
+    ax.set_title("Error sensitivity — alignment vs error-discrimination trade-off")
     ax.grid(alpha=0.3)
     plt.tight_layout()
-    out = plot_dir / "e2_tradeoff.png"
+    out = plot_dir / "error_sensitivity_tradeoff.png"
     plt.savefig(out, dpi=130, bbox_inches="tight")
     plt.close(fig)
     logger.info(f"  [plot] {out}")
@@ -235,10 +235,10 @@ def _plot(results: Dict, plot_dir: Path):
     ax.set_xticklabels(names, rotation=20, ha="right", fontsize=8)
     ax.set_ylabel("error-discrimination accuracy")
     ax.set_ylim(0, 1.02)
-    ax.set_title("E2 — error sensitivity by perturbation type")
+    ax.set_title("Error sensitivity by perturbation type")
     ax.legend(fontsize=8)
     plt.tight_layout()
-    out2 = plot_dir / "e2_by_perturbation.png"
+    out2 = plot_dir / "error_sensitivity_by_perturbation.png"
     plt.savefig(out2, dpi=130, bbox_inches="tight")
     plt.close(fig)
     logger.info(f"  [plot] {out2}")
