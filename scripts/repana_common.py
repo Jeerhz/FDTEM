@@ -144,7 +144,9 @@ class CometEmbedder(Embedder):
         self.hidden_size = self.model.encoder.model.config.hidden_size
         self.is_xlmr_large = "xlm-roberta-large" in str(
             getattr(self.model.hparams, "pretrained_model", "")).lower()
-        self.name = "comet:" + ref.split("/")[-1].replace(".ckpt", "")
+        # informative label (keeps the run-id dir for checkpoints, e.g.
+        # 'comet:4yeqp7cn-last') — used for metric keys, JSON, and the embed cache.
+        self.name = enc_tag("comet:" + ref)
 
     @torch.no_grad()
     def _embed_raw(self, texts, batch_size):
@@ -305,6 +307,33 @@ class E5Embedder(Embedder):
         return np.stack([np.concatenate(c, 0) for c in per_layer], 0)
 
 
+def enc_tag(spec: str) -> str:
+    """A short, human-readable label for an encoder spec — for W&B run tags and
+    log lines, computed *without* loading the model. Mirrors the Embedder naming,
+    but for COMET checkpoint paths it keeps the run-id folder so bio checkpoints
+    are identifiable, e.g. '.../4yeqp7cn/checkpoints/last.ckpt' → 'comet:4yeqp7cn-last'.
+    """
+    kind, _, ref = spec.partition(":")
+    if kind == "comet":
+        if "/" in ref or os.path.isfile(ref):
+            parts = [p for p in ref.split("/") if p]
+            leaf = parts[-1].replace(".ckpt", "")
+            if "checkpoints" in parts:
+                # use the LAST 'checkpoints' (paths can nest e.g. scratch/checkpoints/.../<run>/checkpoints/last.ckpt)
+                ci = len(parts) - 1 - parts[::-1].index("checkpoints")
+                if ci > 0:
+                    return f"comet:{parts[ci - 1]}-{leaf}"
+            return f"comet:{leaf}"
+        return f"comet:{ref.split('/')[-1]}"
+    if kind in ("hf-mean", "xlmr"):
+        return f"xlmr:{ref.split('/')[-1]}"
+    if kind == "labse":
+        return "labse"
+    if kind == "e5":
+        return "e5:" + (ref.split("/")[-1] if ref else "multilingual-e5-base")
+    return spec
+
+
 def build_embedder(spec: str, device: str) -> Embedder:
     """spec → Embedder. See module docstring for the spec grammar."""
     kind, _, ref = spec.partition(":")
@@ -436,6 +465,130 @@ def load_flores(langs: Sequence[str], split: str = "devtest",
     urls = urls[:ref_n]
     logger.info(f"  FLORES {split}: {len(kept)} langs × {ref_n} sentences")
     return FloresData(langs=kept, sentences=sentences, urls=urls)
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Official FLORES+ (OLDI) loader — the access path documented on the dataset card
+# ────────────────────────────────────────────────────────────────────────────
+# Unlike load_flores() above (which reads the legacy flores200_dataset text dump),
+# this follows the *official* FLORES+ guidelines verbatim:
+#
+#     from datasets import load_dataset
+#     ds = load_dataset("openlanguagedata/flores_plus", "fra_Latn", split="devtest")
+#
+# FLORES+ is gated: you must (1) `pip install datasets`, (2) log in to the HF Hub
+# (`hf auth login` or huggingface_hub.login()), and (3) accept the terms of use at
+# https://huggingface.co/datasets/openlanguagedata/flores_plus once.
+#
+# Each languoid config is "<iso_639_3>_<iso_15924>" and rows carry a shared `id`
+# field; rows with the same id+split are mutual translations, so we align across
+# languages by id to recover the multi-parallel matrix. NB the codes differ from
+# the legacy FLORES-200 ones in places — most notably Mandarin is cmn_Hans (not
+# zho_Hans). Names/codes follow the dataset card's language-coverage table.
+FLORES_PLUS_REPO = "openlanguagedata/flores_plus"
+FLORES_PLUS_CODE = {
+    "en": "eng_Latn", "de": "deu_Latn", "es": "spa_Latn", "fr": "fra_Latn",
+    "ru": "rus_Cyrl", "zh": "cmn_Hans", "ar": "arb_Arab", "hi": "hin_Deva",
+    "ja": "jpn_Jpan", "ko": "kor_Hang", "tr": "tur_Latn", "vi": "vie_Latn",
+    "sw": "swh_Latn", "el": "ell_Grek", "th": "tha_Thai", "bg": "bul_Cyrl",
+    "ur": "urd_Arab",
+}
+
+
+def load_flores_plus(langs: Sequence[str], split: str = "devtest",
+                     max_sents: Optional[int] = None,
+                     repo: str = FLORES_PLUS_REPO) -> FloresData:
+    """Load the official FLORES+ benchmark (OLDI), row-aligned across languages.
+
+    Follows the dataset card's recommended access pattern
+    ``load_dataset(repo, "<iso_639_3>_<iso_15924>", split=split)`` per languoid,
+    then intersects the shared ``id`` field so every loaded language is parallel.
+    """
+    try:
+        from datasets import load_dataset
+    except ImportError as exc:  # noqa: BLE001
+        raise RuntimeError("FLORES+ needs the `datasets` package (pip install datasets).") from exc
+
+    # Resolve the stored HF token explicitly: FLORES+ is gated, and the datasets /
+    # hf:// download path only authenticates when HF_TOKEN is in the environment.
+    # NOTE huggingface_hub.get_token() reads $HF_HOME/token, so when HF_HOME is
+    # redirected (e.g. to scratch) it misses the default ~/.cache/huggingface/token
+    # — hence the explicit default-file fallback below.
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if not token:
+        try:
+            from huggingface_hub import get_token
+            token = get_token()
+        except Exception:  # noqa: BLE001
+            token = None
+    if not token:
+        default_token = Path.home() / ".cache" / "huggingface" / "token"
+        if default_token.is_file():
+            token = default_token.read_text(encoding="utf-8").strip() or None
+    if token:
+        # make the resolved token visible to the fsspec/datasets download path
+        os.environ.setdefault("HF_TOKEN", token)
+
+    per_lang_rows: Dict[str, Dict[str, str]] = {}   # lang -> {id: text}
+    meta_url: Dict[str, str] = {}                    # id -> article url (for E3 grouping)
+    kept: List[str] = []
+    for lang in langs:
+        code = FLORES_PLUS_CODE.get(lang)
+        if code is None:
+            logger.warning(f"  no FLORES+ config for {lang!r}, skipping")
+            continue
+        try:
+            ds = load_dataset(repo, code, split=split, token=token)
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError(
+                f"Could not load FLORES+ config {code!r} (split={split!r}) from {repo}. "
+                "Make sure you are logged in to the HF Hub (`hf auth login` or "
+                "huggingface_hub.login()) and have accepted the dataset terms at "
+                f"https://huggingface.co/datasets/{repo}.") from exc
+        rows: Dict[str, str] = {}
+        for r in ds:
+            rid = str(r["id"])
+            rows[rid] = r["text"]
+            meta_url.setdefault(rid, r.get("url", "") or "")
+        per_lang_rows[lang] = rows
+        kept.append(lang)
+        logger.info(f"  FLORES+ {code} {split}: {len(rows)} rows")
+    if not kept:
+        raise RuntimeError("No FLORES+ languages loaded.")
+
+    # keep only ids present in every language → guaranteed multi-parallel; sort numerically
+    common = set.intersection(*(set(per_lang_rows[l]) for l in kept))
+
+    def _key(i: str):
+        try:
+            return (0, int(i))
+        except ValueError:
+            return (1, i)
+
+    ids = sorted(common, key=_key)
+    if max_sents:
+        ids = ids[:max_sents]
+    if not ids:
+        raise RuntimeError("FLORES+: no ids shared across the requested languages.")
+
+    sentences = {l: [per_lang_rows[l][i] for i in ids] for l in kept}
+    urls = [meta_url.get(i, "") or i for i in ids]
+    logger.info(f"  FLORES+ {split}: {len(kept)} langs × {len(ids)} aligned sentences")
+    return FloresData(langs=kept, sentences=sentences, urls=urls)
+
+
+def load_flores_source(source: str, langs: Sequence[str], split: str = "devtest",
+                       max_sents: Optional[int] = None) -> FloresData:
+    """Dispatch FLORES loading by source.
+
+    ``source="plus"`` → official OLDI FLORES+ via the HF Hub (gated; recommended).
+    ``source="raw"``  → legacy flores200_dataset local text files.
+    """
+    if source == "plus":
+        return load_flores_plus(langs, split, max_sents)
+    if source == "raw":
+        return load_flores(langs, split, max_sents)
+    raise ValueError(f"Unknown flores source {source!r} (use 'plus' or 'raw').")
 
 
 def build_pseudo_docs(data: FloresData, k: int) -> Dict[str, List[str]]:

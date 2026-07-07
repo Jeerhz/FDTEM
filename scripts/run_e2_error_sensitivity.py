@@ -41,8 +41,8 @@ from typing import Dict, List
 import numpy as np
 
 from repana_common import (
-    CORE_LANGS, PERTURBATIONS, build_embedder, cached_embed, load_flores,
-    perturb, pick_device,
+    CORE_LANGS, PERTURBATIONS, build_embedder, cached_embed, enc_tag as _enc_tag,
+    load_flores_source, perturb, pick_device,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,6 +80,9 @@ def main():
     p.add_argument("--langs", nargs="+", default=CORE_LANGS)
     p.add_argument("--pivot", default="en")
     p.add_argument("--perturbations", nargs="+", default=PERTURBATIONS, choices=PERTURBATIONS)
+    p.add_argument("--flores_source", choices=["plus", "raw"], default="raw",
+                   help="'plus' = official OLDI FLORES+ (HF, gated); "
+                        "'raw' = legacy flores200_dataset text files.")
     p.add_argument("--split", default="devtest")
     p.add_argument("--max_sents", type=int, default=None)
     p.add_argument("--batch_size", type=int, default=64)
@@ -88,12 +91,14 @@ def main():
     p.add_argument("--cache_dir", default="results/repana/emb_cache")
     p.add_argument("--output", default="results/repana/e2_error_sensitivity.json")
     p.add_argument("--wandb_project", default=None)
+    p.add_argument("--run_name", default=None,
+                   help="W&B run name. Default: '<source>_<split>_xsimpp_error_sensitivity'.")
     args = p.parse_args()
 
     device = pick_device(args.device)
     logger.info(f"Device: {device}")
 
-    data = load_flores(args.langs, args.split, args.max_sents)
+    data = load_flores_source(args.flores_source, args.langs, args.split, args.max_sents)
     pivot = args.pivot
     tgt_langs = [l for l in data.langs if l != pivot]
 
@@ -104,19 +109,27 @@ def main():
     rng = np.random.default_rng(args.seed)
     rand_perm = {l: rng.permutation(data.n) for l in tgt_langs}
 
+    run_name = args.run_name or f"{args.flores_source}_{args.split}_xsimpp_error_sensitivity"
+    enc_tags = [_enc_tag(s) for s in args.encoders]
     wandb_run = None
     if args.wandb_project:
         try:
             import wandb
-            wandb_run = wandb.init(project=args.wandb_project, name="e2_error_sensitivity",
-                                   config=vars(args))
+            wandb_run = wandb.init(
+                project=args.wandb_project, name=run_name,
+                group=f"{args.flores_source}_{args.split}", job_type="xsimpp_error_sensitivity",
+                tags=[f"flores:{args.flores_source}", f"split:{args.split}",
+                      f"langs:{'-'.join(data.langs)}"] + enc_tags,
+                config=vars(args))
         except Exception as exc:  # noqa: BLE001
             logger.warning(f"W&B init failed: {exc}")
 
     results: Dict = {
         "experiment": "E2_error_sensitivity",
+        "run_name": run_name,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "langs": data.langs, "pivot": pivot, "perturbations": args.perturbations,
+        "flores_source": args.flores_source, "split": args.split,
         "encoders": {},
     }
     out_path = Path(args.output)

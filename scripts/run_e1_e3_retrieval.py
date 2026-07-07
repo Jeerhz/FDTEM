@@ -36,8 +36,8 @@ from typing import Dict, List
 import numpy as np
 
 from repana_common import (
-    CORE_LANGS, build_embedder, build_pseudo_docs, cached_embed, load_flores,
-    pick_device, xsim_error,
+    CORE_LANGS, build_embedder, build_pseudo_docs, cached_embed, enc_tag as _enc_tag,
+    load_flores_source, pick_device, xsim_error,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,9 @@ def main():
     p.add_argument("--pivot", default="en")
     p.add_argument("--lengths", nargs="+", type=int, default=[1, 2, 4, 8])
     p.add_argument("--margin", choices=["cosine", "ratio"], default="ratio")
+    p.add_argument("--flores_source", choices=["plus", "raw"], default="raw",
+                   help="'plus' = official OLDI FLORES+ (HF, gated); "
+                        "'raw' = legacy flores200_dataset text files.")
     p.add_argument("--split", default="devtest")
     p.add_argument("--max_sents", type=int, default=None)
     p.add_argument("--batch_size", type=int, default=64)
@@ -79,30 +82,50 @@ def main():
     p.add_argument("--cache_dir", default="results/repana/emb_cache")
     p.add_argument("--output", default="results/repana/e1_e3_retrieval.json")
     p.add_argument("--wandb_project", default=None)
+    p.add_argument("--run_name", default=None,
+                   help="W&B run name. Default: '<source>_<split>_xsim_alignment'.")
     args = p.parse_args()
 
     device = pick_device(args.device)
     logger.info(f"Device: {device}")
 
-    data = load_flores(args.langs, args.split, args.max_sents)
+    data = load_flores_source(args.flores_source, args.langs, args.split, args.max_sents)
+    # Drop pseudo-doc lengths that yield too few parallel docs (e.g. no FLORES+
+    # article is 8 sentences long → k=8 produces 0 docs); xsim needs ≥2 to retrieve.
     docs_by_len = {k: build_pseudo_docs(data, k) for k in args.lengths}
+    lengths: List[int] = []
     for k in args.lengths:
-        logger.info(f"  length k={k}: {len(next(iter(docs_by_len[k].values())))} parallel docs")
+        nd = len(next(iter(docs_by_len[k].values())))
+        if nd >= 2:
+            lengths.append(k)
+            logger.info(f"  length k={k}: {nd} parallel docs")
+        else:
+            logger.warning(f"  length k={k}: only {nd} parallel docs — skipping")
+    if not lengths:
+        raise RuntimeError("No pseudo-doc length has ≥2 parallel docs; nothing to do.")
 
+    run_name = args.run_name or f"{args.flores_source}_{args.split}_xsim_alignment"
+    enc_tags = [_enc_tag(s) for s in args.encoders]
     wandb_run = None
     if args.wandb_project:
         try:
             import wandb
-            wandb_run = wandb.init(project=args.wandb_project, name="e1_e3_retrieval",
-                                   config=vars(args))
+            wandb_run = wandb.init(
+                project=args.wandb_project, name=run_name,
+                group=f"{args.flores_source}_{args.split}", job_type="xsim_alignment",
+                tags=[f"flores:{args.flores_source}", f"split:{args.split}",
+                      f"langs:{'-'.join(data.langs)}"] + enc_tags,
+                config=vars(args))
         except Exception as exc:  # noqa: BLE001
             logger.warning(f"W&B init failed: {exc}")
 
     results: Dict = {
         "experiment": "E1_alignment+E3_length",
+        "run_name": run_name,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "langs": data.langs, "pivot": args.pivot, "margin": args.margin,
-        "lengths": args.lengths, "encoders": {},
+        "flores_source": args.flores_source, "split": args.split,
+        "lengths": lengths, "encoders": {},
     }
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,7 +134,7 @@ def main():
         logger.info(f"\n══ {spec} ══")
         emb = build_embedder(spec, device)
         per_len = {}
-        for k in args.lengths:
+        for k in lengths:
             r = retrieval_for_length(emb, docs_by_len[k], args.pivot, args.margin,
                                      args.batch_size, args.cache_dir, k)
             per_len[str(k)] = r
@@ -155,6 +178,11 @@ def _plot(results: Dict, plot_dir: Path):
     plt.savefig(out, dpi=130, bbox_inches="tight")
     plt.close(fig)
     logger.info(f"  [plot] {out}")
+
+    # per-model alignment bar plot (xSIM accuracy at sentence level, k=1)
+    from plot_alignment_bar import alignment_barplot
+    bar = alignment_barplot(results, plot_dir)
+    logger.info(f"  [plot] {bar}")
 
 
 if __name__ == "__main__":
