@@ -1,0 +1,81 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# COMET retrained with a DIFFERENT (better-aligned) encoder.
+#
+# Question: how much of COMET's behaviour comes from its XLM-R backbone?
+# We retrain the same RegressionMetric head on the same data with
+# microsoft/infoxlm-large — an XLM-R-large-compatible encoder (same size, same
+# tokenizer class) additionally trained with cross-lingual contrastive
+# objectives, i.e. better cross-lingual alignment out of the box.
+#
+# The encoder starts from raw pretrained weights (no wmt22-comet-da init — the
+# weights are incompatible across backbones), so the controlled BASELINE for
+# this arm is xlm-roberta-large trained from raw weights on identical data:
+#   ... --regression_metric.init_args.pretrained_model xlm-roberta-large
+#
+# Other supported swaps (change encoder_model accordingly):
+#   google/rembert            → encoder_model: RemBERT
+#   facebook/xlm-roberta-xl   → encoder_model: XLM-RoBERTa-XL   (3.5B — needs H100,
+#                               batch_size 1 + higher accumulate_grad_batches)
+#
+# Usage (fresh training, no checkpoint):
+#   python scripts/train_wandb.py --cfg configs/models/comet_encoder_swap.yaml
+# ──────────────────────────────────────────────────────────────────────────────
+
+regression_metric:
+  class_path: comet.models.RegressionMetric
+  init_args:
+    # ── encoder (the experimental variable) ────────────────────────────────────
+    encoder_model: XLM-RoBERTa
+    pretrained_model: microsoft/infoxlm-large
+
+    # ── layer pooling ─────────────────────────────────────────────────────────
+    pool: avg
+    layer: mix
+    layer_transformation: sparsemax
+    layer_norm: False
+
+    # ── top-layer regression head ─────────────────────────────────────────────
+    hidden_sizes:
+      - 3072
+      - 1024
+    activations: Tanh
+    final_activation: null
+    dropout: 0.1
+    loss: mse
+
+    # ── learning rates (from-scratch head, as in upstream regression_model) ───
+    nr_frozen_epochs: 0.3
+    keep_embeddings_frozen: True
+    optimizer: AdamW
+    encoder_learning_rate: 1.0e-06
+    learning_rate: 1.5e-05
+    layerwise_decay: 0.95
+    warmup_steps: 100
+
+    # ── batch ─────────────────────────────────────────────────────────────────
+    batch_size: 4
+
+    # ── data — SAME length-balanced paragraph mix as the continue arm, so the
+    #    encoder is the only difference (scripts/prepare_paragraph_data.py) ─────
+    train_data:
+      - ~/scratch/paragraph_mqm/en-de_train.csv
+      - ~/scratch/paragraph_mqm/de-en_train.csv
+      - ~/scratch/paragraph_mqm/en-es_train.csv
+      - ~/scratch/paragraph_mqm/es-en_train.csv
+      - ~/scratch/paragraph_mqm/en-fr_train.csv
+      - ~/scratch/paragraph_mqm/fr-en_train.csv
+      - ~/scratch/paragraph_mqm/en-ru_train.csv
+      - ~/scratch/paragraph_mqm/ru-en_train.csv
+    validation_data:
+      - ~/scratch/paragraph_mqm/en-de_val.csv
+      - ~/scratch/paragraph_mqm/de-en_val.csv
+      - ~/scratch/paragraph_mqm/en-es_val.csv
+      - ~/scratch/paragraph_mqm/es-en_val.csv
+      - ~/scratch/paragraph_mqm/en-fr_val.csv
+      - ~/scratch/paragraph_mqm/fr-en_val.csv
+      - ~/scratch/paragraph_mqm/en-ru_val.csv
+      - ~/scratch/paragraph_mqm/ru-en_val.csv
+
+trainer: ../trainer_wandb.yaml
+early_stopping: ../early_stopping.yaml
+model_checkpoint: ../model_checkpoint.yaml

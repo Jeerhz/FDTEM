@@ -37,6 +37,13 @@ languages and encoders.
 |--------|--------|----------|
 | `run_retrieval.py` | xsim retrieval error (en↔xx); also vs pseudo-doc length k=1,2,4,8 | pull-together / alignment + behaviour past sentence scale |
 | `run_error_sensitivity.py` | P[cos(src,tgt⁺)>cos(src,tgt⁻)] on injected errors | **push-apart** + the trade-off plot |
+| `run_block_xsim.py` | xsim++ error / detection on k-sentence **blocks** with one perturbed sentence | how error-sensitivity **dilutes** with block length (see [../docs/RETRAIN_AND_BLOCK_XSIM.md](../docs/RETRAIN_AND_BLOCK_XSIM.md)) |
+
+Two further experiments live in [../docs/RETRAIN_AND_BLOCK_XSIM.md](../docs/RETRAIN_AND_BLOCK_XSIM.md):
+COMET **retraining** (better encoder / paragraph-level data;
+`prepare_paragraph_data.py`, `eval_length_correlation.py`) and the block-xSIM++
+eval above. The former Lp-norm aggregation probe (`qe_aggregation_probe/`) has
+been **dropped**.
 
 **Length scaling** (in `run_retrieval.py`): consecutive same-article FLORES
 sentences are concatenated (FLORES rows are in document order with a `URL` column

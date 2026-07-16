@@ -136,3 +136,9 @@ wandb/
 
 # logs
 logs/
+
+# experiment caches / large binaries (keep JSON + plots, drop the caches)
+**/emb_cache/
+**/pred_cache/
+**/score_cache/
+*.npy
