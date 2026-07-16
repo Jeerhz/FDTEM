@@ -1,0 +1,819 @@
+<title>COMET on long text — two experiments</title>
+<style>
+  :root {
+    --bg: #f6f8fa; --surface: #ffffff; --surface-2: #eef2f6;
+    --ink: #0f1b2d; --muted: #5a6b7b; --faint: #8595a4;
+    --hair: #dbe2ea; --hair-strong: #c3cedb;
+    --a: #0e7c86;         /* Experiment A — retraining (teal) */
+    --a-soft: #d7ecee;
+    --b: #c2570c;         /* Experiment B — block xSIM++ (rust) */
+    --b-soft: #f6e2d2;
+    --caus: #7c3aed; --caus-soft:#ebe2fb;   /* causality */
+    --ent: #0284c7;  --ent-soft:#d8ecf9;    /* entity */
+    --num: #b45309;  --num-soft:#f7e7cf;    /* number */
+    --good: #157347; --good-soft:#d8ede1;
+    --grey: #64748b; --grey-soft:#e5e9ef;
+    --shadow: 0 1px 2px rgba(16,27,45,.06), 0 8px 30px rgba(16,27,45,.07);
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1220; --surface: #121c2b; --surface-2: #0f1826;
+      --ink: #e7eef6; --muted: #98a8ba; --faint: #6b7d90;
+      --hair: #22303f; --hair-strong: #33465a;
+      --a: #38bdc9; --a-soft: #123138;
+      --b: #f08a3c; --b-soft: #3a2410;
+      --caus: #b794f6; --caus-soft:#2a2140;
+      --ent: #56b6f0; --ent-soft:#122a3c;
+      --num: #e0a458; --num-soft:#33260f;
+      --good: #4ec98a; --good-soft:#12291d;
+      --grey: #9aa8b8; --grey-soft:#1d2836;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f8fa; --surface: #ffffff; --surface-2: #eef2f6;
+    --ink: #0f1b2d; --muted: #5a6b7b; --faint: #8595a4;
+    --hair: #dbe2ea; --hair-strong: #c3cedb;
+    --a: #0e7c86; --a-soft: #d7ecee; --b: #c2570c; --b-soft: #f6e2d2;
+    --caus: #7c3aed; --caus-soft:#ebe2fb; --ent: #0284c7; --ent-soft:#d8ecf9;
+    --num: #b45309; --num-soft:#f7e7cf; --good: #157347; --good-soft:#d8ede1;
+    --grey: #64748b; --grey-soft:#e5e9ef;
+    --shadow: 0 1px 2px rgba(16,27,45,.06), 0 8px 30px rgba(16,27,45,.07);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1220; --surface: #121c2b; --surface-2: #0f1826;
+    --ink: #e7eef6; --muted: #98a8ba; --faint: #6b7d90;
+    --hair: #22303f; --hair-strong: #33465a;
+    --a: #38bdc9; --a-soft: #123138; --b: #f08a3c; --b-soft: #3a2410;
+    --caus: #b794f6; --caus-soft:#2a2140; --ent: #56b6f0; --ent-soft:#122a3c;
+    --num: #e0a458; --num-soft:#33260f; --good: #4ec98a; --good-soft:#12291d;
+    --grey: #9aa8b8; --grey-soft:#1d2836;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .deck { width: 100%; }
+  .slide {
+    min-height: 100svh; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(20px, 5vw, 76px); position: relative;
+    border-bottom: 1px solid var(--hair);
+  }
+  .inner { width: min(1080px, 100%); margin: 0 auto; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .5em;
+    font-size: .74rem; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .eyebrow .tag {
+    padding: .18em .6em; border-radius: 100px; font-weight: 700;
+    letter-spacing: .08em;
+  }
+  .tag.a { background: var(--a-soft); color: var(--a); }
+  .tag.b { background: var(--b-soft); color: var(--b); }
+  h1 { font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.05; margin: .35em 0 .3em;
+       letter-spacing: -.02em; text-wrap: balance; font-weight: 800; }
+  h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.12; margin: .3em 0 .5em;
+       letter-spacing: -.015em; text-wrap: balance; font-weight: 750; }
+  h2 .k { color: var(--a); } h2 .kb { color: var(--b); }
+  p { margin: .5em 0; color: var(--ink); max-width: 68ch; }
+  .lead { font-size: 1.14rem; color: var(--muted); max-width: 64ch; }
+  .muted { color: var(--muted); }
+  strong { font-weight: 700; }
+  code, .mono { font-family: var(--mono); font-size: .9em; }
+  .chip-code { background: var(--surface-2); border: 1px solid var(--hair);
+    padding: .08em .45em; border-radius: 6px; font-family: var(--mono);
+    font-size: .84em; white-space: nowrap; }
+
+  .cols { display: grid; gap: clamp(16px, 3vw, 34px); }
+  .cols.two { grid-template-columns: 1fr 1fr; }
+  .cols.split { grid-template-columns: 1.1fr .9fr; align-items: start; }
+  @media (max-width: 760px) { .cols.two, .cols.split { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 14px; padding: clamp(16px,2.4vw,26px); box-shadow: var(--shadow);
+  }
+  .card.tint-a { border-top: 3px solid var(--a); }
+  .card.tint-b { border-top: 3px solid var(--b); }
+
+  ul.clean { list-style: none; padding: 0; margin: .4em 0; }
+  ul.clean li { padding: .34em 0 .34em 1.5em; position: relative; color: var(--ink); }
+  ul.clean li::before { content: ""; position: absolute; left: 0; top: .95em;
+    width: .5em; height: .5em; border-radius: 2px; background: var(--a); }
+  ul.clean.b li::before { background: var(--b); }
+  ul.clean li b { font-weight: 700; }
+
+  .kvs { display: grid; grid-template-columns: auto 1fr; gap: .3em 1.2em; margin: .3em 0; }
+  .kvs dt { font-family: var(--mono); font-size: .82rem; color: var(--muted); white-space: nowrap; }
+  .kvs dd { margin: 0; font-size: .95rem; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .9rem;
+    font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .5em .7em; border-bottom: 1px solid var(--hair); }
+  th { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+  td.num, th.num { text-align: right; font-family: var(--mono); }
+  tbody tr:last-child td { border-bottom: none; }
+  .tablewrap { overflow-x: auto; }
+
+  /* ---- diagram primitives ---- */
+  .diagram { background: var(--surface-2); border: 1px solid var(--hair);
+    border-radius: 14px; padding: clamp(16px,2.6vw,28px); overflow-x: auto; }
+  .row { display: flex; gap: 8px; align-items: stretch; flex-wrap: nowrap; }
+  .row.wrap { flex-wrap: wrap; }
+  .sent { border: 1px solid var(--hair-strong); background: var(--surface);
+    border-radius: 8px; padding: .5em .7em; font-size: .82rem; min-width: 0;
+    display: flex; align-items: center; gap: .5em; }
+  .sent .idx { font-family: var(--mono); font-size: .72rem; color: var(--faint);
+    font-weight: 700; }
+  .block { border: 2px solid var(--hair-strong); border-radius: 10px; padding: 6px;
+    display: flex; gap: 6px; background: var(--surface); }
+  .lbl { font-family: var(--mono); font-size: .72rem; color: var(--muted);
+    letter-spacing: .03em; margin-bottom: .4em; display: block; text-transform: uppercase; }
+  .pill { display: inline-flex; align-items: center; gap: .4em; padding: .2em .7em;
+    border-radius: 100px; font-size: .78rem; font-weight: 650; }
+  .pill.good { background: var(--good-soft); color: var(--good); }
+  .pill.grey { background: var(--grey-soft); color: var(--grey); }
+  .pill.b { background: var(--b-soft); color: var(--b); }
+  .pill.caus { background: var(--caus-soft); color: var(--caus); }
+  .pill.ent { background: var(--ent-soft); color: var(--ent); }
+  .pill.num { background: var(--num-soft); color: var(--num); }
+  .dot { width:.6em; height:.6em; border-radius: 50%; display:inline-block; }
+  .arrow { color: var(--faint); font-size: 1.4rem; display: flex; align-items: center;
+    padding: 0 .2em; }
+  .note { font-size: .82rem; color: var(--muted); margin-top: .6em; }
+  .callout { border-left: 3px solid var(--b); background: var(--b-soft);
+    padding: .7em 1em; border-radius: 0 10px 10px 0; margin: .6em 0; font-size: .95rem; }
+  .callout.a { border-color: var(--a); background: var(--a-soft); }
+
+  /* highlighted perturbed token */
+  .pert { border-radius: 4px; padding: 0 .15em; font-weight: 700; }
+  .pert.caus { background: var(--caus-soft); color: var(--caus); }
+  .pert.ent { background: var(--ent-soft); color: var(--ent); }
+  .pert.num { background: var(--num-soft); color: var(--num); }
+  del { color: var(--faint); }
+
+  /* progress + nav */
+  .frame { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  .pbar { position: fixed; top: 0; left: 0; height: 3px; background: var(--b);
+    width: 0; z-index: 60; transition: width .15s ease; }
+  .counter { position: fixed; bottom: 14px; right: 18px; z-index: 60;
+    font-family: var(--mono); font-size: .76rem; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 100px;
+    padding: .3em .8em; box-shadow: var(--shadow); }
+  .hint { position: fixed; bottom: 14px; left: 18px; z-index: 60;
+    font-size: .74rem; color: var(--faint); }
+  @media (max-width: 640px) { .hint { display: none; } }
+
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 12px; }
+  .metric { background: var(--surface); border: 1px solid var(--hair); border-radius: 12px;
+    padding: 14px 16px; }
+  .metric .v { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em; }
+  .metric .l { font-size: .78rem; color: var(--muted); margin-top: .1em; }
+
+  .legend { display: flex; gap: 1.1em; flex-wrap: wrap; font-size: .8rem; color: var(--muted);
+    margin-top: .7em; }
+  .legend span { display: inline-flex; align-items: center; gap: .45em; }
+
+  figure { margin: 0; }
+  figure img { width: 100%; border-radius: 12px; border: 1px solid var(--hair);
+    background: var(--surface); display: block; }
+  figcaption { font-size: .8rem; color: var(--muted); margin-top: .5em; }
+</style>
+
+<div class="pbar" id="pbar"></div>
+<div class="counter" id="counter">01</div>
+<div class="hint">↑ ↓ / scroll to navigate</div>
+
+<div class="deck">
+
+<!-- 1 — TITLE -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow">FDTEM · COMET quality estimation · length bias</span>
+    <h1>Does COMET still work<br>on <span style="color:var(--b)">longer text</span>?</h1>
+    <p class="lead">COMET is trained on single short segments. Two experiments ask
+      what happens past sentence scale — one <b style="color:var(--a)">retrains</b>
+      the metric, one <b style="color:var(--b)">stress-tests</b> its encoder on
+      concatenated blocks.</p>
+    <div class="cols two" style="margin-top:1.6em">
+      <div class="card tint-a">
+        <span class="eyebrow"><span class="tag a">Experiment A</span></span>
+        <h2 style="font-size:1.3rem;margin:.5em 0 .2em">Retrain COMET</h2>
+        <p class="muted" style="font-size:.95rem;margin:0">Better encoder, and
+          paragraph-level training data. Does correlation with human quality hold
+          up as text grows?</p>
+      </div>
+      <div class="card tint-b">
+        <span class="eyebrow"><span class="tag b">Experiment B</span></span>
+        <h2 style="font-size:1.3rem;margin:.5em 0 .2em">Block-level xSIM++</h2>
+        <p class="muted" style="font-size:.95rem;margin:0">Bury one perturbed
+          sentence in a k-sentence block. Can the encoder still tell the clean
+          block from the corrupted one?</p>
+      </div>
+    </div>
+    <p class="note">The earlier L<sub>p</sub>-norm aggregation probe was dropped.
+      · Data & models in <span class="chip-code">~/scratch</span> · logging to W&amp;B
+      · FLORES+ via <span class="chip-code">openlanguagedata/flores_plus</span></p>
+  </div>
+</section>
+
+<!-- 2 — WHY / FRAMING -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow">Motivation</span>
+    <h2>An aligner pulls together; a quality metric must also push apart</h2>
+    <div class="cols split">
+      <div>
+        <p>Aligners (LaBSE, LASER, E5) are trained to place a sentence and its
+          translation <b>near</b> each other. A quality metric like COMET has a
+          harder job: it must <b>also separate</b> a correct translation from one
+          that is nearly identical but contains an error.</p>
+        <ul class="clean b">
+          <li><b>The concern:</b> COMET saw only short segments in training. On a
+            paragraph, is a single localised error simply <b>diluted</b> away?</li>
+          <li><b>Two knobs (Exp A):</b> is it the ageing <b>encoder</b>, or the
+            <b>short-segment data</b>, that limits long-text behaviour?</li>
+          <li><b>The stress test (Exp B):</b> measure error-sensitivity directly,
+            as a function of block length k.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <span class="lbl">the two forces</span>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:.3em">
+          <div>
+            <span class="pill good">pull together ✓</span>
+            <p class="note" style="margin:.4em 0 0">src ↔ correct translation
+              → <b>close</b> in embedding space</p>
+          </div>
+          <div>
+            <span class="pill b">push apart ✗</span>
+            <p class="note" style="margin:.4em 0 0">src ↔ translation-with-one-error
+              → must stay <b>farther</b> than the correct one</p>
+          </div>
+          <div style="border-top:1px dashed var(--hair-strong);padding-top:12px">
+            <p class="note" style="margin:0">Both experiments read on this
+              contrast — the second one measures the push-apart force as text
+              gets longer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 — EXP A OVERVIEW -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag a">Experiment A</span> · overview</span>
+    <h2>Retrain COMET — isolate the <span class="k">encoder</span> from the <span class="k">data</span></h2>
+    <div class="cols two">
+      <div class="card">
+        <span class="lbl" style="color:var(--a)">Arm 1 · data effect</span>
+        <p style="margin-top:.2em"><b>Continue</b> the public
+          <span class="chip-code">wmt22-comet-da</span> on
+          <b>paragraph-level</b> data. Same encoder, same head — only the training
+          text gets longer.</p>
+        <p class="note">Answers: is short-segment <i>data</i> the limitation?</p>
+      </div>
+      <div class="card">
+        <span class="lbl" style="color:var(--a)">Arm 2 · encoder effect</span>
+        <p style="margin-top:.2em"><b>Retrain</b> COMET's head on a
+          <b>better-aligned encoder</b>
+          (<span class="chip-code">microsoft/infoxlm-large</span>), from raw
+          encoder weights, on the same data.</p>
+        <p class="note">Answers: is the ageing XLM-R <i>backbone</i> the limitation?</p>
+      </div>
+    </div>
+    <div class="callout a">
+      <b>Controlled comparison.</b> Arm 2 is run twice on identical data —
+      infoXLM vs a plain <span class="chip-code">xlm-roberta-large</span> baseline —
+      so any difference is attributable to the encoder, not the recipe.
+    </div>
+    <p class="note">Task throughout: <b>reference-based regression</b>
+      (RegressionMetric) — predict a scalar quality score from (source, hypothesis,
+      reference). Same as the original COMET.</p>
+  </div>
+</section>
+
+<!-- 4 — EXP A DATA -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag a">Experiment A</span> · data</span>
+    <h2>Length-balanced paragraph mix from Bio-MQM</h2>
+    <div class="cols split">
+      <div>
+        <p>Bio-MQM segments carry <span class="chip-code">(system, doc_id,
+          seg_id)</span>, so consecutive same-document segments form real
+          paragraphs. We slide a <b>window of k segments</b> over each document,
+          concatenate src / mt / ref, and score the window by its
+          <b>mean per-segment MQM penalty</b> (z-scored + sigmoid, per language
+          pair). At k=1 this is exactly the sentence-level score — <b>all lengths
+          share one scale</b>.</p>
+        <ul class="clean">
+          <li><b>Balanced by length:</b> every k contributes the <b>same number</b>
+            of training windows — k=1 kept, so sentence quality isn't sacrificed.</li>
+          <li><b>Train</b> windows overlap (stride 1 = augmentation);
+            <b>validation</b> windows are non-overlapping and never subsampled.</li>
+          <li>Windows over <b>480 tokens</b> dropped (512 encoder limit).</li>
+        </ul>
+        <div class="metric-grid" style="margin-top:1em">
+          <div class="metric"><div class="v">15,410</div><div class="l">train windows (en/de/es/fr/ru)</div></div>
+          <div class="metric"><div class="v">46,882</div><div class="l">validation windows</div></div>
+          <div class="metric"><div class="v">k ∈ {1,2,3,4,6}</div><div class="l">window sizes, equal share</div></div>
+        </div>
+      </div>
+      <div class="diagram">
+        <span class="lbl">one document → windows</span>
+        <div class="row" style="margin:.2em 0 .3em">
+          <div class="sent"><span class="idx">s1</span></div>
+          <div class="sent"><span class="idx">s2</span></div>
+          <div class="sent"><span class="idx">s3</span></div>
+          <div class="sent"><span class="idx">s4</span></div>
+          <div class="sent"><span class="idx">s5</span></div>
+          <div class="sent"><span class="idx">s6</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:.6em">
+          <div><span class="lbl" style="display:inline;margin:0">k=2</span>
+            <div class="row" style="margin-top:.3em">
+              <div class="block"><div class="sent"><span class="idx">s1</span></div><div class="sent"><span class="idx">s2</span></div></div>
+              <div class="block"><div class="sent"><span class="idx">s3</span></div><div class="sent"><span class="idx">s4</span></div></div>
+              <div class="block"><div class="sent"><span class="idx">s5</span></div><div class="sent"><span class="idx">s6</span></div></div>
+            </div>
+          </div>
+          <div><span class="lbl" style="display:inline;margin:0">k=3</span>
+            <div class="row" style="margin-top:.3em">
+              <div class="block"><div class="sent"><span class="idx">s1</span></div><div class="sent"><span class="idx">s2</span></div><div class="sent"><span class="idx">s3</span></div></div>
+              <div class="block"><div class="sent"><span class="idx">s4</span></div><div class="sent"><span class="idx">s5</span></div><div class="sent"><span class="idx">s6</span></div></div>
+            </div>
+          </div>
+        </div>
+        <p class="note">Each window → one training example:
+          <span class="chip-code">src=⧺sᵢ, mt=⧺mtᵢ, ref=⧺refᵢ</span>,
+          <span class="chip-code">score = mean penalty</span>. Length grows
+          ~40 → ~226 tokens from k=1 to k=6.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 — EXP A TRAINING -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag a">Experiment A</span> · training</span>
+    <h2>What is trained, what is frozen</h2>
+    <div class="cols split">
+      <div class="diagram">
+        <span class="lbl">COMET RegressionMetric</span>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:.3em">
+          <div class="sent" style="justify-content:space-between;background:var(--good-soft);border-color:var(--good)">
+            <span>Regression head · <b>3072→1024→1</b></span><span class="pill good">trained</span></div>
+          <div class="arrow" style="justify-content:center">↑</div>
+          <div class="sent" style="justify-content:space-between;background:var(--a-soft);border-color:var(--a)">
+            <span>Layer-attention pool <span class="mono">(sparsemax mix)</span></span><span class="pill good">trained</span></div>
+          <div class="arrow" style="justify-content:center">↑</div>
+          <div class="sent" style="justify-content:space-between">
+            <span>Encoder · XLM-R / infoXLM (24 layers)</span>
+            <span class="pill grey">frozen 30%, then low-LR</span></div>
+          <div class="sent" style="justify-content:space-between">
+            <span>Word embeddings</span><span class="pill grey" id="emb-freeze">see arm</span></div>
+        </div>
+      </div>
+      <div>
+        <table>
+          <thead><tr><th></th><th>Arm 1 · paragraph</th><th>Arm 2 · encoder</th></tr></thead>
+          <tbody>
+            <tr><td class="muted">init from</td><td>wmt22-comet-da ckpt</td><td>raw encoder weights</td></tr>
+            <tr><td class="muted">encoder</td><td>xlm-roberta-large</td><td>infoxlm-large*</td></tr>
+            <tr><td class="muted">enc. LR</td><td class="mono">5e-7</td><td class="mono">1e-6</td></tr>
+            <tr><td class="muted">head LR</td><td class="mono">1e-5</td><td class="mono">1.5e-5</td></tr>
+            <tr><td class="muted">frozen epochs</td><td class="mono">0.3</td><td class="mono">0.3</td></tr>
+            <tr><td class="muted">embeddings</td><td>unfrozen</td><td>frozen</td></tr>
+            <tr><td class="muted">loss</td><td colspan="2">MSE on the scalar score</td></tr>
+          </tbody>
+        </table>
+        <p class="note">*baseline: same recipe with xlm-roberta-large.
+          Layerwise LR decay 0.95; effective batch 32; early-stop on
+          <span class="chip-code">val_kendall</span>. 3 runs on RTX 8000, ≤3 days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 — EXP A EVAL -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag a">Experiment A</span> · evaluation</span>
+    <h2>Does correlation with human quality survive length?</h2>
+    <div class="cols split">
+      <div>
+        <p>On the held-out paragraph <b>validation</b> set, each model predicts a
+          score for every window. Within each <b>(language pair, k)</b> cell we
+          correlate predictions against the gold MQM score —
+          <b>Kendall τ</b>, Pearson, Spearman.</p>
+        <p>The headline is <b>Kendall τ vs k</b>, one line per model. A model that
+          generalises to long text <b>degrades less</b> (or improves) as k grows.</p>
+        <ul class="clean">
+          <li>Compared models: public <b>wmt22-comet-da</b>, the sentence-only
+            <b>Bio-COMET</b>, and the retrained <b>paragraph</b> / <b>infoXLM</b> checkpoints.</li>
+          <li>Predictions are cached per (model, data) so adding a model only
+            scores the new one.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <span class="lbl">expected reading</span>
+        <svg viewBox="0 0 320 200" width="100%" role="img" aria-label="Kendall tau versus k sketch">
+          <line x1="40" y1="20" x2="40" y2="170" stroke="var(--hair-strong)"/>
+          <line x1="40" y1="170" x2="300" y2="170" stroke="var(--hair-strong)"/>
+          <text x="20" y="24" fill="var(--muted)" font-size="10" font-family="monospace">τ</text>
+          <text x="292" y="188" fill="var(--muted)" font-size="10" font-family="monospace">k</text>
+          <polyline points="60,60 130,86 200,118 280,150" fill="none" stroke="var(--grey)" stroke-width="2.5"/>
+          <polyline points="60,54 130,66 200,80 280,96" fill="none" stroke="var(--a)" stroke-width="2.5"/>
+          <circle cx="280" cy="150" r="3" fill="var(--grey)"/>
+          <circle cx="280" cy="96" r="3" fill="var(--a)"/>
+          <text x="150" y="150" fill="var(--grey)" font-size="10">baseline COMET</text>
+          <text x="120" y="52" fill="var(--a)" font-size="10">retrained on paragraphs</text>
+        </svg>
+        <p class="note">Hypothesis: the paragraph-trained curve stays flatter —
+          quality prediction holds at longer k.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 — EXP B OVERVIEW -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · overview</span>
+    <h2>xSIM++ on <span class="kb">concatenated blocks</span></h2>
+    <p class="lead">Standard xSIM++ perturbs a single sentence. We move it to
+      <b>blocks of k sentences</b>: perturb <b>one</b> sentence, leave the other
+      k−1 intact, and ask whether the encoder can still retrieve the clean block.</p>
+    <div class="cols two" style="margin-top:.4em">
+      <div class="card tint-b">
+        <span class="lbl" style="color:var(--b)">the question</span>
+        <p style="margin:.3em 0 0">As k grows, one error is a smaller fraction of
+          the block. How fast does the encoder's sensitivity to it
+          <b>dilute</b>?</p>
+      </div>
+      <div class="card tint-b">
+        <span class="lbl" style="color:var(--b)">the method in one line</span>
+        <p style="margin:.3em 0 0">Cross-lingual retrieval: query = source block;
+          find its true translation block in a pool <b>seeded with hard
+          negatives</b> that differ by exactly one perturbed sentence.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:1.1em">Zoo evaluated: COMET, Bio-COMET, raw
+      XLM-R, LaBSE, E5 (and any Exp-A checkpoint). No training — pure evaluation.
+      Cased scripts only (de, es, fr, ru); zh/ja/th excluded.</p>
+  </div>
+</section>
+
+<!-- 8 — EXP B DATA / AGGREGATION -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · aggregating FLORES+</span>
+    <h2>From FLORES+ sentences to parallel blocks</h2>
+    <div class="cols split">
+      <div>
+        <p>FLORES+ rows are in <b>document order</b> with a <span class="chip-code">url</span>
+          column marking articles. We take <b>non-overlapping</b> windows of k
+          consecutive sentences <b>within one article</b> (stride = k, so no two
+          blocks share a sentence), and apply the <b>same row window to every
+          language</b> — blocks stay parallel across en/de/es/fr/ru.</p>
+        <ul class="clean b">
+          <li>We pool the <b>dev + devtest</b> splits → <b>2,009 sentences</b> per
+            language, <b>562 articles</b> (2–6 sentences each).</li>
+          <li>Partial windows at an article's tail are discarded — only full
+            k-blocks are kept.</li>
+          <li>Larger k ⇒ fewer blocks (below). k=5 is the practical ceiling on
+            FLORES+ article lengths.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="diagram">
+          <span class="lbl">one article, k=3 (parallel across languages)</span>
+          <div style="display:flex;flex-direction:column;gap:6px;margin:.2em 0 .1em">
+            <div class="row">
+              <span class="lbl" style="width:2.5em;margin:0;align-self:center">EN</span>
+              <div class="block" style="border-color:var(--b)"><div class="sent"><span class="idx">s1</span></div><div class="sent"><span class="idx">s2</span></div><div class="sent"><span class="idx">s3</span></div></div>
+              <div class="block"><div class="sent"><span class="idx">s4</span></div><div class="sent"><span class="idx">s5</span></div><div class="sent"><span class="idx">s6</span></div></div>
+            </div>
+            <div class="row">
+              <span class="lbl" style="width:2.5em;margin:0;align-self:center">DE</span>
+              <div class="block" style="border-color:var(--b)"><div class="sent"><span class="idx">t1</span></div><div class="sent"><span class="idx">t2</span></div><div class="sent"><span class="idx">t3</span></div></div>
+              <div class="block"><div class="sent"><span class="idx">t4</span></div><div class="sent"><span class="idx">t5</span></div><div class="sent"><span class="idx">t6</span></div></div>
+            </div>
+          </div>
+          <p class="note">Same window → aligned source block &amp; target block.</p>
+        </div>
+        <div class="tablewrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>block size k</th><th class="num">blocks / language</th></tr></thead>
+            <tbody>
+              <tr><td>k = 2</td><td class="num">846</td></tr>
+              <tr><td>k = 3</td><td class="num">468</td></tr>
+              <tr><td>k = 4</td><td class="num">276</td></tr>
+              <tr><td>k = 5</td><td class="num">141</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 — EXP B POOL (KEY SLIDE) -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · the retrieval pool — the core of the recipe</span>
+    <h2>What is the query, and what is it retrieved against?</h2>
+    <div class="diagram">
+      <div class="cols split" style="align-items:center">
+        <div>
+          <span class="lbl">query — one source block</span>
+          <div class="block" style="border-color:var(--b);margin:.2em 0 .3em">
+            <div class="sent"><span class="idx">EN s1</span></div>
+            <div class="sent"><span class="idx">EN s2</span></div>
+            <div class="sent"><span class="idx">EN s3</span></div>
+          </div>
+          <p class="note">embed → find the nearest candidate by cosine similarity</p>
+        </div>
+        <div>
+          <span class="lbl">candidate pool (target language)</span>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:.2em">
+            <div class="block" style="border-color:var(--good);background:var(--good-soft)">
+              <div class="sent" style="border-color:var(--good)"><span class="idx">t1</span></div>
+              <div class="sent" style="border-color:var(--good)"><span class="idx">t2</span></div>
+              <div class="sent" style="border-color:var(--good)"><span class="idx">t3</span></div>
+              <span class="pill good" style="align-self:center">✓ the answer — clean block</span>
+            </div>
+            <div class="block" style="border-color:var(--b);background:var(--b-soft)">
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t1</span></div>
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t2*</span></div>
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t3</span></div>
+              <span class="pill b" style="align-self:center">hard negative — 1 sentence perturbed</span>
+            </div>
+            <div class="block" style="border-color:var(--b);background:var(--b-soft)">
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t1*</span></div>
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t2</span></div>
+              <div class="sent" style="border-color:var(--b)"><span class="idx">t3</span></div>
+              <span class="pill b" style="align-self:center">hard negative — different sentence / edit</span>
+            </div>
+            <div class="block" style="border-style:dashed;border-color:var(--grey)">
+              <div class="sent"><span class="idx">u1</span></div>
+              <div class="sent"><span class="idx">u2</span></div>
+              <div class="sent"><span class="idx">u3</span></div>
+              <span class="pill grey" style="align-self:center">every OTHER true block (distractors)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--good)"></span> clean target block = correct retrieval</span>
+        <span><span class="dot" style="background:var(--b)"></span> hard negative = <b>this block’s own</b> translation, one sentence perturbed</span>
+        <span><span class="dot" style="background:var(--grey)"></span> other true blocks = ordinary distractors</span>
+      </div>
+    </div>
+    <div class="callout">
+      <b>Crucial:</b> hard negatives are built <b>per block, from that block’s own
+      k translations</b> — one sentence perturbed, the other k−1 untouched. They are
+      <b>not</b> perturbations of other blocks. The pool for the whole corpus =
+      <b>all clean target blocks</b> (mutual distractors) <b>+</b> every block’s own
+      hard negatives.
+    </div>
+  </div>
+</section>
+
+<!-- 10 — EXP B: exactly what is perturbed -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · exactly what gets perturbed</span>
+    <h2>One sentence, inside the block, for every block</h2>
+    <div class="cols split">
+      <div>
+        <p>For a k-block we generate hard negatives by sweeping:</p>
+        <ul class="clean b">
+          <li><b>each position</b> p = 1…k — perturb sentence p, keep the rest;</li>
+          <li><b>each category</b> — causality, entity, number;</li>
+          <li><b>a few variants</b> each (default 2, deduplicated).</li>
+        </ul>
+        <p>So a k=3 German block yields on the order of a dozen hard negatives —
+          one clean block, many near-clones each differing by a single edit in a
+          single sentence.</p>
+        <div class="callout">
+          The other k−1 sentences of a hard negative are <b>byte-identical</b> to
+          the clean block. Only the perturbed sentence differs — that is what makes
+          the negative <i>hard</i>, and harder as k grows.
+        </div>
+      </div>
+      <div>
+        <div class="diagram">
+          <span class="lbl">de · k=3 · pool sizes (variants/pos = 2)</span>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>k</th><th class="num">true blocks</th><th class="num">hard negs</th><th class="num">pool</th></tr></thead>
+              <tbody>
+                <tr><td>2</td><td class="num">846</td><td class="num">6,379</td><td class="num">7,225</td></tr>
+                <tr><td>3</td><td class="num">468</td><td class="num">5,287</td><td class="num">5,755</td></tr>
+                <tr><td>4</td><td class="num">276</td><td class="num">4,172</td><td class="num">4,448</td></tr>
+                <tr><td>5</td><td class="num">141</td><td class="num">2,611</td><td class="num">2,752</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Per block, avg variants (k=3): causality ≈ 4, entity ≈ 6,
+            number ≈ 1.3 — coverage depends on what each sentence contains.
+            Entity bank for German: 6,163 surfaces harvested from the corpus.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 — EXP B PERTURBATIONS -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · the three perturbation types</span>
+    <h2>Minimal, meaning-changing edits (xSIM++ §2.2)</h2>
+    <div class="cols" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card" style="border-top:3px solid var(--caus)">
+        <span class="pill caus">causality</span>
+        <p style="font-size:.92rem;margin:.6em 0 .3em">antonym swap · negation
+          insert/remove · modal strengthening</p>
+        <p class="mono" style="font-size:.78rem;color:var(--muted)">…ne s'amélioreraient
+          <del>pas</del> → <span class="pert caus">s'amélioreraient</span></p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--ent)">
+        <span class="pill ent">entity</span>
+        <p style="font-size:.92rem;margin:.6em 0 .3em">replace a named-entity span
+          with another from a corpus bank</p>
+        <p class="mono" style="font-size:.78rem;color:var(--muted)">M. <del>Pittman</del>
+          → M. <span class="pert ent">Phéniciens</span></p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--num)">
+        <span class="pill num">number</span>
+        <p style="font-size:.92rem;margin:.6em 0 .3em">change a digit / ordinal
+          value</p>
+        <p class="mono" style="font-size:.78rem;color:var(--muted)"><del>88</del>
+          → <span class="pert num">98</span> · <del>first</del> →
+          <span class="pert num">sixth</span></p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1.1em">
+      <b>Self-contained &amp; multilingual.</b> Unlike the paper (English via
+      NLTK / spaCy / WordNet), perturbations here run directly on the
+      <b>translation</b> side with compact per-language lexicons — the cluster
+      sandbox blocks the NLTK download anyway. Entity edits need letter case,
+      so they’re unavailable for zh/ja/th (which is why we run cased languages).
+    </div>
+    <p class="note">Every edit is deterministic — seeded by
+      (seed, lang, category, sentence, variant) — so the whole pool is
+      reproducible.</p>
+  </div>
+</section>
+
+<!-- 12 — EXP B EVALUATION -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow"><span class="tag b">Experiment B</span> · how we score it</span>
+    <h2>Retrieval rule &amp; the metrics we read</h2>
+    <div class="cols split">
+      <div>
+        <p>Embed the query block and every candidate; retrieval picks the
+          candidate of <b>maximum cosine similarity</b> (absolute-margin rule, as
+          in the xSIM++ paper). A block is <b>correct</b> only if that argmax is
+          its own clean target block.</p>
+        <table>
+          <tbody>
+            <tr><td><b>xsim error</b></td><td class="muted">over the clean-blocks-only pool (classic)</td></tr>
+            <tr><td><b>xsim++ error</b></td><td class="muted">over the full pool incl. hard negatives</td></tr>
+            <tr><td><b>detection rate</b></td><td class="muted">P[ cos(q,clean) &gt; cos(q,perturbed) ]</td></tr>
+            <tr><td><b>error typology</b></td><td class="muted">misaligned vs which category won</td></tr>
+            <tr><td><b>by position</b></td><td class="muted">detection vs where the error sits</td></tr>
+            <tr><td><b>margin</b></td><td class="muted">gold − best negative similarity</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="diagram">
+        <span class="lbl">the headline: dilution with k</span>
+        <svg viewBox="0 0 320 200" width="100%" role="img" aria-label="xsim++ error rising with k sketch">
+          <line x1="40" y1="20" x2="40" y2="170" stroke="var(--hair-strong)"/>
+          <line x1="40" y1="170" x2="300" y2="170" stroke="var(--hair-strong)"/>
+          <text x="14" y="24" fill="var(--muted)" font-size="9" font-family="monospace">err</text>
+          <text x="292" y="188" fill="var(--muted)" font-size="10" font-family="monospace">k</text>
+          <polyline points="60,158 130,150 200,150 280,152" fill="none" stroke="var(--grey)" stroke-width="2.5" stroke-dasharray="4 3"/>
+          <polyline points="60,150 130,120 200,86 280,52" fill="none" stroke="var(--b)" stroke-width="2.5"/>
+          <circle cx="280" cy="52" r="3" fill="var(--b)"/>
+          <text x="150" y="168" fill="var(--grey)" font-size="10">xsim (clean pool)</text>
+          <text x="120" y="70" fill="var(--b)" font-size="10">xsim++ (with negatives)</text>
+        </svg>
+        <p class="note">If xsim stays ≈0 but xsim++ climbs with k, the encoder
+          aligns blocks fine yet grows <b>blind to a buried error</b> — the
+          dilution we set out to measure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 — RESULTS PLACEHOLDER -->
+<section class="slide" id="results">
+  <div class="inner">
+    <span class="eyebrow">Results · <span id="results-state">jobs running on the cluster</span></span>
+    <h2>Figures land here as jobs finish</h2>
+    <div class="cols two" id="results-figs">
+      <figure class="card">
+        <div style="aspect-ratio:8/5;display:flex;align-items:center;justify-content:center;color:var(--faint);font-family:var(--mono);font-size:.85rem;text-align:center;padding:1em">
+          block-xSIM++ · xsim vs xsim++ error vs k<br>(generated by run_block_xsim.py)
+        </div>
+        <figcaption>Exp B headline — filled in when job 5110425 completes (~hours).</figcaption>
+      </figure>
+      <figure class="card">
+        <div style="aspect-ratio:8/5;display:flex;align-items:center;justify-content:center;color:var(--faint);font-family:var(--mono);font-size:.85rem;text-align:center;padding:1em">
+          Exp A · Kendall τ vs k, per model<br>(eval_length_correlation.py, after training)
+        </div>
+        <figcaption>Exp A headline — training runs ≤3 days, then evaluation.</figcaption>
+      </figure>
+    </div>
+    <p class="note">Live metrics stream to W&amp;B: projects
+      <span class="chip-code">comet-block-xsim</span> and
+      <span class="chip-code">comet-retrain</span>.</p>
+  </div>
+</section>
+
+<!-- 14 — RECAP -->
+<section class="slide">
+  <div class="inner">
+    <span class="eyebrow">Recap · the recipe in one view</span>
+    <h2>Two experiments, one question</h2>
+    <div class="cols two">
+      <div class="card tint-a">
+        <span class="eyebrow"><span class="tag a">A · retraining</span></span>
+        <dl class="kvs" style="margin-top:.6em">
+          <dt>data</dt><dd>Bio-MQM, length-balanced windows k∈{1,2,3,4,6}</dd>
+          <dt>task</dt><dd>reference-based scalar regression (MSE)</dd>
+          <dt>trained</dt><dd>head + pool + encoder (low LR)</dd>
+          <dt>varies</dt><dd>encoder (infoXLM) · or data (paragraphs)</dd>
+          <dt>eval</dt><dd>Kendall τ vs k on held-out windows</dd>
+        </dl>
+      </div>
+      <div class="card tint-b">
+        <span class="eyebrow"><span class="tag b">B · block xSIM++</span></span>
+        <dl class="kvs" style="margin-top:.6em">
+          <dt>data</dt><dd>FLORES+ dev+devtest, non-overlapping k-blocks</dd>
+          <dt>task</dt><dd>cross-lingual block retrieval (no training)</dd>
+          <dt>negatives</dt><dd>per block, 1 sentence perturbed, k−1 intact</dd>
+          <dt>varies</dt><dd>block length k = 2…5 · encoder zoo</dd>
+          <dt>eval</dt><dd>xsim vs xsim++ error, detection, dilution</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:1.2em">Together: does COMET’s quality signal —
+      and its encoder’s error-sensitivity — <b>survive the move from sentences to
+      paragraphs</b>?</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const pbar = document.getElementById('pbar');
+  const pad = n => String(n).padStart(2, '0');
+  let current = 0;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        current = slides.indexOf(e.target);
+        counter.textContent = pad(current + 1) + ' / ' + pad(slides.length);
+        pbar.style.width = ((current + 1) / slides.length * 100) + '%';
+      }
+    });
+  }, { threshold: 0.55 });
+  slides.forEach(s => io.observe(s));
+
+  function go(d) {
+    const next = Math.min(slides.length - 1, Math.max(0, current + d));
+    slides[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+    else if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); slides[0].scrollIntoView(); }
+    else if (e.key === 'End') { e.preventDefault(); slides[slides.length-1].scrollIntoView(); }
+  });
+  counter.textContent = pad(1) + ' / ' + pad(slides.length);
+</script>
