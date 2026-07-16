@@ -11,7 +11,9 @@
       "MultiEdit",
       "Write",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
     ],
     "deny": [],
     "ask": []
