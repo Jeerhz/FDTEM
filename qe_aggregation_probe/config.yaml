@@ -1,0 +1,138 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# qe_aggregation_probe — config  (Exp 0: estimate the aggregation function)
+#
+# Question: score(paragraph) ≈ f(score(sent_1), ..., score(sent_k)) — which f?
+# Mean, min, penalty-sum, or a generalized power mean M_p whose fitted exponent p
+# interpolates continuously between mean (p=1) and min (p→−∞). The fitted p IS
+# the answer, and the dilution curve Δ(m, k, severity) is the null model for the
+# rest of the length-bias study.
+#
+# Nested paired design: the sampling unit is a FAMILY of k_max contiguous units;
+# every scale k is a prefix of the same family; each unit's perturbation is
+# generated once per condition and frozen at all scales; perturbation sets grow
+# as a monotone chain (new perturbations only arrive with new segments). So the
+# candidate pool and the perturbation content are identical across scales —
+# length is the only variable.
+#
+# Env vars are expanded with ${VAR} and ${VAR:-default}.
+# ══════════════════════════════════════════════════════════════════════════════
+
+experiment_name: qe_aggregation_probe
+seed: 42
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+data:
+  source: wmt24pp                      # wmt24pp | flores | synthetic
+  # WMT24++ (google/wmt24pp on HF): human post-edits = error-free baseline.
+  wmt24pp_lps: [en-de_DE, en-zh_CN, en-es_MX, en-fr_FR]
+  # FLORES robustness set (longer paragraphs; gold translations). Raw layout as
+  # in scripts/representation_analysis_common.py; point $FLORES_DIR at it.
+  flores_dir: "${FLORES_DIR:-}"
+  flores_langs: [de, zh, es, fr]       # target ISO codes; source is en
+  flores_split: devtest
+  # Unit = one aligned sentence-ish segment.
+  #   segment   : use WMT24++ segments as-is (aligned by construction; ~1-2 sents)
+  #   bertalign : re-align each document into sentence pairs with bertalign
+  #               (pip install git+https://github.com/bfsujason/bertalign; heavy)
+  resegment: segment
+  drop_bad_source: true                # WMT24++ is_bad_source filter
+  min_unit_chars: 5                    # drop degenerate units
+
+# ── Design (items) ────────────────────────────────────────────────────────────
+design:
+  # Scales are PREFIXES of the same k_max = max(k_list) family. k=1 is the
+  # trivial anchor (S ≡ s_1) feeding dilution/severity tables, not the fits.
+  k_list: [1, 2, 3, 4, 6]
+  n_families: 120                      # per language: non-overlapping k_max windows
+  severities: [minor, major]
+  families: [accuracy, fluency]
+  # Positions are perturbed along a per-family deterministic permutation π
+  # (seeded by family identity, shared across conditions): nested chain
+  # P_1 ⊂ P_2 ⊂ ... ⊂ P_k_max, realized at scale k as P_j ∩ [0,k) — exactly one
+  # item per m ∈ {0..k} per (family, condition, k).
+  max_tokens: 500                      # token filter applied to the FULL k_max prefix
+  drop_truncated: true
+  token_counter: "FacebookAI/xlm-roberta-large"   # tokenizer used only to COUNT tokens
+
+# ── Perturbations ─────────────────────────────────────────────────────────────
+perturb:
+  backend: llm                         # llm (real run) | rule (deterministic, free, smoke)
+  # LLM backend — OpenAI-compatible chat completions. Prompts are the published
+  # error-injection prompts of Zhang et al. 2026 (arXiv:2510.22028, App. A.4):
+  # base template + {major,minor}×{accuracy,fluency} task descriptions.
+  llm:
+    model: "${PERTURB_MODEL:-gpt-4o-mini}"
+    base_url: "${PERTURB_BASE_URL:-}"  # empty = api.openai.com; set for vLLM/Gemini-compat
+    api_key_env: OPENAI_API_KEY
+    temperature: 0.3
+    max_retries: 3
+    request_timeout: 60
+  # Quality control: minimal, length-preserving edits only. A rejected
+  # perturbation drops the whole (family, condition) cell at ALL scales — the
+  # clean sentence is NEVER substituted into a perturbed candidate set.
+  qc:
+    max_char_ratio_delta: 0.30         # |len(pert)/len(orig) − 1| must be below this
+    reject_identical: true
+    strip_wrappers: true               # strip quotes / "Translation:" preambles
+
+# ── Metrics to probe (each fitted independently) ──────────────────────────────
+# kind: quality (higher=better, bounded ~[0,1]) | error (MQM-style, higher=worse)
+metrics:
+  - name: cometkiwi
+    kind: quality
+    spec: "comet:Unbabel/wmt22-cometkiwi-da"
+    needs_ref: false
+    enabled: true
+  - name: comet
+    kind: quality
+    spec: "comet:Unbabel/wmt22-comet-da"
+    needs_ref: true                    # ref = the unperturbed post-edit prefix
+    enabled: true
+  - name: metricx24-qe
+    kind: error
+    spec: "metricx:google/metricx-24-hybrid-large-v2p6"
+    tokenizer: "google/mt5-xl"
+    needs_ref: false
+    enabled: false                     # enable on cluster; needs pip install metricx (see README)
+  - name: mock
+    kind: quality
+    spec: "mock"
+    needs_ref: false
+    enabled: false                     # smoke only: paragraph = power mean of parts at true_p
+    true_p: -4.0
+    noise_sd: 0.01
+
+scoring:
+  batch_size: 32
+  device: auto
+  fp16: true
+
+# ── Fitting the aggregation function f ────────────────────────────────────────
+fit:
+  eps: 1.0e-3                          # positivity floor for power means
+  affine: true                         # fit S ≈ a + b·g(s) for every candidate (fair AIC comparison)
+  p_grid: { lo: -40.0, hi: 40.0, n: 161 }
+  softmin_logT_grid: { lo: -3.0, hi: 1.5, n: 60 }
+  cv_folds: 5                          # GroupKFold by document
+  bootstrap: { n_resamples: 500, ci: 0.95, seed: 12345 }
+  min_rows_per_fit: 40                 # skip (metric,k) cells thinner than this
+  mixed_effects: true                  # statsmodels MixedLM on residuals (optional dep)
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+paths:
+  results_dir: results
+  data_dir: results/data
+  perturb_cache: results/perturb_cache
+  score_cache: results/score_cache
+  analysis_dir: results/analysis
+  figures_dir: results/figures
+
+# ── Smoke test (mock metric + rule perturbations + synthetic data, no GPU/API) ─
+smoke:
+  source: synthetic
+  langs: [de]
+  k_list: [1, 2, 4]
+  n_families: 60
+  perturb_backend: rule
+  metrics_enabled: [mock]
+  bootstrap_n: 100
