@@ -1,0 +1,4084 @@
+{
+  "experiment": "block_duel",
+  "timestamp": "2026-07-28T10:25:25.008621+00:00",
+  "config": {
+    "encoders": [
+      "comet:Unbabel/wmt22-comet-da",
+      "hf-mean:xlm-roberta-large",
+      "labse",
+      "e5",
+      "comet:/home/abensale/scratch/checkpoints/bio_mqm/comet-bio-mqm/4yeqp7cn/checkpoints/last.ckpt"
+    ],
+    "langs": [
+      "de",
+      "es",
+      "fr",
+      "ru"
+    ],
+    "pivot": "en",
+    "direction": "en2xx",
+    "k_list": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "categories": [
+      "causality",
+      "entity",
+      "number"
+    ],
+    "duel_sizes": [
+      6,
+      5,
+      4
+    ],
+    "flores_source": "plus",
+    "splits": [
+      "dev",
+      "devtest"
+    ],
+    "max_sents": null,
+    "max_blocks": null,
+    "batch_size": 32,
+    "device": null,
+    "seed": 42,
+    "cache_dir": "results/block_duel/emb_cache",
+    "output": "results/block_duel/block_duel.json",
+    "wandb_project": "comet-block-duel",
+    "run_name": null,
+    "dry_run": false
+  },
+  "encoders": {
+    "comet:wmt22-comet-da": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 78,
+              "n_skipped": 768,
+              "coverage": 0.09219858156028368,
+              "mean_negatives": 6.0,
+              "duel_err": 0.9102564102564102,
+              "all_negatives_err": 0.9102564102564102
+            },
+            "5": {
+              "n_used": 293,
+              "n_skipped": 553,
+              "coverage": 0.3463356973995272,
+              "mean_negatives": 5.266211604095563,
+              "duel_err": 0.89419795221843,
+              "all_negatives_err": 0.8976109215017065
+            },
+            "4": {
+              "n_used": 843,
+              "n_skipped": 3,
+              "coverage": 0.9964539007092199,
+              "mean_negatives": 4.440094899169632,
+              "duel_err": 0.8728351126927639,
+              "all_negatives_err": 0.8813760379596678
+            }
+          },
+          "detection_rate": 0.4538912579957356,
+          "beat_by_category": {
+            "causality": 0.4107565011820331,
+            "entity": 0.49703791469194314,
+            "number": 0.4543010752688172
+          },
+          "beat_by_position": {
+            "0": 0.4624338624338624,
+            "1": 0.4452201933404941
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 466,
+              "n_skipped": 2,
+              "coverage": 0.9957264957264957,
+              "mean_negatives": 6.660944206008583,
+              "duel_err": 0.9738146331493971,
+              "all_negatives_err": 0.9763948497854077
+            },
+            "5": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.9635310676977343,
+              "all_negatives_err": 0.9743589743589743
+            },
+            "4": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.9505155338488672,
+              "all_negatives_err": 0.9743589743589743
+            }
+          },
+          "detection_rate": 0.2970456005138086,
+          "beat_by_category": {
+            "causality": 0.23575498575498577,
+            "entity": 0.32476802284082795,
+            "number": 0.44983818770226536
+          },
+          "beat_by_position": {
+            "0": 0.3028571428571429,
+            "1": 0.2868292682926829,
+            "2": 0.3012512030798845
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9912345504736809,
+              "all_negatives_err": 0.9963768115942029
+            },
+            "5": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.987841013656231,
+              "all_negatives_err": 0.9963768115942029
+            },
+            "4": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9818228872576699,
+              "all_negatives_err": 0.9963768115942029
+            }
+          },
+          "detection_rate": 0.21583027335781313,
+          "beat_by_category": {
+            "causality": 0.17028985507246377,
+            "entity": 0.22232304900181488,
+            "number": 0.39183673469387753
+          },
+          "beat_by_position": {
+            "0": 0.22617124394184168,
+            "1": 0.2238562091503268,
+            "2": 0.20261437908496732,
+            "3": 0.21052631578947367
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9968005989282585,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9955725913172722,
+              "all_negatives_err": 1.0
+            },
+            "4": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9934262742773381,
+              "all_negatives_err": 1.0
+            }
+          },
+          "detection_rate": 0.14341336794289422,
+          "beat_by_category": {
+            "causality": 0.12482269503546099,
+            "entity": 0.13068181818181818,
+            "number": 0.3106060606060606
+          },
+          "beat_by_position": {
+            "0": 0.15584415584415584,
+            "1": 0.14006514657980457,
+            "2": 0.13636363636363635,
+            "3": 0.13548387096774195,
+            "4": 0.14935064935064934
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 9,
+              "n_skipped": 837,
+              "coverage": 0.010638297872340425,
+              "mean_negatives": 6.0,
+              "duel_err": 0.6666666666666667,
+              "all_negatives_err": 0.6666666666666667
+            },
+            "5": {
+              "n_used": 62,
+              "n_skipped": 784,
+              "coverage": 0.07328605200945626,
+              "mean_negatives": 5.145161290322581,
+              "duel_err": 0.6424731182795699,
+              "all_negatives_err": 0.6451612903225806
+            },
+            "4": {
+              "n_used": 220,
+              "n_skipped": 626,
+              "coverage": 0.26004728132387706,
+              "mean_negatives": 4.322727272727272,
+              "duel_err": 0.6196969696969697,
+              "all_negatives_err": 0.6363636363636364
+            }
+          },
+          "detection_rate": 0.7476467951591215,
+          "beat_by_category": {
+            "causality": 0.7349624060150376,
+            "entity": 0.7828220858895706,
+            "number": 0.7045454545454546
+          },
+          "beat_by_position": {
+            "0": 0.75,
+            "1": 0.7450980392156863
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 85,
+              "n_skipped": 383,
+              "coverage": 0.18162393162393162,
+              "mean_negatives": 6.4941176470588236,
+              "duel_err": 0.8238095238095238,
+              "all_negatives_err": 0.8470588235294118
+            },
+            "5": {
+              "n_used": 169,
+              "n_skipped": 299,
+              "coverage": 0.3611111111111111,
+              "mean_negatives": 5.7514792899408285,
+              "duel_err": 0.8089954916877994,
+              "all_negatives_err": 0.8461538461538461
+            },
+            "4": {
+              "n_used": 256,
+              "n_skipped": 212,
+              "coverage": 0.5470085470085471,
+              "mean_negatives": 5.15625,
+              "duel_err": 0.7159164186507936,
+              "all_negatives_err": 0.78125
+            }
+          },
+          "detection_rate": 0.6607832322118037,
+          "beat_by_category": {
+            "causality": 0.6447520184544406,
+            "entity": 0.6965098634294385,
+            "number": 0.627177700348432
+          },
+          "beat_by_position": {
+            "0": 0.6764705882352942,
+            "1": 0.6506238859180036,
+            "2": 0.6534653465346535
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 117,
+              "n_skipped": 159,
+              "coverage": 0.42391304347826086,
+              "mean_negatives": 7.256410256410256,
+              "duel_err": 0.8696174196174197,
+              "all_negatives_err": 0.8888888888888888
+            },
+            "5": {
+              "n_used": 162,
+              "n_skipped": 114,
+              "coverage": 0.5869565217391305,
+              "mean_negatives": 6.62962962962963,
+              "duel_err": 0.8538604742308447,
+              "all_negatives_err": 0.8888888888888888
+            },
+            "4": {
+              "n_used": 228,
+              "n_skipped": 48,
+              "coverage": 0.8260869565217391,
+              "mean_negatives": 5.868421052631579,
+              "duel_err": 0.8085978835978835,
+              "all_negatives_err": 0.868421052631579
+            }
+          },
+          "detection_rate": 0.5777930089102125,
+          "beat_by_category": {
+            "causality": 0.5647226173541963,
+            "entity": 0.6149425287356322,
+            "number": 0.5341880341880342
+          },
+          "beat_by_position": {
+            "0": 0.5754475703324808,
+            "1": 0.5803571428571429,
+            "2": 0.5682451253481894,
+            "3": 0.5871313672922251
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 80,
+              "n_skipped": 61,
+              "coverage": 0.5673758865248227,
+              "mean_negatives": 8.0125,
+              "duel_err": 0.9379193722943723,
+              "all_negatives_err": 0.9625
+            },
+            "5": {
+              "n_used": 105,
+              "n_skipped": 36,
+              "coverage": 0.7446808510638298,
+              "mean_negatives": 7.295238095238095,
+              "duel_err": 0.9028533635676492,
+              "all_negatives_err": 0.9428571428571428
+            },
+            "4": {
+              "n_used": 123,
+              "n_skipped": 18,
+              "coverage": 0.8723404255319149,
+              "mean_negatives": 6.813008130081301,
+              "duel_err": 0.8592428348525909,
+              "all_negatives_err": 0.9349593495934959
+            }
+          },
+          "detection_rate": 0.5221339387060159,
+          "beat_by_category": {
+            "causality": 0.5010940919037199,
+            "entity": 0.5608108108108109,
+            "number": 0.5078125
+          },
+          "beat_by_position": {
+            "0": 0.5567010309278351,
+            "1": 0.5337423312883436,
+            "2": 0.5227272727272727,
+            "3": 0.5166666666666667,
+            "4": 0.47619047619047616
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.875,
+              "all_negatives_err": 0.875
+            },
+            "5": {
+              "n_used": 56,
+              "n_skipped": 790,
+              "coverage": 0.06619385342789598,
+              "mean_negatives": 5.142857142857143,
+              "duel_err": 0.9196428571428571,
+              "all_negatives_err": 0.9285714285714286
+            },
+            "4": {
+              "n_used": 155,
+              "n_skipped": 691,
+              "coverage": 0.18321513002364065,
+              "mean_negatives": 4.412903225806452,
+              "duel_err": 0.8305376344086022,
+              "all_negatives_err": 0.8516129032258064
+            }
+          },
+          "detection_rate": 0.5718832891246685,
+          "beat_by_category": {
+            "causality": 0.5251798561151079,
+            "entity": 0.6425061425061425,
+            "number": 0.5053191489361702
+          },
+          "beat_by_position": {
+            "0": 0.5730223123732252,
+            "1": 0.5706340378197998
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 71,
+              "n_skipped": 397,
+              "coverage": 0.1517094017094017,
+              "mean_negatives": 6.47887323943662,
+              "duel_err": 0.9411468812877264,
+              "all_negatives_err": 0.9436619718309859
+            },
+            "5": {
+              "n_used": 120,
+              "n_skipped": 348,
+              "coverage": 0.2564102564102564,
+              "mean_negatives": 5.875,
+              "duel_err": 0.9576388888888889,
+              "all_negatives_err": 0.9666666666666667
+            },
+            "4": {
+              "n_used": 198,
+              "n_skipped": 270,
+              "coverage": 0.4230769230769231,
+              "mean_negatives": 5.136363636363637,
+              "duel_err": 0.9251322751322751,
+              "all_negatives_err": 0.9494949494949495
+            }
+          },
+          "detection_rate": 0.450227716330514,
+          "beat_by_category": {
+            "causality": 0.42730496453900707,
+            "entity": 0.48120300751879697,
+            "number": 0.4253246753246753
+          },
+          "beat_by_position": {
+            "0": 0.45869947275922673,
+            "1": 0.4282700421940928,
+            "2": 0.46153846153846156
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 84,
+              "n_skipped": 192,
+              "coverage": 0.30434782608695654,
+              "mean_negatives": 7.2023809523809526,
+              "duel_err": 0.9827123273551845,
+              "all_negatives_err": 0.9880952380952381
+            },
+            "5": {
+              "n_used": 125,
+              "n_skipped": 151,
+              "coverage": 0.4528985507246377,
+              "mean_negatives": 6.48,
+              "duel_err": 0.9826103896103896,
+              "all_negatives_err": 0.992
+            },
+            "4": {
+              "n_used": 175,
+              "n_skipped": 101,
+              "coverage": 0.6340579710144928,
+              "mean_negatives": 5.771428571428571,
+              "duel_err": 0.9635497835497836,
+              "all_negatives_err": 0.9828571428571429
+            }
+          },
+          "detection_rate": 0.3885245901639344,
+          "beat_by_category": {
+            "causality": 0.3588621444201313,
+            "entity": 0.436399217221135,
+            "number": 0.34523809523809523
+          },
+          "beat_by_position": {
+            "0": 0.3887240356083086,
+            "1": 0.3678571428571429,
+            "2": 0.3993055555555556,
+            "3": 0.3968253968253968
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 65,
+              "n_skipped": 76,
+              "coverage": 0.46099290780141844,
+              "mean_negatives": 7.492307692307692,
+              "duel_err": 0.9810855810855811,
+              "all_negatives_err": 0.9846153846153847
+            },
+            "5": {
+              "n_used": 78,
+              "n_skipped": 63,
+              "coverage": 0.5531914893617021,
+              "mean_negatives": 7.076923076923077,
+              "duel_err": 0.9801864801864801,
+              "all_negatives_err": 0.9871794871794872
+            },
+            "4": {
+              "n_used": 100,
+              "n_skipped": 41,
+              "coverage": 0.7092198581560284,
+              "mean_negatives": 6.4,
+              "duel_err": 0.9645411255411256,
+              "all_negatives_err": 0.98
+            }
+          },
+          "detection_rate": 0.33967391304347827,
+          "beat_by_category": {
+            "causality": 0.31333333333333335,
+            "entity": 0.37333333333333335,
+            "number": 0.3235294117647059
+          },
+          "beat_by_position": {
+            "0": 0.3393939393939394,
+            "1": 0.34074074074074073,
+            "2": 0.30714285714285716,
+            "3": 0.4178082191780822,
+            "4": 0.29333333333333333
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 1.0,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 46,
+              "n_skipped": 800,
+              "coverage": 0.054373522458628844,
+              "mean_negatives": 5.173913043478261,
+              "duel_err": 0.9130434782608696,
+              "all_negatives_err": 0.9130434782608696
+            },
+            "4": {
+              "n_used": 158,
+              "n_skipped": 688,
+              "coverage": 0.1867612293144208,
+              "mean_negatives": 4.341772151898734,
+              "duel_err": 0.8413502109704641,
+              "all_negatives_err": 0.8544303797468354
+            }
+          },
+          "detection_rate": 0.553580497714576,
+          "beat_by_category": {
+            "causality": 0.5660964230171073,
+            "entity": 0.5746887966804979,
+            "number": 0.47513812154696133
+          },
+          "beat_by_position": {
+            "0": 0.5538922155688623,
+            "1": 0.5532574974146846
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 405,
+              "coverage": 0.1346153846153846,
+              "mean_negatives": 6.4603174603174605,
+              "duel_err": 0.981859410430839,
+              "all_negatives_err": 0.9841269841269842
+            },
+            "5": {
+              "n_used": 127,
+              "n_skipped": 341,
+              "coverage": 0.27136752136752135,
+              "mean_negatives": 5.724409448818897,
+              "duel_err": 0.9516779152605924,
+              "all_negatives_err": 0.9606299212598425
+            },
+            "4": {
+              "n_used": 210,
+              "n_skipped": 258,
+              "coverage": 0.44871794871794873,
+              "mean_negatives": 5.042857142857143,
+              "duel_err": 0.9247694633408919,
+              "all_negatives_err": 0.9476190476190476
+            }
+          },
+          "detection_rate": 0.4555624611559975,
+          "beat_by_category": {
+            "causality": 0.48015122873345933,
+            "entity": 0.4607594936708861,
+            "number": 0.39655172413793105
+          },
+          "beat_by_position": {
+            "0": 0.4785714285714286,
+            "1": 0.43079922027290446,
+            "2": 0.4552238805970149
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 88,
+              "n_skipped": 188,
+              "coverage": 0.3188405797101449,
+              "mean_negatives": 7.0,
+              "duel_err": 0.9595508658008658,
+              "all_negatives_err": 0.9659090909090909
+            },
+            "5": {
+              "n_used": 134,
+              "n_skipped": 142,
+              "coverage": 0.4855072463768116,
+              "mean_negatives": 6.313432835820896,
+              "duel_err": 0.94143864013267,
+              "all_negatives_err": 0.9552238805970149
+            },
+            "4": {
+              "n_used": 188,
+              "n_skipped": 88,
+              "coverage": 0.6811594202898551,
+              "mean_negatives": 5.648936170212766,
+              "duel_err": 0.9328190721807743,
+              "all_negatives_err": 0.9574468085106383
+            }
+          },
+          "detection_rate": 0.3917525773195876,
+          "beat_by_category": {
+            "causality": 0.4405940594059406,
+            "entity": 0.37540453074433655,
+            "number": 0.3514644351464435
+          },
+          "beat_by_position": {
+            "0": 0.3875,
+            "1": 0.37987012987012986,
+            "2": 0.4262295081967213,
+            "3": 0.375
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 78,
+              "coverage": 0.44680851063829785,
+              "mean_negatives": 7.666666666666667,
+              "duel_err": 0.967257610114753,
+              "all_negatives_err": 0.9682539682539683
+            },
+            "5": {
+              "n_used": 83,
+              "n_skipped": 58,
+              "coverage": 0.5886524822695035,
+              "mean_negatives": 7.024096385542169,
+              "duel_err": 0.9732284114814236,
+              "all_negatives_err": 0.9759036144578314
+            },
+            "4": {
+              "n_used": 110,
+              "n_skipped": 31,
+              "coverage": 0.7801418439716312,
+              "mean_negatives": 6.281818181818182,
+              "duel_err": 0.9658980413525868,
+              "all_negatives_err": 0.9727272727272728
+            }
+          },
+          "detection_rate": 0.3468586387434555,
+          "beat_by_category": {
+            "causality": 0.39705882352941174,
+            "entity": 0.3269230769230769,
+            "number": 0.296875
+          },
+          "beat_by_position": {
+            "0": 0.3950617283950617,
+            "1": 0.33783783783783783,
+            "2": 0.3931034482758621,
+            "3": 0.33774834437086093,
+            "4": 0.2721518987341772
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.8629807692307693,
+              "all_negatives_err": 0.8629807692307693,
+              "coverage": 0.030437352245862883,
+              "n_used": 103,
+              "n_skipped": 3281
+            },
+            "5": {
+              "duel_err": 0.8423393514754317,
+              "all_negatives_err": 0.8460967796641464,
+              "coverage": 0.13504728132387706,
+              "n_used": 457,
+              "n_skipped": 2927
+            },
+            "4": {
+              "duel_err": 0.7911049819421999,
+              "all_negatives_err": 0.8059457393239865,
+              "coverage": 0.4066193853427896,
+              "n_used": 1376,
+              "n_skipped": 2008
+            }
+          },
+          "detection_rate": 0.5817504599985254,
+          "beat_by_category": {
+            "causality": 0.5592487965823214,
+            "entity": 0.6242637349420386,
+            "number": 0.5348259500743509
+          },
+          "beat_by_position": {
+            "0": 0.5848370975939875,
+            "1": 0.5785524419476662
+          }
+        },
+        "3": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9301576121693717,
+              "all_negatives_err": 0.9378106573181973,
+              "coverage": 0.3659188034188034,
+              "n_used": 685,
+              "n_skipped": 1187
+            },
+            "5": {
+              "duel_err": 0.9204608408837537,
+              "all_negatives_err": 0.9369523521098324,
+              "coverage": 0.4722222222222222,
+              "n_used": 884,
+              "n_skipped": 988
+            },
+            "4": {
+              "duel_err": 0.8790834227432069,
+              "all_negatives_err": 0.9131807428682428,
+              "coverage": 0.6047008547008548,
+              "n_used": 1132,
+              "n_skipped": 740
+            }
+          },
+          "detection_rate": 0.465904752553031,
+          "beat_by_category": {
+            "causality": 0.4469907993704732,
+            "entity": 0.4908100968649874,
+            "number": 0.4747230718783259
+          },
+          "beat_by_position": {
+            "0": 0.47914965810577315,
+            "1": 0.44913060416942097,
+            "2": 0.4678697229375036
+          }
+        },
+        "4": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9507787908117877,
+              "all_negatives_err": 0.9598175073718551,
+              "coverage": 0.5117753623188406,
+              "n_used": 565,
+              "n_skipped": 539
+            },
+            "5": {
+              "duel_err": 0.9414376294075337,
+              "all_negatives_err": 0.9581223952700266,
+              "coverage": 0.6313405797101449,
+              "n_used": 697,
+              "n_skipped": 407
+            },
+            "4": {
+              "duel_err": 0.9216974066465278,
+              "all_negatives_err": 0.9512754538983909,
+              "coverage": 0.7853260869565217,
+              "n_used": 867,
+              "n_skipped": 237
+            }
+          },
+          "detection_rate": 0.3934751124378869,
+          "beat_by_category": {
+            "causality": 0.383617169063183,
+            "entity": 0.41226733142572963,
+            "number": 0.4056818248166126
+          },
+          "beat_by_position": {
+            "0": 0.3944607124706578,
+            "1": 0.3879851561836856,
+            "2": 0.3990986420463584,
+            "3": 0.3923707699767739
+          }
+        },
+        "5": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9707657906057412,
+              "all_negatives_err": 0.9788423382173382,
+              "coverage": 0.6187943262411347,
+              "n_used": 349,
+              "n_skipped": 215
+            },
+            "5": {
+              "duel_err": 0.9629602116382063,
+              "all_negatives_err": 0.9764850611236154,
+              "coverage": 0.7216312056737589,
+              "n_used": 407,
+              "n_skipped": 157
+            },
+            "4": {
+              "duel_err": 0.9457770690059103,
+              "all_negatives_err": 0.9719216555801922,
+              "coverage": 0.8404255319148937,
+              "n_used": 474,
+              "n_skipped": 90
+            }
+          },
+          "detection_rate": 0.338019964608961,
+          "beat_by_category": {
+            "causality": 0.3340772359504815,
+            "entity": 0.3479372598122598,
+            "number": 0.3597057430926916
+          },
+          "beat_by_position": {
+            "0": 0.361750213640248,
+            "1": 0.33809651411168173,
+            "2": 0.3398343036274071,
+            "3": 0.35192677529583793,
+            "4": 0.297756589402159
+          }
+        }
+      }
+    },
+    "xlmr:xlm-roberta-large": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 78,
+              "n_skipped": 768,
+              "coverage": 0.09219858156028368,
+              "mean_negatives": 6.0,
+              "duel_err": 0.8846153846153846,
+              "all_negatives_err": 0.8846153846153846
+            },
+            "5": {
+              "n_used": 293,
+              "n_skipped": 553,
+              "coverage": 0.3463356973995272,
+              "mean_negatives": 5.266211604095563,
+              "duel_err": 0.8549488054607508,
+              "all_negatives_err": 0.863481228668942
+            },
+            "4": {
+              "n_used": 843,
+              "n_skipped": 3,
+              "coverage": 0.9964539007092199,
+              "mean_negatives": 4.440094899169632,
+              "duel_err": 0.8140767101621194,
+              "all_negatives_err": 0.8315539739027283
+            }
+          },
+          "detection_rate": 0.560501066098081,
+          "beat_by_category": {
+            "causality": 0.6128841607565012,
+            "entity": 0.5171800947867299,
+            "number": 0.5188172043010753
+          },
+          "beat_by_position": {
+            "0": 0.5597883597883598,
+            "1": 0.5612244897959183
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 466,
+              "n_skipped": 2,
+              "coverage": 0.9957264957264957,
+              "mean_negatives": 6.660944206008583,
+              "duel_err": 0.9189658696096464,
+              "all_negatives_err": 0.9291845493562232
+            },
+            "5": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.8931623931623932,
+              "all_negatives_err": 0.9273504273504274
+            },
+            "4": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.8557488807488808,
+              "all_negatives_err": 0.9273504273504274
+            }
+          },
+          "detection_rate": 0.5228002569043031,
+          "beat_by_category": {
+            "causality": 0.5747863247863247,
+            "entity": 0.470378301213419,
+            "number": 0.5242718446601942
+          },
+          "beat_by_position": {
+            "0": 0.5085714285714286,
+            "1": 0.511219512195122,
+            "2": 0.548604427333975
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9365769496204279,
+              "all_negatives_err": 0.9637681159420289
+            },
+            "5": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9161948156513374,
+              "all_negatives_err": 0.9637681159420289
+            },
+            "4": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.8832962126440388,
+              "all_negatives_err": 0.9637681159420289
+            }
+          },
+          "detection_rate": 0.49326805385556916,
+          "beat_by_category": {
+            "causality": 0.5507246376811594,
+            "entity": 0.4455535390199637,
+            "number": 0.4489795918367347
+          },
+          "beat_by_position": {
+            "0": 0.5153473344103393,
+            "1": 0.4526143790849673,
+            "2": 0.49673202614379086,
+            "3": 0.5082236842105263
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9426326628454288,
+              "all_negatives_err": 0.9858156028368794
+            },
+            "5": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9216016450059004,
+              "all_negatives_err": 0.9858156028368794
+            },
+            "4": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.8895935427850321,
+              "all_negatives_err": 0.9858156028368794
+            }
+          },
+          "detection_rate": 0.4646333549643089,
+          "beat_by_category": {
+            "causality": 0.5219858156028369,
+            "entity": 0.42329545454545453,
+            "number": 0.3787878787878788
+          },
+          "beat_by_position": {
+            "0": 0.5,
+            "1": 0.4234527687296417,
+            "2": 0.4448051948051948,
+            "3": 0.49032258064516127,
+            "4": 0.4642857142857143
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 9,
+              "n_skipped": 837,
+              "coverage": 0.010638297872340425,
+              "mean_negatives": 6.0,
+              "duel_err": 1.0,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 62,
+              "n_skipped": 784,
+              "coverage": 0.07328605200945626,
+              "mean_negatives": 5.145161290322581,
+              "duel_err": 0.9112903225806451,
+              "all_negatives_err": 0.9193548387096774
+            },
+            "4": {
+              "n_used": 220,
+              "n_skipped": 626,
+              "coverage": 0.26004728132387706,
+              "mean_negatives": 4.322727272727272,
+              "duel_err": 0.8484848484848485,
+              "all_negatives_err": 0.8636363636363636
+            }
+          },
+          "detection_rate": 0.5316001792917974,
+          "beat_by_category": {
+            "causality": 0.4793233082706767,
+            "entity": 0.5938650306748466,
+            "number": 0.5454545454545454
+          },
+          "beat_by_position": {
+            "0": 0.531896551724138,
+            "1": 0.5312791783380019
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 85,
+              "n_skipped": 383,
+              "coverage": 0.18162393162393162,
+              "mean_negatives": 6.4941176470588236,
+              "duel_err": 0.9330532212885154,
+              "all_negatives_err": 0.9411764705882353
+            },
+            "5": {
+              "n_used": 169,
+              "n_skipped": 299,
+              "coverage": 0.3611111111111111,
+              "mean_negatives": 5.7514792899408285,
+              "duel_err": 0.8946886446886446,
+              "all_negatives_err": 0.9112426035502958
+            },
+            "4": {
+              "n_used": 256,
+              "n_skipped": 212,
+              "coverage": 0.5470085470085471,
+              "mean_negatives": 5.15625,
+              "duel_err": 0.8676153273809524,
+              "all_negatives_err": 0.90234375
+            }
+          },
+          "detection_rate": 0.507446221731936,
+          "beat_by_category": {
+            "causality": 0.47635524798154555,
+            "entity": 0.5462822458270106,
+            "number": 0.5121951219512195
+          },
+          "beat_by_position": {
+            "0": 0.5232198142414861,
+            "1": 0.49732620320855614,
+            "2": 0.5
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 117,
+              "n_skipped": 159,
+              "coverage": 0.42391304347826086,
+              "mean_negatives": 7.256410256410256,
+              "duel_err": 0.9684981684981685,
+              "all_negatives_err": 0.9829059829059829
+            },
+            "5": {
+              "n_used": 162,
+              "n_skipped": 114,
+              "coverage": 0.5869565217391305,
+              "mean_negatives": 6.62962962962963,
+              "duel_err": 0.9364466980207721,
+              "all_negatives_err": 0.962962962962963
+            },
+            "4": {
+              "n_used": 228,
+              "n_skipped": 48,
+              "coverage": 0.8260869565217391,
+              "mean_negatives": 5.868421052631579,
+              "duel_err": 0.9003411306042886,
+              "all_negatives_err": 0.9429824561403509
+            }
+          },
+          "detection_rate": 0.49211788896504455,
+          "beat_by_category": {
+            "causality": 0.4822190611664296,
+            "entity": 0.5306513409961686,
+            "number": 0.4358974358974359
+          },
+          "beat_by_position": {
+            "0": 0.46547314578005117,
+            "1": 0.4791666666666667,
+            "2": 0.5153203342618384,
+            "3": 0.5093833780160858
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 80,
+              "n_skipped": 61,
+              "coverage": 0.5673758865248227,
+              "mean_negatives": 8.0125,
+              "duel_err": 0.9757575757575757,
+              "all_negatives_err": 0.9875
+            },
+            "5": {
+              "n_used": 105,
+              "n_skipped": 36,
+              "coverage": 0.7446808510638298,
+              "mean_negatives": 7.295238095238095,
+              "duel_err": 0.9593107950250808,
+              "all_negatives_err": 0.9809523809523809
+            },
+            "4": {
+              "n_used": 123,
+              "n_skipped": 18,
+              "coverage": 0.8723404255319149,
+              "mean_negatives": 6.813008130081301,
+              "duel_err": 0.9340970682434098,
+              "all_negatives_err": 0.975609756097561
+            }
+          },
+          "detection_rate": 0.4767309875141884,
+          "beat_by_category": {
+            "causality": 0.4923413566739606,
+            "entity": 0.47635135135135137,
+            "number": 0.421875
+          },
+          "beat_by_position": {
+            "0": 0.4587628865979381,
+            "1": 0.4539877300613497,
+            "2": 0.5056818181818182,
+            "3": 0.5388888888888889,
+            "4": 0.4226190476190476
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.875,
+              "all_negatives_err": 0.875
+            },
+            "5": {
+              "n_used": 56,
+              "n_skipped": 790,
+              "coverage": 0.06619385342789598,
+              "mean_negatives": 5.142857142857143,
+              "duel_err": 0.9107142857142857,
+              "all_negatives_err": 0.9107142857142857
+            },
+            "4": {
+              "n_used": 155,
+              "n_skipped": 691,
+              "coverage": 0.18321513002364065,
+              "mean_negatives": 4.412903225806452,
+              "duel_err": 0.8997849462365591,
+              "all_negatives_err": 0.9096774193548387
+            }
+          },
+          "detection_rate": 0.4625994694960212,
+          "beat_by_category": {
+            "causality": 0.4071942446043165,
+            "entity": 0.5061425061425061,
+            "number": 0.47074468085106386
+          },
+          "beat_by_position": {
+            "0": 0.46551724137931033,
+            "1": 0.4593993325917686
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 71,
+              "n_skipped": 397,
+              "coverage": 0.1517094017094017,
+              "mean_negatives": 6.47887323943662,
+              "duel_err": 0.9522132796780685,
+              "all_negatives_err": 0.9577464788732395
+            },
+            "5": {
+              "n_used": 120,
+              "n_skipped": 348,
+              "coverage": 0.2564102564102564,
+              "mean_negatives": 5.875,
+              "duel_err": 0.9278273809523809,
+              "all_negatives_err": 0.9416666666666667
+            },
+            "4": {
+              "n_used": 198,
+              "n_skipped": 270,
+              "coverage": 0.4230769230769231,
+              "mean_negatives": 5.136363636363637,
+              "duel_err": 0.9123857623857624,
+              "all_negatives_err": 0.9393939393939394
+            }
+          },
+          "detection_rate": 0.4378659726740403,
+          "beat_by_category": {
+            "causality": 0.37943262411347517,
+            "entity": 0.47218045112781953,
+            "number": 0.4707792207792208
+          },
+          "beat_by_position": {
+            "0": 0.4446397188049209,
+            "1": 0.4092827004219409,
+            "2": 0.4574898785425101
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 84,
+              "n_skipped": 192,
+              "coverage": 0.30434782608695654,
+              "mean_negatives": 7.2023809523809526,
+              "duel_err": 0.984369202226345,
+              "all_negatives_err": 0.9880952380952381
+            },
+            "5": {
+              "n_used": 125,
+              "n_skipped": 151,
+              "coverage": 0.4528985507246377,
+              "mean_negatives": 6.48,
+              "duel_err": 0.9715699855699855,
+              "all_negatives_err": 0.984
+            },
+            "4": {
+              "n_used": 175,
+              "n_skipped": 101,
+              "coverage": 0.6340579710144928,
+              "mean_negatives": 5.771428571428571,
+              "duel_err": 0.94946361574933,
+              "all_negatives_err": 0.9771428571428571
+            }
+          },
+          "detection_rate": 0.4098360655737705,
+          "beat_by_category": {
+            "causality": 0.34573304157549234,
+            "entity": 0.46966731898238745,
+            "number": 0.40476190476190477
+          },
+          "beat_by_position": {
+            "0": 0.4629080118694362,
+            "1": 0.37142857142857144,
+            "2": 0.3854166666666667,
+            "3": 0.4095238095238095
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 65,
+              "n_skipped": 76,
+              "coverage": 0.46099290780141844,
+              "mean_negatives": 7.492307692307692,
+              "duel_err": 0.9930835830835831,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 78,
+              "n_skipped": 63,
+              "coverage": 0.5531914893617021,
+              "mean_negatives": 7.076923076923077,
+              "duel_err": 0.9871586746586747,
+              "all_negatives_err": 1.0
+            },
+            "4": {
+              "n_used": 100,
+              "n_skipped": 41,
+              "coverage": 0.7092198581560284,
+              "mean_negatives": 6.4,
+              "duel_err": 0.975930735930736,
+              "all_negatives_err": 1.0
+            }
+          },
+          "detection_rate": 0.3736413043478261,
+          "beat_by_category": {
+            "causality": 0.36333333333333334,
+            "entity": 0.4166666666666667,
+            "number": 0.3014705882352941
+          },
+          "beat_by_position": {
+            "0": 0.4121212121212121,
+            "1": 0.34074074074074073,
+            "2": 0.35714285714285715,
+            "3": 0.4246575342465753,
+            "4": 0.32666666666666666
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 1.0,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 46,
+              "n_skipped": 800,
+              "coverage": 0.054373522458628844,
+              "mean_negatives": 5.173913043478261,
+              "duel_err": 0.9311594202898551,
+              "all_negatives_err": 0.9347826086956522
+            },
+            "4": {
+              "n_used": 158,
+              "n_skipped": 688,
+              "coverage": 0.1867612293144208,
+              "mean_negatives": 4.341772151898734,
+              "duel_err": 0.8978902953586498,
+              "all_negatives_err": 0.9050632911392404
+            }
+          },
+          "detection_rate": 0.4829862874555612,
+          "beat_by_category": {
+            "causality": 0.4401244167962675,
+            "entity": 0.5103734439834025,
+            "number": 0.4861878453038674
+          },
+          "beat_by_position": {
+            "0": 0.48602794411177647,
+            "1": 0.47983453981385726
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 405,
+              "coverage": 0.1346153846153846,
+              "mean_negatives": 6.4603174603174605,
+              "duel_err": 0.9606953892668179,
+              "all_negatives_err": 0.9682539682539683
+            },
+            "5": {
+              "n_used": 127,
+              "n_skipped": 341,
+              "coverage": 0.27136752136752135,
+              "mean_negatives": 5.724409448818897,
+              "duel_err": 0.9599268841394826,
+              "all_negatives_err": 0.9763779527559056
+            },
+            "4": {
+              "n_used": 210,
+              "n_skipped": 258,
+              "coverage": 0.44871794871794873,
+              "mean_negatives": 5.042857142857143,
+              "duel_err": 0.9344595616024187,
+              "all_negatives_err": 0.9619047619047619
+            }
+          },
+          "detection_rate": 0.43567433188315724,
+          "beat_by_category": {
+            "causality": 0.389413988657845,
+            "entity": 0.4569620253164557,
+            "number": 0.46206896551724136
+          },
+          "beat_by_position": {
+            "0": 0.45357142857142857,
+            "1": 0.4191033138401559,
+            "2": 0.43283582089552236
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 88,
+              "n_skipped": 188,
+              "coverage": 0.3188405797101449,
+              "mean_negatives": 7.0,
+              "duel_err": 0.9612996851633215,
+              "all_negatives_err": 0.9772727272727273
+            },
+            "5": {
+              "n_used": 134,
+              "n_skipped": 142,
+              "coverage": 0.4855072463768116,
+              "mean_negatives": 6.313432835820896,
+              "duel_err": 0.9531145678533738,
+              "all_negatives_err": 0.9776119402985075
+            },
+            "4": {
+              "n_used": 188,
+              "n_skipped": 88,
+              "coverage": 0.6811594202898551,
+              "mean_negatives": 5.648936170212766,
+              "duel_err": 0.9268359890700316,
+              "all_negatives_err": 0.9680851063829787
+            }
+          },
+          "detection_rate": 0.4655035685963521,
+          "beat_by_category": {
+            "causality": 0.44554455445544555,
+            "entity": 0.47249190938511326,
+            "number": 0.4811715481171548
+          },
+          "beat_by_position": {
+            "0": 0.48125,
+            "1": 0.4642857142857143,
+            "2": 0.419672131147541,
+            "3": 0.49390243902439024
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 78,
+              "coverage": 0.44680851063829785,
+              "mean_negatives": 7.666666666666667,
+              "duel_err": 0.973863702435131,
+              "all_negatives_err": 0.9841269841269842
+            },
+            "5": {
+              "n_used": 83,
+              "n_skipped": 58,
+              "coverage": 0.5886524822695035,
+              "mean_negatives": 7.024096385542169,
+              "duel_err": 0.9573338308278068,
+              "all_negatives_err": 0.9759036144578314
+            },
+            "4": {
+              "n_used": 110,
+              "n_skipped": 31,
+              "coverage": 0.7801418439716312,
+              "mean_negatives": 6.281818181818182,
+              "duel_err": 0.9216656071201526,
+              "all_negatives_err": 0.9545454545454546
+            }
+          },
+          "detection_rate": 0.4397905759162304,
+          "beat_by_category": {
+            "causality": 0.4338235294117647,
+            "entity": 0.45879120879120877,
+            "number": 0.3984375
+          },
+          "beat_by_position": {
+            "0": 0.5246913580246914,
+            "1": 0.3783783783783784,
+            "2": 0.35172413793103446,
+            "3": 0.423841059602649,
+            "4": 0.5063291139240507
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9399038461538461,
+              "all_negatives_err": 0.9399038461538461,
+              "coverage": 0.030437352245862883,
+              "n_used": 103,
+              "n_skipped": 3281
+            },
+            "5": {
+              "duel_err": 0.9020282085113841,
+              "all_negatives_err": 0.9070832404471393,
+              "coverage": 0.13504728132387706,
+              "n_used": 457,
+              "n_skipped": 2927
+            },
+            "4": {
+              "duel_err": 0.8650592000605443,
+              "all_negatives_err": 0.8774827620082928,
+              "coverage": 0.4066193853427896,
+              "n_used": 1376,
+              "n_skipped": 2008
+            }
+          },
+          "detection_rate": 0.5094217505853652,
+          "beat_by_category": {
+            "causality": 0.4848815326069405,
+            "entity": 0.5318902688968713,
+            "number": 0.5053010689776379
+          },
+          "beat_by_position": {
+            "0": 0.5108075242508961,
+            "1": 0.5079343851348865
+          }
+        },
+        "3": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9412319399607619,
+              "all_negatives_err": 0.9490903667679166,
+              "coverage": 0.3659188034188034,
+              "n_used": 685,
+              "n_skipped": 1187
+            },
+            "5": {
+              "duel_err": 0.9189013257357252,
+              "all_negatives_err": 0.9391594125808238,
+              "coverage": 0.4722222222222222,
+              "n_used": 884,
+              "n_skipped": 988
+            },
+            "4": {
+              "duel_err": 0.8925523830295036,
+              "all_negatives_err": 0.9327482196622823,
+              "coverage": 0.6047008547008548,
+              "n_used": 1132,
+              "n_skipped": 740
+            }
+          },
+          "detection_rate": 0.4759466957983592,
+          "beat_by_category": {
+            "causality": 0.4549970463847976,
+            "entity": 0.4864507558711762,
+            "number": 0.49232878822696896
+          },
+          "beat_by_position": {
+            "0": 0.48250059754731606,
+            "1": 0.4592329324164437,
+            "2": 0.48473253169300184
+          }
+        },
+        "4": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9626860013770657,
+              "all_negatives_err": 0.9780105160539942,
+              "coverage": 0.5117753623188406,
+              "n_used": 565,
+              "n_skipped": 539
+            },
+            "5": {
+              "duel_err": 0.9443315167738672,
+              "all_negatives_err": 0.9720857548008749,
+              "coverage": 0.6313405797101449,
+              "n_used": 697,
+              "n_skipped": 407
+            },
+            "4": {
+              "duel_err": 0.9149842370169222,
+              "all_negatives_err": 0.962994633902054,
+              "coverage": 0.7853260869565217,
+              "n_used": 867,
+              "n_skipped": 237
+            }
+          },
+          "detection_rate": 0.4651813942476841,
+          "beat_by_category": {
+            "causality": 0.45605532371963176,
+            "entity": 0.47959102709590823,
+            "number": 0.4427026201533076
+          },
+          "beat_by_position": {
+            "0": 0.4812446230149567,
+            "1": 0.44187383286647997,
+            "2": 0.4542852895549593,
+            "3": 0.48025832769370297
+          }
+        },
+        "5": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9713343810304297,
+              "all_negatives_err": 0.9893606467409659,
+              "coverage": 0.6187943262411347,
+              "n_used": 349,
+              "n_skipped": 215
+            },
+            "5": {
+              "duel_err": 0.9563512363793656,
+              "all_negatives_err": 0.9856678995617729,
+              "coverage": 0.7216312056737589,
+              "n_used": 407,
+              "n_skipped": 157
+            },
+            "4": {
+              "duel_err": 0.9303217385198326,
+              "all_negatives_err": 0.9789927033699738,
+              "coverage": 0.8404255319148937,
+              "n_used": 474,
+              "n_skipped": 90
+            }
+          },
+          "detection_rate": 0.43869905568563844,
+          "beat_by_category": {
+            "causality": 0.45287100875547387,
+            "entity": 0.44377617033867034,
+            "number": 0.3751427417557932
+          },
+          "beat_by_position": {
+            "0": 0.47389386418596036,
+            "1": 0.3991399044775277,
+            "2": 0.4148385020152262,
+            "3": 0.4694275158458186,
+            "4": 0.4299751356238698
+          }
+        }
+      }
+    },
+    "labse": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 78,
+              "n_skipped": 768,
+              "coverage": 0.09219858156028368,
+              "mean_negatives": 6.0,
+              "duel_err": 0.39743589743589747,
+              "all_negatives_err": 0.39743589743589747
+            },
+            "5": {
+              "n_used": 293,
+              "n_skipped": 553,
+              "coverage": 0.3463356973995272,
+              "mean_negatives": 5.266211604095563,
+              "duel_err": 0.37315130830489196,
+              "all_negatives_err": 0.38566552901023887
+            },
+            "4": {
+              "n_used": 843,
+              "n_skipped": 3,
+              "coverage": 0.9964539007092199,
+              "mean_negatives": 4.440094899169632,
+              "duel_err": 0.31016211941478844,
+              "all_negatives_err": 0.3345195729537367
+            }
+          },
+          "detection_rate": 0.9037846481876333,
+          "beat_by_category": {
+            "causality": 0.857565011820331,
+            "entity": 0.931872037914692,
+            "number": 0.9865591397849462
+          },
+          "beat_by_position": {
+            "0": 0.9079365079365079,
+            "1": 0.8995703544575725
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 466,
+              "n_skipped": 2,
+              "coverage": 0.9957264957264957,
+              "mean_negatives": 6.660944206008583,
+              "duel_err": 0.5761291641119968,
+              "all_negatives_err": 0.6072961373390557
+            },
+            "5": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.5207570207570208,
+              "all_negatives_err": 0.6068376068376069
+            },
+            "4": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.45367657034323705,
+              "all_negatives_err": 0.6068376068376069
+            }
+          },
+          "detection_rate": 0.8519588953114965,
+          "beat_by_category": {
+            "causality": 0.7905982905982906,
+            "entity": 0.8850820842255531,
+            "number": 0.9805825242718447
+          },
+          "beat_by_position": {
+            "0": 0.8704761904761905,
+            "1": 0.8536585365853658,
+            "2": 0.8315688161693936
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.660773887947801,
+              "all_negatives_err": 0.7717391304347826
+            },
+            "5": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.6050874950331473,
+              "all_negatives_err": 0.7717391304347826
+            },
+            "4": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.5349457305979045,
+              "all_negatives_err": 0.7717391304347826
+            }
+          },
+          "detection_rate": 0.813953488372093,
+          "beat_by_category": {
+            "causality": 0.7490942028985508,
+            "entity": 0.8448275862068966,
+            "number": 0.9673469387755103
+          },
+          "beat_by_position": {
+            "0": 0.840064620355412,
+            "1": 0.8284313725490197,
+            "2": 0.7630718954248366,
+            "3": 0.8240131578947368
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.7339339147849786,
+              "all_negatives_err": 0.8794326241134752
+            },
+            "5": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.6830195021684384,
+              "all_negatives_err": 0.8794326241134752
+            },
+            "4": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.617373091841177,
+              "all_negatives_err": 0.8794326241134752
+            }
+          },
+          "detection_rate": 0.7611940298507462,
+          "beat_by_category": {
+            "causality": 0.6836879432624113,
+            "entity": 0.7982954545454546,
+            "number": 0.9772727272727273
+          },
+          "beat_by_position": {
+            "0": 0.8051948051948052,
+            "1": 0.7850162866449512,
+            "2": 0.7402597402597403,
+            "3": 0.7258064516129032,
+            "4": 0.75
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 9,
+              "n_skipped": 837,
+              "coverage": 0.010638297872340425,
+              "mean_negatives": 6.0,
+              "duel_err": 0.11111111111111116,
+              "all_negatives_err": 0.11111111111111116
+            },
+            "5": {
+              "n_used": 62,
+              "n_skipped": 784,
+              "coverage": 0.07328605200945626,
+              "mean_negatives": 5.145161290322581,
+              "duel_err": 0.22311827956989239,
+              "all_negatives_err": 0.22580645161290325
+            },
+            "4": {
+              "n_used": 220,
+              "n_skipped": 626,
+              "coverage": 0.26004728132387706,
+              "mean_negatives": 4.322727272727272,
+              "duel_err": 0.21484848484848473,
+              "all_negatives_err": 0.2272727272727273
+            }
+          },
+          "detection_rate": 0.9417301658449126,
+          "beat_by_category": {
+            "causality": 0.8834586466165414,
+            "entity": 0.9938650306748467,
+            "number": 0.9971590909090909
+          },
+          "beat_by_position": {
+            "0": 0.9525862068965517,
+            "1": 0.9299719887955182
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 85,
+              "n_skipped": 383,
+              "coverage": 0.18162393162393162,
+              "mean_negatives": 6.4941176470588236,
+              "duel_err": 0.3092436974789916,
+              "all_negatives_err": 0.3294117647058824
+            },
+            "5": {
+              "n_used": 169,
+              "n_skipped": 299,
+              "coverage": 0.3611111111111111,
+              "mean_negatives": 5.7514792899408285,
+              "duel_err": 0.30205691744153274,
+              "all_negatives_err": 0.33136094674556216
+            },
+            "4": {
+              "n_used": 256,
+              "n_skipped": 212,
+              "coverage": 0.5470085470085471,
+              "mean_negatives": 5.15625,
+              "duel_err": 0.25632440476190477,
+              "all_negatives_err": 0.30859375
+            }
+          },
+          "detection_rate": 0.9128516271373415,
+          "beat_by_category": {
+            "causality": 0.8350634371395617,
+            "entity": 0.9802731411229135,
+            "number": 0.9930313588850174
+          },
+          "beat_by_position": {
+            "0": 0.9427244582043344,
+            "1": 0.9073083778966132,
+            "2": 0.8861386138613861
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 117,
+              "n_skipped": 159,
+              "coverage": 0.42391304347826086,
+              "mean_negatives": 7.256410256410256,
+              "duel_err": 0.34436304436304443,
+              "all_negatives_err": 0.3931623931623932
+            },
+            "5": {
+              "n_used": 162,
+              "n_skipped": 114,
+              "coverage": 0.5869565217391305,
+              "mean_negatives": 6.62962962962963,
+              "duel_err": 0.35034538506760726,
+              "all_negatives_err": 0.4135802469135802
+            },
+            "4": {
+              "n_used": 228,
+              "n_skipped": 48,
+              "coverage": 0.8260869565217391,
+              "mean_negatives": 5.868421052631579,
+              "duel_err": 0.3488164856585909,
+              "all_negatives_err": 0.4298245614035088
+            }
+          },
+          "detection_rate": 0.8937628512679918,
+          "beat_by_category": {
+            "causality": 0.8008534850640113,
+            "entity": 0.975095785440613,
+            "number": 0.9914529914529915
+          },
+          "beat_by_position": {
+            "0": 0.9360613810741688,
+            "1": 0.9047619047619048,
+            "2": 0.871866295264624,
+            "3": 0.8605898123324397
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 80,
+              "n_skipped": 61,
+              "coverage": 0.5673758865248227,
+              "mean_negatives": 8.0125,
+              "duel_err": 0.5528544372294373,
+              "all_negatives_err": 0.6375
+            },
+            "5": {
+              "n_used": 105,
+              "n_skipped": 36,
+              "coverage": 0.7446808510638298,
+              "mean_negatives": 7.295238095238095,
+              "duel_err": 0.506708238851096,
+              "all_negatives_err": 0.6095238095238096
+            },
+            "4": {
+              "n_used": 123,
+              "n_skipped": 18,
+              "coverage": 0.8723404255319149,
+              "mean_negatives": 6.813008130081301,
+              "duel_err": 0.4480977017562384,
+              "all_negatives_err": 0.5853658536585367
+            }
+          },
+          "detection_rate": 0.8524404086265607,
+          "beat_by_category": {
+            "causality": 0.7527352297592997,
+            "entity": 0.956081081081081,
+            "number": 0.96875
+          },
+          "beat_by_position": {
+            "0": 0.9072164948453608,
+            "1": 0.8588957055214724,
+            "2": 0.8465909090909091,
+            "3": 0.8555555555555555,
+            "4": 0.7857142857142857
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.5,
+              "all_negatives_err": 0.5
+            },
+            "5": {
+              "n_used": 56,
+              "n_skipped": 790,
+              "coverage": 0.06619385342789598,
+              "mean_negatives": 5.142857142857143,
+              "duel_err": 0.2767857142857143,
+              "all_negatives_err": 0.2857142857142857
+            },
+            "4": {
+              "n_used": 155,
+              "n_skipped": 691,
+              "coverage": 0.18321513002364065,
+              "mean_negatives": 4.412903225806452,
+              "duel_err": 0.2116129032258065,
+              "all_negatives_err": 0.23225806451612907
+            }
+          },
+          "detection_rate": 0.9374005305039788,
+          "beat_by_category": {
+            "causality": 0.8589928057553957,
+            "entity": 0.984029484029484,
+            "number": 0.9813829787234043
+          },
+          "beat_by_position": {
+            "0": 0.9543610547667343,
+            "1": 0.9187986651835373
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 71,
+              "n_skipped": 397,
+              "coverage": 0.1517094017094017,
+              "mean_negatives": 6.47887323943662,
+              "duel_err": 0.43309859154929575,
+              "all_negatives_err": 0.45070422535211263
+            },
+            "5": {
+              "n_used": 120,
+              "n_skipped": 348,
+              "coverage": 0.2564102564102564,
+              "mean_negatives": 5.875,
+              "duel_err": 0.32341269841269826,
+              "all_negatives_err": 0.3583333333333333
+            },
+            "4": {
+              "n_used": 198,
+              "n_skipped": 270,
+              "coverage": 0.4230769230769231,
+              "mean_negatives": 5.136363636363637,
+              "duel_err": 0.25962000962000975,
+              "all_negatives_err": 0.30808080808080807
+            }
+          },
+          "detection_rate": 0.8939492517891997,
+          "beat_by_category": {
+            "causality": 0.7606382978723404,
+            "entity": 0.9669172932330827,
+            "number": 0.9805194805194806
+          },
+          "beat_by_position": {
+            "0": 0.9121265377855887,
+            "1": 0.8924050632911392,
+            "2": 0.8744939271255061
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 84,
+              "n_skipped": 192,
+              "coverage": 0.30434782608695654,
+              "mean_negatives": 7.2023809523809526,
+              "duel_err": 0.399649556792414,
+              "all_negatives_err": 0.45238095238095233
+            },
+            "5": {
+              "n_used": 125,
+              "n_skipped": 151,
+              "coverage": 0.4528985507246377,
+              "mean_negatives": 6.48,
+              "duel_err": 0.37377056277056275,
+              "all_negatives_err": 0.43999999999999995
+            },
+            "4": {
+              "n_used": 175,
+              "n_skipped": 101,
+              "coverage": 0.6340579710144928,
+              "mean_negatives": 5.771428571428571,
+              "duel_err": 0.350679859822717,
+              "all_negatives_err": 0.43999999999999995
+            }
+          },
+          "detection_rate": 0.8844262295081967,
+          "beat_by_category": {
+            "causality": 0.7439824945295405,
+            "entity": 0.9628180039138943,
+            "number": 0.9801587301587301
+          },
+          "beat_by_position": {
+            "0": 0.9080118694362018,
+            "1": 0.8821428571428571,
+            "2": 0.875,
+            "3": 0.8698412698412699
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 65,
+              "n_skipped": 76,
+              "coverage": 0.46099290780141844,
+              "mean_negatives": 7.492307692307692,
+              "duel_err": 0.5656177156177156,
+              "all_negatives_err": 0.6153846153846154
+            },
+            "5": {
+              "n_used": 78,
+              "n_skipped": 63,
+              "coverage": 0.5531914893617021,
+              "mean_negatives": 7.076923076923077,
+              "duel_err": 0.5161944536944537,
+              "all_negatives_err": 0.6025641025641026
+            },
+            "4": {
+              "n_used": 100,
+              "n_skipped": 41,
+              "coverage": 0.7092198581560284,
+              "mean_negatives": 6.4,
+              "duel_err": 0.47173015873015867,
+              "all_negatives_err": 0.5900000000000001
+            }
+          },
+          "detection_rate": 0.845108695652174,
+          "beat_by_category": {
+            "causality": 0.69,
+            "entity": 0.9533333333333334,
+            "number": 0.9485294117647058
+          },
+          "beat_by_position": {
+            "0": 0.8787878787878788,
+            "1": 0.8518518518518519,
+            "2": 0.8571428571428571,
+            "3": 0.8698630136986302,
+            "4": 0.7666666666666667
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.25,
+              "all_negatives_err": 0.25
+            },
+            "5": {
+              "n_used": 46,
+              "n_skipped": 800,
+              "coverage": 0.054373522458628844,
+              "mean_negatives": 5.173913043478261,
+              "duel_err": 0.3659420289855072,
+              "all_negatives_err": 0.3695652173913043
+            },
+            "4": {
+              "n_used": 158,
+              "n_skipped": 688,
+              "coverage": 0.1867612293144208,
+              "mean_negatives": 4.341772151898734,
+              "duel_err": 0.330379746835443,
+              "all_negatives_err": 0.3481012658227848
+            }
+          },
+          "detection_rate": 0.9090909090909091,
+          "beat_by_category": {
+            "causality": 0.8055987558320373,
+            "entity": 0.9481327800829875,
+            "number": 0.988950276243094
+          },
+          "beat_by_position": {
+            "0": 0.9211576846307385,
+            "1": 0.8965873836608066
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 405,
+              "coverage": 0.1346153846153846,
+              "mean_negatives": 6.4603174603174605,
+              "duel_err": 0.5597127739984883,
+              "all_negatives_err": 0.5873015873015873
+            },
+            "5": {
+              "n_used": 127,
+              "n_skipped": 341,
+              "coverage": 0.27136752136752135,
+              "mean_negatives": 5.724409448818897,
+              "duel_err": 0.49557867766529184,
+              "all_negatives_err": 0.5433070866141732
+            },
+            "4": {
+              "n_used": 210,
+              "n_skipped": 258,
+              "coverage": 0.44871794871794873,
+              "mean_negatives": 5.042857142857143,
+              "duel_err": 0.37151171579743014,
+              "all_negatives_err": 0.4476190476190476
+            }
+          },
+          "detection_rate": 0.867619639527657,
+          "beat_by_category": {
+            "causality": 0.7277882797731569,
+            "entity": 0.9265822784810127,
+            "number": 0.9620689655172414
+          },
+          "beat_by_position": {
+            "0": 0.9035714285714286,
+            "1": 0.8635477582846004,
+            "2": 0.8339552238805971
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 88,
+              "n_skipped": 188,
+              "coverage": 0.3188405797101449,
+              "mean_negatives": 7.0,
+              "duel_err": 0.6465392561983472,
+              "all_negatives_err": 0.7159090909090908
+            },
+            "5": {
+              "n_used": 134,
+              "n_skipped": 142,
+              "coverage": 0.4855072463768116,
+              "mean_negatives": 6.313432835820896,
+              "duel_err": 0.5611391096465723,
+              "all_negatives_err": 0.6567164179104478
+            },
+            "4": {
+              "n_used": 188,
+              "n_skipped": 88,
+              "coverage": 0.6811594202898551,
+              "mean_negatives": 5.648936170212766,
+              "duel_err": 0.4969950262503454,
+              "all_negatives_err": 0.6223404255319149
+            }
+          },
+          "detection_rate": 0.838223632038065,
+          "beat_by_category": {
+            "causality": 0.6658415841584159,
+            "entity": 0.9077669902912622,
+            "number": 0.9497907949790795
+          },
+          "beat_by_position": {
+            "0": 0.8875,
+            "1": 0.8376623376623377,
+            "2": 0.8131147540983606,
+            "3": 0.8140243902439024
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 78,
+              "coverage": 0.44680851063829785,
+              "mean_negatives": 7.666666666666667,
+              "duel_err": 0.706834435405864,
+              "all_negatives_err": 0.7777777777777778
+            },
+            "5": {
+              "n_used": 83,
+              "n_skipped": 58,
+              "coverage": 0.5886524822695035,
+              "mean_negatives": 7.024096385542169,
+              "duel_err": 0.6592421968927993,
+              "all_negatives_err": 0.7590361445783133
+            },
+            "4": {
+              "n_used": 110,
+              "n_skipped": 31,
+              "coverage": 0.7801418439716312,
+              "mean_negatives": 6.281818181818182,
+              "duel_err": 0.5884355038900493,
+              "all_negatives_err": 0.7181818181818183
+            }
+          },
+          "detection_rate": 0.7866492146596858,
+          "beat_by_category": {
+            "causality": 0.625,
+            "entity": 0.8571428571428571,
+            "number": 0.9296875
+          },
+          "beat_by_position": {
+            "0": 0.8395061728395061,
+            "1": 0.831081081081081,
+            "2": 0.7586206896551724,
+            "3": 0.7549668874172185,
+            "4": 0.7468354430379747
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.31463675213675213,
+              "all_negatives_err": 0.31463675213675213,
+              "coverage": 0.030437352245862883,
+              "n_used": 103,
+              "n_skipped": 3281
+            },
+            "5": {
+              "duel_err": 0.30974933278650146,
+              "all_negatives_err": 0.31668787093218304,
+              "coverage": 0.13504728132387706,
+              "n_used": 457,
+              "n_skipped": 2927
+            },
+            "4": {
+              "duel_err": 0.2667508135811307,
+              "all_negatives_err": 0.28553790764134446,
+              "coverage": 0.4066193853427896,
+              "n_used": 1376,
+              "n_skipped": 2008
+            }
+          },
+          "detection_rate": 0.9230015634068585,
+          "beat_by_category": {
+            "causality": 0.8514038050060763,
+            "entity": 0.9644748331755026,
+            "number": 0.9885128714151339
+          },
+          "beat_by_position": {
+            "0": 0.9340103635576331,
+            "1": 0.9112320980243587
+          }
+        },
+        "3": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.4695460567846931,
+              "all_negatives_err": 0.4936784286746595,
+              "coverage": 0.3659188034188034,
+              "n_used": 685,
+              "n_skipped": 1187
+            },
+            "5": {
+              "duel_err": 0.4104513285691359,
+              "all_negatives_err": 0.4599597433826689,
+              "coverage": 0.4722222222222222,
+              "n_used": 884,
+              "n_skipped": 988
+            },
+            "4": {
+              "duel_err": 0.33528317513064543,
+              "all_negatives_err": 0.4177828031343656,
+              "coverage": 0.6047008547008548,
+              "n_used": 1132,
+              "n_skipped": 740
+            }
+          },
+          "detection_rate": 0.8815948534414236,
+          "beat_by_category": {
+            "causality": 0.7785220763458374,
+            "entity": 0.9397136992656405,
+            "number": 0.9790505822983961
+          },
+          "beat_by_position": {
+            "0": 0.9072246537593855,
+            "1": 0.8792299340144297,
+            "2": 0.8565391452592208
+          }
+        },
+        "4": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.5128314363254016,
+              "all_negatives_err": 0.5832978917218048,
+              "coverage": 0.5117753623188406,
+              "n_used": 565,
+              "n_skipped": 539
+            },
+            "5": {
+              "duel_err": 0.4725856381294724,
+              "all_negatives_err": 0.5705089488147026,
+              "coverage": 0.6313405797101449,
+              "n_used": 697,
+              "n_skipped": 407
+            },
+            "4": {
+              "duel_err": 0.43285927558238946,
+              "all_negatives_err": 0.5659760293425515,
+              "coverage": 0.7853260869565217,
+              "n_used": 867,
+              "n_skipped": 237
+            }
+          },
+          "detection_rate": 0.8575915502965867,
+          "beat_by_category": {
+            "causality": 0.7399429416626295,
+            "entity": 0.9226270914631665,
+            "number": 0.9721873638415779
+          },
+          "beat_by_position": {
+            "0": 0.8929094677164457,
+            "1": 0.8632496180290298,
+            "2": 0.8307632361969554,
+            "3": 0.8421171575780871
+          }
+        },
+        "5": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.6398101257594988,
+              "all_negatives_err": 0.7275237543189671,
+              "coverage": 0.6187943262411347,
+              "n_used": 349,
+              "n_skipped": 215
+            },
+            "5": {
+              "duel_err": 0.5912910979016969,
+              "all_negatives_err": 0.7126391701949252,
+              "coverage": 0.7216312056737589,
+              "n_used": 407,
+              "n_skipped": 157
+            },
+            "4": {
+              "duel_err": 0.5314091140544058,
+              "all_negatives_err": 0.6932450739884576,
+              "coverage": 0.8404255319148937,
+              "n_used": 474,
+              "n_skipped": 90
+            }
+          },
+          "detection_rate": 0.8113480871972917,
+          "beat_by_category": {
+            "causality": 0.6878557932554278,
+            "entity": 0.8912131815256815,
+            "number": 0.9560599097593583
+          },
+          "beat_by_position": {
+            "0": 0.8576763379168877,
+            "1": 0.8317112312748391,
+            "2": 0.8006535490371698,
+            "3": 0.8015479770710768,
+            "4": 0.7623040988547317
+          }
+        }
+      }
+    },
+    "e5:multilingual-e5-base": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 78,
+              "n_skipped": 768,
+              "coverage": 0.09219858156028368,
+              "mean_negatives": 6.0,
+              "duel_err": 0.23076923076923073,
+              "all_negatives_err": 0.23076923076923073
+            },
+            "5": {
+              "n_used": 293,
+              "n_skipped": 553,
+              "coverage": 0.3463356973995272,
+              "mean_negatives": 5.266211604095563,
+              "duel_err": 0.24459613196814567,
+              "all_negatives_err": 0.2525597269624573
+            },
+            "4": {
+              "n_used": 843,
+              "n_skipped": 3,
+              "coverage": 0.9964539007092199,
+              "mean_negatives": 4.440094899169632,
+              "duel_err": 0.24278370897587986,
+              "all_negatives_err": 0.25978647686832745
+            }
+          },
+          "detection_rate": 0.9344349680170576,
+          "beat_by_category": {
+            "causality": 0.8894799054373522,
+            "entity": 0.9674170616113744,
+            "number": 0.989247311827957
+          },
+          "beat_by_position": {
+            "0": 0.9317460317460318,
+            "1": 0.9371643394199786
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 466,
+              "n_skipped": 2,
+              "coverage": 0.9957264957264957,
+              "mean_negatives": 6.660944206008583,
+              "duel_err": 0.4199366441855711,
+              "all_negatives_err": 0.43991416309012876
+            },
+            "5": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.37553418803418803,
+              "all_negatives_err": 0.43803418803418803
+            },
+            "4": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.32468796635463315,
+              "all_negatives_err": 0.43803418803418803
+            }
+          },
+          "detection_rate": 0.8972382787411689,
+          "beat_by_category": {
+            "causality": 0.8304843304843305,
+            "entity": 0.9507494646680942,
+            "number": 0.9579288025889967
+          },
+          "beat_by_position": {
+            "0": 0.8961904761904762,
+            "1": 0.9024390243902439,
+            "2": 0.8931665062560153
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.5589646464646465,
+              "all_negatives_err": 0.677536231884058
+            },
+            "5": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.5029049553506075,
+              "all_negatives_err": 0.677536231884058
+            },
+            "4": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.4365518539431583,
+              "all_negatives_err": 0.677536231884058
+            }
+          },
+          "detection_rate": 0.857609139126887,
+          "beat_by_category": {
+            "causality": 0.7536231884057971,
+            "entity": 0.9428312159709619,
+            "number": 0.9428571428571428
+          },
+          "beat_by_position": {
+            "0": 0.8594507269789984,
+            "1": 0.8774509803921569,
+            "2": 0.8316993464052288,
+            "3": 0.8618421052631579
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.5986137975499678,
+              "all_negatives_err": 0.7730496453900709
+            },
+            "5": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.5477136142029759,
+              "all_negatives_err": 0.7730496453900709
+            },
+            "4": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.4866201568329228,
+              "all_negatives_err": 0.7730496453900709
+            }
+          },
+          "detection_rate": 0.81765087605451,
+          "beat_by_category": {
+            "causality": 0.7021276595744681,
+            "entity": 0.9147727272727273,
+            "number": 0.9166666666666666
+          },
+          "beat_by_position": {
+            "0": 0.8376623376623377,
+            "1": 0.8371335504885994,
+            "2": 0.7954545454545454,
+            "3": 0.8193548387096774,
+            "4": 0.7987012987012987
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 9,
+              "n_skipped": 837,
+              "coverage": 0.010638297872340425,
+              "mean_negatives": 6.0,
+              "duel_err": 0.33333333333333337,
+              "all_negatives_err": 0.33333333333333337
+            },
+            "5": {
+              "n_used": 62,
+              "n_skipped": 784,
+              "coverage": 0.07328605200945626,
+              "mean_negatives": 5.145161290322581,
+              "duel_err": 0.2822580645161291,
+              "all_negatives_err": 0.29032258064516125
+            },
+            "4": {
+              "n_used": 220,
+              "n_skipped": 626,
+              "coverage": 0.26004728132387706,
+              "mean_negatives": 4.322727272727272,
+              "duel_err": 0.2300000000000001,
+              "all_negatives_err": 0.24545454545454548
+            }
+          },
+          "detection_rate": 0.924697445091887,
+          "beat_by_category": {
+            "causality": 0.8515037593984962,
+            "entity": 0.992638036809816,
+            "number": 0.9886363636363636
+          },
+          "beat_by_position": {
+            "0": 0.9267241379310345,
+            "1": 0.9225023342670402
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 85,
+              "n_skipped": 383,
+              "coverage": 0.18162393162393162,
+              "mean_negatives": 6.4941176470588236,
+              "duel_err": 0.3701680672268908,
+              "all_negatives_err": 0.388235294117647
+            },
+            "5": {
+              "n_used": 169,
+              "n_skipped": 299,
+              "coverage": 0.3611111111111111,
+              "mean_negatives": 5.7514792899408285,
+              "duel_err": 0.26968864468864473,
+              "all_negatives_err": 0.30177514792899407
+            },
+            "4": {
+              "n_used": 256,
+              "n_skipped": 212,
+              "coverage": 0.5470085470085471,
+              "mean_negatives": 5.15625,
+              "duel_err": 0.27739955357142865,
+              "all_negatives_err": 0.328125
+            }
+          },
+          "detection_rate": 0.8996138996138996,
+          "beat_by_category": {
+            "causality": 0.8004613610149942,
+            "entity": 0.992412746585736,
+            "number": 0.9860627177700348
+          },
+          "beat_by_position": {
+            "0": 0.9117647058823529,
+            "1": 0.8894830659536542,
+            "2": 0.8960396039603961
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 117,
+              "n_skipped": 159,
+              "coverage": 0.42391304347826086,
+              "mean_negatives": 7.256410256410256,
+              "duel_err": 0.40516890516890525,
+              "all_negatives_err": 0.45299145299145294
+            },
+            "5": {
+              "n_used": 162,
+              "n_skipped": 114,
+              "coverage": 0.5869565217391305,
+              "mean_negatives": 6.62962962962963,
+              "duel_err": 0.4038555751518714,
+              "all_negatives_err": 0.4691358024691358
+            },
+            "4": {
+              "n_used": 228,
+              "n_skipped": 48,
+              "coverage": 0.8260869565217391,
+              "mean_negatives": 5.868421052631579,
+              "duel_err": 0.40136452241715403,
+              "all_negatives_err": 0.49122807017543857
+            }
+          },
+          "detection_rate": 0.8752570253598355,
+          "beat_by_category": {
+            "causality": 0.7581792318634424,
+            "entity": 0.9865900383141762,
+            "number": 0.9786324786324786
+          },
+          "beat_by_position": {
+            "0": 0.8797953964194374,
+            "1": 0.8898809523809523,
+            "2": 0.8607242339832869,
+            "3": 0.871313672922252
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 80,
+              "n_skipped": 61,
+              "coverage": 0.5673758865248227,
+              "mean_negatives": 8.0125,
+              "duel_err": 0.6136038961038961,
+              "all_negatives_err": 0.7
+            },
+            "5": {
+              "n_used": 105,
+              "n_skipped": 36,
+              "coverage": 0.7446808510638298,
+              "mean_negatives": 7.295238095238095,
+              "duel_err": 0.5671270528413386,
+              "all_negatives_err": 0.6857142857142857
+            },
+            "4": {
+              "n_used": 123,
+              "n_skipped": 18,
+              "coverage": 0.8723404255319149,
+              "mean_negatives": 6.813008130081301,
+              "duel_err": 0.48040450967280235,
+              "all_negatives_err": 0.6504065040650406
+            }
+          },
+          "detection_rate": 0.8444948921679909,
+          "beat_by_category": {
+            "causality": 0.7286652078774617,
+            "entity": 0.972972972972973,
+            "number": 0.9609375
+          },
+          "beat_by_position": {
+            "0": 0.8969072164948454,
+            "1": 0.8588957055214724,
+            "2": 0.8181818181818182,
+            "3": 0.8,
+            "4": 0.8452380952380952
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.625,
+              "all_negatives_err": 0.625
+            },
+            "5": {
+              "n_used": 56,
+              "n_skipped": 790,
+              "coverage": 0.06619385342789598,
+              "mean_negatives": 5.142857142857143,
+              "duel_err": 0.25297619047619047,
+              "all_negatives_err": 0.2678571428571429
+            },
+            "4": {
+              "n_used": 155,
+              "n_skipped": 691,
+              "coverage": 0.18321513002364065,
+              "mean_negatives": 4.412903225806452,
+              "duel_err": 0.1711827956989247,
+              "all_negatives_err": 0.19354838709677424
+            }
+          },
+          "detection_rate": 0.9389920424403183,
+          "beat_by_category": {
+            "causality": 0.8532374100719424,
+            "entity": 0.9926289926289926,
+            "number": 0.9813829787234043
+          },
+          "beat_by_position": {
+            "0": 0.936105476673428,
+            "1": 0.9421579532814238
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 71,
+              "n_skipped": 397,
+              "coverage": 0.1517094017094017,
+              "mean_negatives": 6.47887323943662,
+              "duel_err": 0.4517102615694164,
+              "all_negatives_err": 0.49295774647887325
+            },
+            "5": {
+              "n_used": 120,
+              "n_skipped": 348,
+              "coverage": 0.2564102564102564,
+              "mean_negatives": 5.875,
+              "duel_err": 0.335813492063492,
+              "all_negatives_err": 0.4
+            },
+            "4": {
+              "n_used": 198,
+              "n_skipped": 270,
+              "coverage": 0.4230769230769231,
+              "mean_negatives": 5.136363636363637,
+              "duel_err": 0.2521164021164022,
+              "all_negatives_err": 0.3282828282828283
+            }
+          },
+          "detection_rate": 0.9089134677944047,
+          "beat_by_category": {
+            "causality": 0.7943262411347518,
+            "entity": 0.9774436090225563,
+            "number": 0.9707792207792207
+          },
+          "beat_by_position": {
+            "0": 0.9138840070298769,
+            "1": 0.9113924050632911,
+            "2": 0.9008097165991903
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 84,
+              "n_skipped": 192,
+              "coverage": 0.30434782608695654,
+              "mean_negatives": 7.2023809523809526,
+              "duel_err": 0.40918367346938767,
+              "all_negatives_err": 0.4642857142857143
+            },
+            "5": {
+              "n_used": 125,
+              "n_skipped": 151,
+              "coverage": 0.4528985507246377,
+              "mean_negatives": 6.48,
+              "duel_err": 0.36069841269841263,
+              "all_negatives_err": 0.43200000000000005
+            },
+            "4": {
+              "n_used": 175,
+              "n_skipped": 101,
+              "coverage": 0.6340579710144928,
+              "mean_negatives": 5.771428571428571,
+              "duel_err": 0.3192199546485259,
+              "all_negatives_err": 0.4114285714285715
+            }
+          },
+          "detection_rate": 0.8836065573770492,
+          "beat_by_category": {
+            "causality": 0.75054704595186,
+            "entity": 0.974559686888454,
+            "number": 0.9404761904761905
+          },
+          "beat_by_position": {
+            "0": 0.8961424332344213,
+            "1": 0.8928571428571429,
+            "2": 0.8854166666666666,
+            "3": 0.8603174603174604
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 65,
+              "n_skipped": 76,
+              "coverage": 0.46099290780141844,
+              "mean_negatives": 7.492307692307692,
+              "duel_err": 0.5045621045621046,
+              "all_negatives_err": 0.5384615384615384
+            },
+            "5": {
+              "n_used": 78,
+              "n_skipped": 63,
+              "coverage": 0.5531914893617021,
+              "mean_negatives": 7.076923076923077,
+              "duel_err": 0.4280233655233655,
+              "all_negatives_err": 0.5
+            },
+            "4": {
+              "n_used": 100,
+              "n_skipped": 41,
+              "coverage": 0.7092198581560284,
+              "mean_negatives": 6.4,
+              "duel_err": 0.39989754689754686,
+              "all_negatives_err": 0.5
+            }
+          },
+          "detection_rate": 0.8491847826086957,
+          "beat_by_category": {
+            "causality": 0.7066666666666667,
+            "entity": 0.96,
+            "number": 0.9191176470588235
+          },
+          "beat_by_position": {
+            "0": 0.8787878787878788,
+            "1": 0.8888888888888888,
+            "2": 0.8714285714285714,
+            "3": 0.773972602739726,
+            "4": 0.8333333333333334
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.375,
+              "all_negatives_err": 0.375
+            },
+            "5": {
+              "n_used": 46,
+              "n_skipped": 800,
+              "coverage": 0.054373522458628844,
+              "mean_negatives": 5.173913043478261,
+              "duel_err": 0.3804347826086957,
+              "all_negatives_err": 0.3913043478260869
+            },
+            "4": {
+              "n_used": 158,
+              "n_skipped": 688,
+              "coverage": 0.1867612293144208,
+              "mean_negatives": 4.341772151898734,
+              "duel_err": 0.2443037974683544,
+              "all_negatives_err": 0.26582278481012656
+            }
+          },
+          "detection_rate": 0.9243270695784662,
+          "beat_by_category": {
+            "causality": 0.8164852255054432,
+            "entity": 0.9730290456431535,
+            "number": 0.9861878453038674
+          },
+          "beat_by_position": {
+            "0": 0.9231536926147704,
+            "1": 0.9255429162357808
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 405,
+              "coverage": 0.1346153846153846,
+              "mean_negatives": 6.4603174603174605,
+              "duel_err": 0.5287226001511717,
+              "all_negatives_err": 0.5555555555555556
+            },
+            "5": {
+              "n_used": 127,
+              "n_skipped": 341,
+              "coverage": 0.27136752136752135,
+              "mean_negatives": 5.724409448818897,
+              "duel_err": 0.4184008248968878,
+              "all_negatives_err": 0.4645669291338582
+            },
+            "4": {
+              "n_used": 210,
+              "n_skipped": 258,
+              "coverage": 0.44871794871794873,
+              "mean_negatives": 5.042857142857143,
+              "duel_err": 0.36672713529856393,
+              "all_negatives_err": 0.4285714285714286
+            }
+          },
+          "detection_rate": 0.8812927284027346,
+          "beat_by_category": {
+            "causality": 0.7391304347826086,
+            "entity": 0.9481012658227848,
+            "number": 0.9586206896551724
+          },
+          "beat_by_position": {
+            "0": 0.9053571428571429,
+            "1": 0.8732943469785575,
+            "2": 0.8638059701492538
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 88,
+              "n_skipped": 188,
+              "coverage": 0.3188405797101449,
+              "mean_negatives": 7.0,
+              "duel_err": 0.5234873081463991,
+              "all_negatives_err": 0.5795454545454546
+            },
+            "5": {
+              "n_used": 134,
+              "n_skipped": 142,
+              "coverage": 0.4855072463768116,
+              "mean_negatives": 6.313432835820896,
+              "duel_err": 0.5130166268225971,
+              "all_negatives_err": 0.5895522388059702
+            },
+            "4": {
+              "n_used": 188,
+              "n_skipped": 88,
+              "coverage": 0.6811594202898551,
+              "mean_negatives": 5.648936170212766,
+              "duel_err": 0.4472820914310276,
+              "all_negatives_err": 0.5531914893617021
+            }
+          },
+          "detection_rate": 0.8556701030927835,
+          "beat_by_category": {
+            "causality": 0.6905940594059405,
+            "entity": 0.9320388349514563,
+            "number": 0.9372384937238494
+          },
+          "beat_by_position": {
+            "0": 0.90625,
+            "1": 0.8766233766233766,
+            "2": 0.8459016393442623,
+            "3": 0.7957317073170732
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 78,
+              "coverage": 0.44680851063829785,
+              "mean_negatives": 7.666666666666667,
+              "duel_err": 0.6589492518063946,
+              "all_negatives_err": 0.7301587301587302
+            },
+            "5": {
+              "n_used": 83,
+              "n_skipped": 58,
+              "coverage": 0.5886524822695035,
+              "mean_negatives": 7.024096385542169,
+              "duel_err": 0.616122665821461,
+              "all_negatives_err": 0.7108433734939759
+            },
+            "4": {
+              "n_used": 110,
+              "n_skipped": 31,
+              "coverage": 0.7801418439716312,
+              "mean_negatives": 6.281818181818182,
+              "duel_err": 0.5610083855538401,
+              "all_negatives_err": 0.6909090909090909
+            }
+          },
+          "detection_rate": 0.7984293193717278,
+          "beat_by_category": {
+            "causality": 0.5882352941176471,
+            "entity": 0.9148351648351648,
+            "number": 0.9140625
+          },
+          "beat_by_position": {
+            "0": 0.8518518518518519,
+            "1": 0.8445945945945946,
+            "2": 0.7586206896551724,
+            "3": 0.7284768211920529,
+            "4": 0.8037974683544303
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.391025641025641,
+              "all_negatives_err": 0.391025641025641,
+              "coverage": 0.030437352245862883,
+              "n_used": 103,
+              "n_skipped": 3281
+            },
+            "5": {
+              "duel_err": 0.2900662923922902,
+              "all_negatives_err": 0.30051094957271207,
+              "coverage": 0.13504728132387706,
+              "n_used": 457,
+              "n_skipped": 2927
+            },
+            "4": {
+              "duel_err": 0.22206757553578976,
+              "all_negatives_err": 0.24115304855744343,
+              "coverage": 0.4066193853427896,
+              "n_used": 1376,
+              "n_skipped": 2008
+            }
+          },
+          "detection_rate": 0.9306128812819323,
+          "beat_by_category": {
+            "causality": 0.8526765751033086,
+            "entity": 0.9814282841733342,
+            "number": 0.9863636248728981
+          },
+          "beat_by_position": {
+            "0": 0.9294323347413161,
+            "1": 0.9318418858010559
+          }
+        },
+        "3": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.4426343932832625,
+              "all_negatives_err": 0.4691656898105511,
+              "coverage": 0.3659188034188034,
+              "n_used": 685,
+              "n_skipped": 1187
+            },
+            "5": {
+              "duel_err": 0.34985928742080313,
+              "all_negatives_err": 0.40109406627426014,
+              "coverage": 0.4722222222222222,
+              "n_used": 884,
+              "n_skipped": 988
+            },
+            "4": {
+              "duel_err": 0.305232764335257,
+              "all_negatives_err": 0.38075336122211123,
+              "coverage": 0.6047008547008548,
+              "n_used": 1132,
+              "n_skipped": 740
+            }
+          },
+          "detection_rate": 0.8967645936380519,
+          "beat_by_category": {
+            "causality": 0.7911005918541711,
+            "entity": 0.9671767715247928,
+            "number": 0.9683478576983561
+          },
+          "beat_by_position": {
+            "0": 0.9067990829899623,
+            "1": 0.8941522105964367,
+            "2": 0.8884554492412138
+          }
+        },
+        "4": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.47420113331233466,
+              "all_negatives_err": 0.54358971342667,
+              "coverage": 0.5117753623188406,
+              "n_used": 565,
+              "n_skipped": 539
+            },
+            "5": {
+              "duel_err": 0.44511889250587217,
+              "all_negatives_err": 0.542056068289791,
+              "coverage": 0.6313405797101449,
+              "n_used": 697,
+              "n_skipped": 407
+            },
+            "4": {
+              "duel_err": 0.40110460560996647,
+              "all_negatives_err": 0.5333460907124425,
+              "coverage": 0.7853260869565217,
+              "n_used": 867,
+              "n_skipped": 237
+            }
+          },
+          "detection_rate": 0.8680357062391388,
+          "beat_by_category": {
+            "causality": 0.73823588140676,
+            "entity": 0.9590049440312621,
+            "number": 0.9498010764224152
+          },
+          "beat_by_position": {
+            "0": 0.8854096391582142,
+            "1": 0.8842031130634072,
+            "2": 0.8559354715998612,
+            "3": 0.8473012364549859
+          }
+        },
+        "5": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.5939322625055908,
+              "all_negatives_err": 0.6854174785025848,
+              "coverage": 0.6187943262411347,
+              "n_used": 349,
+              "n_skipped": 215
+            },
+            "5": {
+              "duel_err": 0.5397466745972852,
+              "all_negatives_err": 0.6674018261495831,
+              "coverage": 0.7216312056737589,
+              "n_used": 407,
+              "n_skipped": 157
+            },
+            "4": {
+              "duel_err": 0.48198264973927807,
+              "all_negatives_err": 0.6535913100910506,
+              "coverage": 0.8404255319148937,
+              "n_used": 474,
+              "n_skipped": 90
+            }
+          },
+          "detection_rate": 0.8274399675507311,
+          "beat_by_category": {
+            "causality": 0.6814237070590609,
+            "entity": 0.9406452162702162,
+            "number": 0.9276960784313725
+          },
+          "beat_by_position": {
+            "0": 0.8663023211992285,
+            "1": 0.8573781848733888,
+            "2": 0.810921406180027,
+            "3": 0.780451065660364,
+            "4": 0.8202675489067894
+          }
+        }
+      }
+    },
+    "comet:4yeqp7cn-last": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 78,
+              "n_skipped": 768,
+              "coverage": 0.09219858156028368,
+              "mean_negatives": 6.0,
+              "duel_err": 0.9102564102564102,
+              "all_negatives_err": 0.9102564102564102
+            },
+            "5": {
+              "n_used": 293,
+              "n_skipped": 553,
+              "coverage": 0.3463356973995272,
+              "mean_negatives": 5.266211604095563,
+              "duel_err": 0.8936291240045506,
+              "all_negatives_err": 0.8976109215017065
+            },
+            "4": {
+              "n_used": 843,
+              "n_skipped": 3,
+              "coverage": 0.9964539007092199,
+              "mean_negatives": 4.440094899169632,
+              "duel_err": 0.8703044681692369,
+              "all_negatives_err": 0.8790035587188612
+            }
+          },
+          "detection_rate": 0.44642857142857145,
+          "beat_by_category": {
+            "causality": 0.40070921985815605,
+            "entity": 0.4934834123222749,
+            "number": 0.44086021505376344
+          },
+          "beat_by_position": {
+            "0": 0.45661375661375664,
+            "1": 0.43609022556390975
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 466,
+              "n_skipped": 2,
+              "coverage": 0.9957264957264957,
+              "mean_negatives": 6.660944206008583,
+              "duel_err": 0.96553750255467,
+              "all_negatives_err": 0.9678111587982833
+            },
+            "5": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.9556411952245285,
+              "all_negatives_err": 0.9658119658119658
+            },
+            "4": {
+              "n_used": 468,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 6.653846153846154,
+              "duel_err": 0.9425315425315426,
+              "all_negatives_err": 0.9658119658119658
+            }
+          },
+          "detection_rate": 0.294155427103404,
+          "beat_by_category": {
+            "causality": 0.23076923076923078,
+            "entity": 0.32548179871520344,
+            "number": 0.4401294498381877
+          },
+          "beat_by_position": {
+            "0": 0.29619047619047617,
+            "1": 0.2809756097560976,
+            "2": 0.30510105871029836
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9891696467783424,
+              "all_negatives_err": 0.9963768115942029
+            },
+            "5": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9847942415877199,
+              "all_negatives_err": 0.9963768115942029
+            },
+            "4": {
+              "n_used": 276,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 8.880434782608695,
+              "duel_err": 0.9780486019616454,
+              "all_negatives_err": 0.9963768115942029
+            }
+          },
+          "detection_rate": 0.20848633210934311,
+          "beat_by_category": {
+            "causality": 0.15760869565217392,
+            "entity": 0.21869328493647913,
+            "number": 0.39183673469387753
+          },
+          "beat_by_position": {
+            "0": 0.21163166397415187,
+            "1": 0.21895424836601307,
+            "2": 0.20098039215686275,
+            "3": 0.20230263157894737
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9936690968605862,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9913382519765499,
+              "all_negatives_err": 1.0
+            },
+            "4": {
+              "n_used": 141,
+              "n_skipped": 0,
+              "coverage": 1.0,
+              "mean_negatives": 10.929078014184396,
+              "duel_err": 0.9879478283733603,
+              "all_negatives_err": 1.0
+            }
+          },
+          "detection_rate": 0.14536015574302402,
+          "beat_by_category": {
+            "causality": 0.12056737588652482,
+            "entity": 0.13636363636363635,
+            "number": 0.32575757575757575
+          },
+          "beat_by_position": {
+            "0": 0.1590909090909091,
+            "1": 0.1498371335504886,
+            "2": 0.1266233766233766,
+            "3": 0.13225806451612904,
+            "4": 0.1590909090909091
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 9,
+              "n_skipped": 837,
+              "coverage": 0.010638297872340425,
+              "mean_negatives": 6.0,
+              "duel_err": 0.7777777777777778,
+              "all_negatives_err": 0.7777777777777778
+            },
+            "5": {
+              "n_used": 62,
+              "n_skipped": 784,
+              "coverage": 0.07328605200945626,
+              "mean_negatives": 5.145161290322581,
+              "duel_err": 0.6881720430107526,
+              "all_negatives_err": 0.6935483870967742
+            },
+            "4": {
+              "n_used": 220,
+              "n_skipped": 626,
+              "coverage": 0.26004728132387706,
+              "mean_negatives": 4.322727272727272,
+              "duel_err": 0.6409090909090909,
+              "all_negatives_err": 0.6590909090909092
+            }
+          },
+          "detection_rate": 0.737337516808606,
+          "beat_by_category": {
+            "causality": 0.7227443609022557,
+            "entity": 0.7742331288343558,
+            "number": 0.6960227272727273
+          },
+          "beat_by_position": {
+            "0": 0.7405172413793103,
+            "1": 0.7338935574229691
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 85,
+              "n_skipped": 383,
+              "coverage": 0.18162393162393162,
+              "mean_negatives": 6.4941176470588236,
+              "duel_err": 0.8259103641456582,
+              "all_negatives_err": 0.8470588235294118
+            },
+            "5": {
+              "n_used": 169,
+              "n_skipped": 299,
+              "coverage": 0.3611111111111111,
+              "mean_negatives": 5.7514792899408285,
+              "duel_err": 0.8051211608903917,
+              "all_negatives_err": 0.8402366863905325
+            },
+            "4": {
+              "n_used": 256,
+              "n_skipped": 212,
+              "coverage": 0.5470085470085471,
+              "mean_negatives": 5.15625,
+              "duel_err": 0.728453621031746,
+              "all_negatives_err": 0.7890625
+            }
+          },
+          "detection_rate": 0.6525096525096525,
+          "beat_by_category": {
+            "causality": 0.635524798154556,
+            "entity": 0.6904400606980273,
+            "number": 0.6167247386759582
+          },
+          "beat_by_position": {
+            "0": 0.6625386996904025,
+            "1": 0.6417112299465241,
+            "2": 0.6518151815181518
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 117,
+              "n_skipped": 159,
+              "coverage": 0.42391304347826086,
+              "mean_negatives": 7.256410256410256,
+              "duel_err": 0.8603581603581604,
+              "all_negatives_err": 0.8803418803418803
+            },
+            "5": {
+              "n_used": 162,
+              "n_skipped": 114,
+              "coverage": 0.5869565217391305,
+              "mean_negatives": 6.62962962962963,
+              "duel_err": 0.8357338820301783,
+              "all_negatives_err": 0.8703703703703703
+            },
+            "4": {
+              "n_used": 228,
+              "n_skipped": 48,
+              "coverage": 0.8260869565217391,
+              "mean_negatives": 5.868421052631579,
+              "duel_err": 0.7986911723753829,
+              "all_negatives_err": 0.8552631578947368
+            }
+          },
+          "detection_rate": 0.5791638108293352,
+          "beat_by_category": {
+            "causality": 0.5647226173541963,
+            "entity": 0.6168582375478927,
+            "number": 0.5384615384615384
+          },
+          "beat_by_position": {
+            "0": 0.5831202046035806,
+            "1": 0.5744047619047619,
+            "2": 0.5793871866295265,
+            "3": 0.579088471849866
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 80,
+              "n_skipped": 61,
+              "coverage": 0.5673758865248227,
+              "mean_negatives": 8.0125,
+              "duel_err": 0.9176488095238096,
+              "all_negatives_err": 0.95
+            },
+            "5": {
+              "n_used": 105,
+              "n_skipped": 36,
+              "coverage": 0.7446808510638298,
+              "mean_negatives": 7.295238095238095,
+              "duel_err": 0.8758211365354223,
+              "all_negatives_err": 0.9238095238095239
+            },
+            "4": {
+              "n_used": 123,
+              "n_skipped": 18,
+              "coverage": 0.8723404255319149,
+              "mean_negatives": 6.813008130081301,
+              "duel_err": 0.8412252607374558,
+              "all_negatives_err": 0.9186991869918699
+            }
+          },
+          "detection_rate": 0.5232690124858116,
+          "beat_by_category": {
+            "causality": 0.4989059080962801,
+            "entity": 0.5608108108108109,
+            "number": 0.5234375
+          },
+          "beat_by_position": {
+            "0": 0.5824742268041238,
+            "1": 0.5398773006134969,
+            "2": 0.5284090909090909,
+            "3": 0.5,
+            "4": 0.4583333333333333
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 0.875,
+              "all_negatives_err": 0.875
+            },
+            "5": {
+              "n_used": 56,
+              "n_skipped": 790,
+              "coverage": 0.06619385342789598,
+              "mean_negatives": 5.142857142857143,
+              "duel_err": 0.9196428571428571,
+              "all_negatives_err": 0.9285714285714286
+            },
+            "4": {
+              "n_used": 155,
+              "n_skipped": 691,
+              "coverage": 0.18321513002364065,
+              "mean_negatives": 4.412903225806452,
+              "duel_err": 0.8468817204301076,
+              "all_negatives_err": 0.864516129032258
+            }
+          },
+          "detection_rate": 0.5655172413793104,
+          "beat_by_category": {
+            "causality": 0.520863309352518,
+            "entity": 0.6363636363636364,
+            "number": 0.4946808510638298
+          },
+          "beat_by_position": {
+            "0": 0.565922920892495,
+            "1": 0.5650723025583982
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 71,
+              "n_skipped": 397,
+              "coverage": 0.1517094017094017,
+              "mean_negatives": 6.47887323943662,
+              "duel_err": 0.9220321931589537,
+              "all_negatives_err": 0.9295774647887324
+            },
+            "5": {
+              "n_used": 120,
+              "n_skipped": 348,
+              "coverage": 0.2564102564102564,
+              "mean_negatives": 5.875,
+              "duel_err": 0.9464781746031746,
+              "all_negatives_err": 0.9583333333333334
+            },
+            "4": {
+              "n_used": 198,
+              "n_skipped": 270,
+              "coverage": 0.4230769230769231,
+              "mean_negatives": 5.136363636363637,
+              "duel_err": 0.9250841750841751,
+              "all_negatives_err": 0.9494949494949495
+            }
+          },
+          "detection_rate": 0.439167208848406,
+          "beat_by_category": {
+            "causality": 0.4024822695035461,
+            "entity": 0.4781954887218045,
+            "number": 0.42207792207792205
+          },
+          "beat_by_position": {
+            "0": 0.44815465729349735,
+            "1": 0.4219409282700422,
+            "2": 0.44534412955465585
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 84,
+              "n_skipped": 192,
+              "coverage": 0.30434782608695654,
+              "mean_negatives": 7.2023809523809526,
+              "duel_err": 0.9810374149659864,
+              "all_negatives_err": 0.9880952380952381
+            },
+            "5": {
+              "n_used": 125,
+              "n_skipped": 151,
+              "coverage": 0.4528985507246377,
+              "mean_negatives": 6.48,
+              "duel_err": 0.9808715728715729,
+              "all_negatives_err": 0.992
+            },
+            "4": {
+              "n_used": 175,
+              "n_skipped": 101,
+              "coverage": 0.6340579710144928,
+              "mean_negatives": 5.771428571428571,
+              "duel_err": 0.9573374561945991,
+              "all_negatives_err": 0.9771428571428571
+            }
+          },
+          "detection_rate": 0.3844262295081967,
+          "beat_by_category": {
+            "causality": 0.3522975929978118,
+            "entity": 0.43052837573385516,
+            "number": 0.3492063492063492
+          },
+          "beat_by_position": {
+            "0": 0.3916913946587537,
+            "1": 0.3821428571428571,
+            "2": 0.3958333333333333,
+            "3": 0.3682539682539683
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 65,
+              "n_skipped": 76,
+              "coverage": 0.46099290780141844,
+              "mean_negatives": 7.492307692307692,
+              "duel_err": 0.9810855810855811,
+              "all_negatives_err": 0.9846153846153847
+            },
+            "5": {
+              "n_used": 78,
+              "n_skipped": 63,
+              "coverage": 0.5531914893617021,
+              "mean_negatives": 7.076923076923077,
+              "duel_err": 0.9785076035076035,
+              "all_negatives_err": 0.9871794871794872
+            },
+            "4": {
+              "n_used": 100,
+              "n_skipped": 41,
+              "coverage": 0.7092198581560284,
+              "mean_negatives": 6.4,
+              "duel_err": 0.9642236652236652,
+              "all_negatives_err": 0.98
+            }
+          },
+          "detection_rate": 0.33559782608695654,
+          "beat_by_category": {
+            "causality": 0.31333333333333335,
+            "entity": 0.36666666666666664,
+            "number": 0.3161764705882353
+          },
+          "beat_by_position": {
+            "0": 0.3333333333333333,
+            "1": 0.34074074074074073,
+            "2": 0.32142857142857145,
+            "3": 0.3835616438356164,
+            "4": 0.3
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "by_duel_size": {
+            "6": {
+              "n_used": 8,
+              "n_skipped": 838,
+              "coverage": 0.009456264775413711,
+              "mean_negatives": 6.0,
+              "duel_err": 1.0,
+              "all_negatives_err": 1.0
+            },
+            "5": {
+              "n_used": 46,
+              "n_skipped": 800,
+              "coverage": 0.054373522458628844,
+              "mean_negatives": 5.173913043478261,
+              "duel_err": 0.9130434782608696,
+              "all_negatives_err": 0.9130434782608696
+            },
+            "4": {
+              "n_used": 158,
+              "n_skipped": 688,
+              "coverage": 0.1867612293144208,
+              "mean_negatives": 4.341772151898734,
+              "duel_err": 0.8489451476793248,
+              "all_negatives_err": 0.8607594936708861
+            }
+          },
+          "detection_rate": 0.5347892331132554,
+          "beat_by_category": {
+            "causality": 0.5381026438569206,
+            "entity": 0.5612033195020747,
+            "number": 0.4585635359116022
+          },
+          "beat_by_position": {
+            "0": 0.5329341317365269,
+            "1": 0.5367114788004137
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 405,
+              "coverage": 0.1346153846153846,
+              "mean_negatives": 6.4603174603174605,
+              "duel_err": 0.981859410430839,
+              "all_negatives_err": 0.9841269841269842
+            },
+            "5": {
+              "n_used": 127,
+              "n_skipped": 341,
+              "coverage": 0.27136752136752135,
+              "mean_negatives": 5.724409448818897,
+              "duel_err": 0.9499906261717286,
+              "all_negatives_err": 0.9606299212598425
+            },
+            "4": {
+              "n_used": 210,
+              "n_skipped": 258,
+              "coverage": 0.44871794871794873,
+              "mean_negatives": 5.042857142857143,
+              "duel_err": 0.9245049130763416,
+              "all_negatives_err": 0.9476190476190476
+            }
+          },
+          "detection_rate": 0.44748290863890616,
+          "beat_by_category": {
+            "causality": 0.46880907372400754,
+            "entity": 0.4518987341772152,
+            "number": 0.39655172413793105
+          },
+          "beat_by_position": {
+            "0": 0.475,
+            "1": 0.42300194931773877,
+            "2": 0.44216417910447764
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "by_duel_size": {
+            "6": {
+              "n_used": 88,
+              "n_skipped": 188,
+              "coverage": 0.3188405797101449,
+              "mean_negatives": 7.0,
+              "duel_err": 0.9483225108225108,
+              "all_negatives_err": 0.9545454545454546
+            },
+            "5": {
+              "n_used": 134,
+              "n_skipped": 142,
+              "coverage": 0.4855072463768116,
+              "mean_negatives": 6.313432835820896,
+              "duel_err": 0.9380034352049278,
+              "all_negatives_err": 0.9477611940298507
+            },
+            "4": {
+              "n_used": 188,
+              "n_skipped": 88,
+              "coverage": 0.6811594202898551,
+              "mean_negatives": 5.648936170212766,
+              "duel_err": 0.9325320070000921,
+              "all_negatives_err": 0.9521276595744681
+            }
+          },
+          "detection_rate": 0.3877874702616971,
+          "beat_by_category": {
+            "causality": 0.43316831683168316,
+            "entity": 0.3737864077669903,
+            "number": 0.3472803347280335
+          },
+          "beat_by_position": {
+            "0": 0.390625,
+            "1": 0.36688311688311687,
+            "2": 0.4262295081967213,
+            "3": 0.36890243902439024
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "by_duel_size": {
+            "6": {
+              "n_used": 63,
+              "n_skipped": 78,
+              "coverage": 0.44680851063829785,
+              "mean_negatives": 7.666666666666667,
+              "duel_err": 0.967257610114753,
+              "all_negatives_err": 0.9682539682539683
+            },
+            "5": {
+              "n_used": 83,
+              "n_skipped": 58,
+              "coverage": 0.5886524822695035,
+              "mean_negatives": 7.024096385542169,
+              "duel_err": 0.9732223934031163,
+              "all_negatives_err": 0.9759036144578314
+            },
+            "4": {
+              "n_used": 110,
+              "n_skipped": 31,
+              "coverage": 0.7801418439716312,
+              "mean_negatives": 6.281818181818182,
+              "duel_err": 0.9657593921230285,
+              "all_negatives_err": 0.9727272727272728
+            }
+          },
+          "detection_rate": 0.3298429319371728,
+          "beat_by_category": {
+            "causality": 0.36764705882352944,
+            "entity": 0.3131868131868132,
+            "number": 0.296875
+          },
+          "beat_by_position": {
+            "0": 0.37037037037037035,
+            "1": 0.30405405405405406,
+            "2": 0.38620689655172413,
+            "3": 0.31788079470198677,
+            "4": 0.2721518987341772
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.8907585470085471,
+              "all_negatives_err": 0.8907585470085471,
+              "coverage": 0.030437352245862883,
+              "n_used": 103,
+              "n_skipped": 3281
+            },
+            "5": {
+              "duel_err": 0.8536218756047576,
+              "all_negatives_err": 0.8581935538576947,
+              "coverage": 0.13504728132387706,
+              "n_used": 457,
+              "n_skipped": 2927
+            },
+            "4": {
+              "duel_err": 0.8017601067969401,
+              "all_negatives_err": 0.8158425226282287,
+              "coverage": 0.4066193853427896,
+              "n_used": 1376,
+              "n_skipped": 2008
+            }
+          },
+          "detection_rate": 0.5710181406824358,
+          "beat_by_category": {
+            "causality": 0.5456048834924626,
+            "entity": 0.6163208742555855,
+            "number": 0.5225318323254807
+          },
+          "beat_by_position": {
+            "0": 0.5739970126555222,
+            "1": 0.5679418910864227
+          }
+        },
+        "3": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9238348675725302,
+              "all_negatives_err": 0.9321436078108529,
+              "coverage": 0.3659188034188034,
+              "n_used": 685,
+              "n_skipped": 1187
+            },
+            "5": {
+              "duel_err": 0.9143077892224558,
+              "all_negatives_err": 0.9312529766989186,
+              "coverage": 0.4722222222222222,
+              "n_used": 884,
+              "n_skipped": 988
+            },
+            "4": {
+              "duel_err": 0.8801435629309513,
+              "all_negatives_err": 0.9129971157314907,
+              "coverage": 0.6047008547008548,
+              "n_used": 1132,
+              "n_skipped": 740
+            }
+          },
+          "detection_rate": 0.4583287992750922,
+          "beat_by_category": {
+            "causality": 0.43439634303783514,
+            "entity": 0.48650402057806263,
+            "number": 0.4688709586824998
+          },
+          "beat_by_position": {
+            "0": 0.470470958293594,
+            "1": 0.4419074293226007,
+            "2": 0.4611061372218959
+          }
+        },
+        "4": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.94472193323125,
+              "all_negatives_err": 0.9548398461441939,
+              "coverage": 0.5117753623188406,
+              "n_used": 565,
+              "n_skipped": 539
+            },
+            "5": {
+              "duel_err": 0.9348507829235997,
+              "all_negatives_err": 0.951627093998606,
+              "coverage": 0.6313405797101449,
+              "n_used": 697,
+              "n_skipped": 407
+            },
+            "4": {
+              "duel_err": 0.91665230938293,
+              "all_negatives_err": 0.9452276215515663,
+              "coverage": 0.7853260869565217,
+              "n_used": 867,
+              "n_skipped": 237
+            }
+          },
+          "detection_rate": 0.389965960677143,
+          "beat_by_category": {
+            "causality": 0.3769493057089663,
+            "entity": 0.4099665764963043,
+            "number": 0.40669623927244963
+          },
+          "beat_by_position": {
+            "0": 0.3942670658091215,
+            "1": 0.38559624607418724,
+            "2": 0.400607605079111,
+            "3": 0.37963687767679294
+          }
+        },
+        "5": {
+          "by_duel_size": {
+            "6": {
+              "duel_err": 0.9649152743961825,
+              "all_negatives_err": 0.9757173382173383,
+              "coverage": 0.6187943262411347,
+              "n_used": 349,
+              "n_skipped": 215
+            },
+            "5": {
+              "duel_err": 0.9547223463556729,
+              "all_negatives_err": 0.9717231563617107,
+              "coverage": 0.7216312056737589,
+              "n_used": 407,
+              "n_skipped": 157
+            },
+            "4": {
+              "duel_err": 0.9397890366143774,
+              "all_negatives_err": 0.9678566149297856,
+              "coverage": 0.8404255319148937,
+              "n_used": 474,
+              "n_skipped": 90
+            }
+          },
+          "detection_rate": 0.33351748156324124,
+          "beat_by_category": {
+            "causality": 0.3251134190349169,
+            "entity": 0.3442569817569818,
+            "number": 0.36556163658645274
+          },
+          "beat_by_position": {
+            "0": 0.3613172098996841,
+            "1": 0.33362730723969514,
+            "2": 0.34066698387819083,
+            "3": 0.3334251257634331,
+            "4": 0.29739403528960495
+          }
+        }
+      }
+    }
+  }
+}
