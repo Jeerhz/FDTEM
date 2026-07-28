@@ -13,7 +13,8 @@
       "WebFetch",
       "WebSearch",
       "Skill(artifact-design)",
-      "Skill(artifact-design:*)"
+      "Skill(artifact-design:*)",
+      "mcp__claude_ai_Supabase__list_projects"
     ],
     "deny": [],
     "ask": []
