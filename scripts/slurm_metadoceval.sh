@@ -68,7 +68,10 @@ if [[ "${SWEEP:-0}" == "1" ]]; then
   for d in "$HOME"/scratch/checkpoints/retrain/mix-*/; do
     [[ -d "$d" ]] || continue
     arm=$(basename "$d")
-    ckpt=$(ls -t "$d"/*/checkpoints/last.ckpt 2>/dev/null | head -1 || true)
+    # Lightning nests as $CKPT_DIR/<wandb-project>/<run-id>/checkpoints/last.ckpt,
+    # so search rather than glob a fixed depth; newest wins if a run was resumed
+    ckpt=$(find "$d" -path '*/checkpoints/last.ckpt' -printf '%T@ %p\n' 2>/dev/null \
+             | sort -rn | head -1 | cut -d' ' -f2- || true)
     if [[ -n "$ckpt" ]]; then
       MODEL_ARGS="$MODEL_ARGS ${arm}=${ckpt}"
       echo "  + $arm -> $ckpt"
