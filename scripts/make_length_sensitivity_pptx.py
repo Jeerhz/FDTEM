@@ -68,12 +68,31 @@ def _load_results():
 
 RESULTS = _load_results()
 
+<<<<<<< HEAD
+=======
+DUEL_JSON = Path("results/block_duel/block_duel.json")
+DPLOTS = Path("results/block_duel/plots")
+
+
+def _load_duel():
+    j = json.loads(DUEL_JSON.read_text())
+    return {disp: j["encoders"][spec]["_mean_by_k"]
+            for spec, disp in _NAMES.items() if spec in j["encoders"]}
+
+
+DUEL = _load_duel()
+
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
 prs = Presentation()
 prs.slide_width = I(13.333)
 prs.slide_height = I(7.5)
 SW, SH = prs.slide_width, prs.slide_height
 BLANK = prs.slide_layouts[6]
+<<<<<<< HEAD
 TOTAL = 12
+=======
+TOTAL = 18
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -560,7 +579,11 @@ footer(s, 10)
 s = slide()
 eyebrow(s, "Result · the numbers")
 title(s, "xsim++ error and detection rate vs block length")
+<<<<<<< HEAD
 rows = ["COMET", "Bio-COMET", "LaBSE", "E5", "XLM-R (raw)"]
+=======
+enc_rows = ["COMET", "Bio-COMET", "LaBSE", "E5", "XLM-R (raw)"]
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
 ks = ["2", "3", "4", "5"]
 tx, ty = I(0.6), I(1.95)
 colw = [I(2.5)] + [I(1.16)] * 8
@@ -577,7 +600,11 @@ for j, hd in enumerate(heads):
          align=PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
     x += colw[j]
 box(s, tx, hy + I(0.42), Emu(sum(int(c) for c in colw)), I(0.02), fill=HAIR, rounded=False)
+<<<<<<< HEAD
 for i, enc in enumerate(rows):
+=======
+for i, enc in enumerate(enc_rows):
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
     ry = hy + I(0.5) + Emu(i * int(I(0.64)))
     if i % 2 == 0:
         box(s, tx, ry, Emu(sum(int(c) for c in colw)), I(0.6), fill=PANEL, line=None)
@@ -609,7 +636,11 @@ footer(s, 11)
 s = slide()
 eyebrow(s, "Recap")
 title(s, "One planted error, four lengths, one conclusion")
+<<<<<<< HEAD
 box(s, I(0.6), I(1.9), I(12.1), I(3.15), fill=WHITE, line=HAIR)
+=======
+box(s, I(0.6), I(1.9), I(12.1), I(3.35), fill=WHITE, line=HAIR)
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
 recap = [
     ("concatenate", "non-overlapping k-sentence windows, same window in every "
      "language → parallel source & target blocks (k = 2…5)."),
@@ -621,6 +652,7 @@ recap = [
      "is never added — the gold is never duplicated as a negative."),
     ("result", "COMET aligns blocks perfectly (xsim ≈ 0) but its error "
      "sensitivity dilutes fast: below chance from k = 3, 0.98 xsim++ at k = 5. "
+<<<<<<< HEAD
      "Pure aligners resist."),
 ]
 yy = I(2.15)
@@ -643,6 +675,256 @@ def main():
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     prs.save(a.out)
     print(f"wrote {a.out}  ({len(prs.slides._sldIdLst)} slides)")
+=======
+     "Pure aligners (LaBSE, E5) resist far better."),
+]
+ry = I(2.12)
+for rlab, rdesc in recap:
+    tag(s, I(0.85), ry, rlab.upper(), RUST, RUSTS, w=I(1.75), size=10.5)
+    text(s, I(2.8), ry - I(0.02), I(9.6), I(0.58), [[(rdesc, 12.5, INK)]], line=1.14)
+    ry += I(0.62)
+box(s, I(0.6), I(5.42), I(12.1), I(1.3), fill=RUSTS, line=None)
+box(s, I(0.6), I(5.42), I(0.09), I(1.3), fill=RUST, rounded=False)
+text(s, I(0.85), I(5.54), I(11.7), I(1.1),
+     [[("Part II — fixed-pool duels (next slides). ", 12.5, RUST, True),
+       ("Pin the pool to the gold + D single-error negatives of its own block "
+        "at every k, averaged over all D-subsets — constant difficulty, no "
+        "pool-composition confound. ", 12.5, INK),
+       ("Coverage caveat: ", 12.5, RUST, True),
+       ("D = 6 (the full k = 2 budget, 2 positions × 3 error types) requires "
+        "both sentences of a k = 2 block to host all three edit types — only "
+        "78 / 846 de blocks (≈ 9 %) qualify — so D = 5 and D = 4 are scored "
+        "alongside from the same embeddings, trading pool size for coverage.",
+        12.5, INK)]], line=1.16)
+footer(s, 12)
+
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 13 — PART II · WHY D=6 COVERAGE COLLAPSES AT k=2
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · fixed-pool duels — why 6-negative coverage is thin")
+title(s, "A negative must be possible — six at once rarely are", size=27)
+bullets(s, I(0.6), I(1.8), I(6.3), I(4.9), [
+    [("A (position, category) pair yields a negative only if the edit can "
+      "fire on that sentence AND change the string:", 13, INK)],
+    "",
+    [("NUMBER — ", 13, NUM, True),
+     ("the sentence must contain a digit or an ordinal word; the redrawn "
+      "value must differ.", 13, INK)],
+    [("ENTITY — ", 13, ENT, True),
+     ("needs a capitalised span (≥ 2 chars) that never appears lowercased in "
+      "the corpus, plus a same-width replacement in the bank.", 13, INK)],
+    [("CAUSALITY — ", 13, CAUS, True),
+     ("needs an antonym-lexicon hit, a boostable modal (may→will), or a "
+      "negation that can be added / removed.", 13, INK)],
+    "",
+    [("D = 6 at k = 2 demands all three categories on BOTH sentences — a "
+      "conjunction of six events. FLORES sentences often lack digits, and "
+      "es/fr/ru entity spans are rare, so the joint probability collapses.",
+      13, INK, True)],
+    "",
+    [("German is the exception: every noun is capitalised, so the entity "
+      "edit almost always applies — 78/846 blocks vs 8–9 elsewhere.", 13, INK)],
+], size=13, line=1.16)
+s.shapes.add_picture(str(DPLOTS / "duel_coverage.png"), I(7.15), I(1.85), width=I(5.6))
+box(s, I(7.15), I(5.55), I(5.6), I(1.15), fill=PANEL, line=HAIR)
+text(s, I(7.4), I(5.65), I(5.1), I(0.3),
+     [[("blocks with ≥ D negatives at k = 2 (of 846)", 10.5, RUST, True)]])
+rowsd = [("de", "78/293/843"), ("es", "9/62/220"),
+         ("fr", "8/56/155"), ("ru", "8/46/158")]
+for i, (lg, v3) in enumerate(rowsd):
+    xx = I(7.4) + Emu(i * int(I(1.32)))
+    text(s, xx, I(6.0), I(1.3), I(0.6),
+         [[(lg + " ", 11.5, INK, True), (v3, 10, MUTED, False, False, MONO)]],
+         line=1.1)
+text(s, I(7.4), I(6.42), I(5.1), I(0.25),
+     [[("per language: D = 6 / 5 / 4", 9.5, FAINT, False, True)]])
+footer(s, 13)
+
+# ════════════════════════════════════════════════════════════════════════════
+# 14 — PART II · PROTOCOL & COUNTS
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · the fixed-pool protocol")
+title(s, "Same number of candidates at every k — the counts, exactly")
+bullets(s, I(0.6), I(1.9), I(5.7), I(4.6), [
+    [("One variant per (position, category)", 13.5, INK, True),
+     (" → a k-sentence block owns at most 3k single-error negatives.",
+      13.5, INK)],
+    "",
+    [("A duel is the gold + D of them", 13.5, INK, True),
+     (" (D = 6, 5, 4). Score = mean retrieval accuracy over ALL C(m, D) "
+      "subsets of the block's m valid negatives.", 13.5, INK)],
+    "",
+    [("Closed form, no enumeration: ", 13.5, INK, True),
+     ("the gold wins a D-subset iff it beats every member, so", 13.5, INK)],
+    [("P[win] = C(w, D) / C(m, D)", 12.5, RUST, True, False, MONO)],
+    [("w = #negatives beaten — verified against brute-force enumeration.",
+      12, MUTED, False, True)],
+    "",
+    [("Blocks with m < D are skipped", 13.5, INK, True),
+     (" — every scored duel has exactly D + 1 candidates; a tie counts "
+      "against the gold.", 13.5, INK)],
+], size=13.5, line=1.18)
+tx, ty = I(6.6), I(2.0)
+colw = [I(0.7), I(1.2), I(1.5), I(1.0), I(1.0), I(1.0)]
+heads = ["k", "blocks", "max m = 3k", "C(3k,6)", "C(3k,5)", "C(3k,4)"]
+x = tx
+for j, hd in enumerate(heads):
+    text(s, x, ty, colw[j], I(0.4), [[(hd, 11.5, MUTED, True)]],
+         align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    x += colw[j]
+box(s, tx, ty + I(0.44), Emu(sum(int(c) for c in colw)), I(0.02), fill=HAIR, rounded=False)
+crow = [("2", "846", "6", "1", "6", "15"),
+        ("3", "468", "9", "84", "126", "126"),
+        ("4", "276", "12", "924", "792", "495"),
+        ("5", "141", "15", "5005", "3003", "1365")]
+for i, vals in enumerate(crow):
+    ry = ty + I(0.52) + Emu(i * int(I(0.6)))
+    if i % 2 == 0:
+        box(s, tx, ry, Emu(sum(int(c) for c in colw)), I(0.56), fill=PANEL, line=None)
+    x = tx
+    for j, v in enumerate(vals):
+        text(s, x, ry, colw[j], I(0.56),
+             [[(v, 12.5, INK, j == 0, False, MONO)]],
+             align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        x += colw[j]
+text(s, tx, ty + I(3.15), I(6.3), I(1.5),
+     [[("blocks = per language (dev + devtest), identical across languages. "
+        "In practice a block has m ≤ 3k valid negatives (conditions on the "
+        "previous slide); the duel averages over the C(m, D) subsets that "
+        "exist and skips blocks with m < D.", 11.5, MUTED)]], line=1.18)
+footer(s, 14)
+
+# ════════════════════════════════════════════════════════════════════════════
+# 15 — PART II · RESULTS HEADLINE
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · results — constant pool size, same conclusion")
+title(s, "Dilution survives the pool-size control", size=27)
+s.shapes.add_picture(str(DPLOTS / "duel_err_vs_length.png"), I(0.75), I(1.75), width=I(11.8))
+text(s, I(0.75), I(5.62), I(11.8), I(0.5),
+     [[("One panel per duel size; each has its own chance line D/(D+1): "
+        "6/7 ≈ .857, 5/6 ≈ .833, 4/5 = .800. Encoder ranking and the upward "
+        "dilution trend are identical in all three.", 11, MUTED)]], line=1.12)
+box(s, I(0.6), I(6.2), I(12.1), I(0.75), fill=RUSTS, line=None)
+box(s, I(0.6), I(6.2), I(0.09), I(0.75), fill=RUST, rounded=False)
+text(s, I(0.85), I(6.28), I(11.7), I(0.6),
+     [[("Finding: ", 12.5, RUST, True),
+       ("COMET / Bio-COMET / raw XLM-R sit at or above chance from k = 2–3 "
+        "even with the pool pinned to D + 1 candidates; LaBSE and E5 stay far "
+        "below chance at every k. D = 4 is the recommended headline: chance "
+        "drops only .857 → .800 while the k = 2 sample grows 103 → 1376 "
+        "blocks (13×).", 12.5, INK)]], line=1.14)
+footer(s, 15)
+
+# ════════════════════════════════════════════════════════════════════════════
+# 16 — PART II · RESULTS NUMBERS
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · results — the numbers")
+title(s, "Duel error vs block length (mean over de · es · fr · ru)")
+enc_rows2 = ["COMET", "Bio-COMET", "LaBSE", "E5", "XLM-R (raw)"]
+ks2 = ["2", "3", "4", "5"]
+tx, ty = I(0.6), I(1.95)
+colw = [I(2.5)] + [I(1.16)] * 8
+text(s, tx + colw[0], ty, Emu(sum(int(c) for c in colw[1:5])), I(0.32),
+     [[("D = 6   (chance .857)", 12, RUST, True)]], align=PP_ALIGN.CENTER)
+text(s, tx + Emu(int(colw[0]) + sum(int(c) for c in colw[1:5])), ty,
+     Emu(sum(int(c) for c in colw[5:9])), I(0.32),
+     [[("D = 4   (chance .800)", 12, TEAL, True)]], align=PP_ALIGN.CENTER)
+hy = ty + I(0.36)
+heads = ["encoder"] + [f"k={k}" for k in ks2] + [f"k={k}" for k in ks2]
+x = tx
+for j, hd in enumerate(heads):
+    text(s, x, hy, colw[j], I(0.4), [[(hd, 12, MUTED, True)]],
+         align=PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    x += colw[j]
+box(s, tx, hy + I(0.42), Emu(sum(int(c) for c in colw)), I(0.02), fill=HAIR, rounded=False)
+for i, enc in enumerate(enc_rows2):
+    ry = hy + I(0.5) + Emu(i * int(I(0.64)))
+    if i % 2 == 0:
+        box(s, tx, ry, Emu(sum(int(c) for c in colw)), I(0.6), fill=PANEL, line=None)
+    accent = RUST if enc in ("COMET", "Bio-COMET") else (TEAL if enc in ("LaBSE", "E5") else GREY)
+    text(s, tx + I(0.1), ry, colw[0], I(0.6), [[(enc, 13, accent, True)]], anchor=MSO_ANCHOR.MIDDLE)
+    x = tx + colw[0]
+    for D, chance in (("6", 6 / 7), ("4", 4 / 5)):
+        for k in ks2:
+            v = DUEL[enc][k]["by_duel_size"][D]["duel_err"]
+            bad = v is not None and v >= chance
+            vtxt = f"{v:.2f}" if v is not None else "—"
+            text(s, x, ry, colw[1], I(0.6),
+                 [[(vtxt, 12.5, RUST if bad else INK, bad, False, MONO)]],
+                 align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+            x += colw[1]
+text(s, I(0.6), I(6.15), I(12.1), I(0.8),
+     [[("Bold rust = at or above the duel's chance line — no better than "
+        "picking one of the D + 1 candidates at random. Coverage at k = 2 "
+        "(blocks scored, of 3384): D = 6 → 103, D = 5 → 457, D = 4 → 1376. "
+        "D = 5 sits between the two columns shown (full numbers in "
+        "results/block_duel/block_duel.json).", 12, MUTED, False, True)]],
+     line=1.14)
+footer(s, 16)
+
+# ════════════════════════════════════════════════════════════════════════════
+# 17 — PART II · CATEGORY SENSITIVITY
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · sensitivity by error category")
+title(s, "Causality errors are the hardest — for everyone", size=27)
+s.shapes.add_picture(str(DPLOTS / "beat_by_category.png"), I(0.55), I(1.8), width=I(12.2))
+text(s, I(0.55), I(4.25), I(12.2), I(0.4),
+     [[("P[gold beats the negative] per category (bars per k = 2,3,4,5; "
+        "dotted line = chance .50). One panel per encoder.", 11, MUTED)]],
+     line=1.1)
+box(s, I(0.6), I(4.8), I(12.1), I(1.85), fill=WHITE, line=HAIR)
+bullets(s, I(0.9), I(5.0), I(11.6), I(1.6), [
+    [("Aligners: ", 13, TEAL, True),
+     ("number and entity swaps stay easy at k = 5 (LaBSE .96 / .89, E5 .93 / "
+      ".94) but causality falls to .68–.69 — antonyms and negation move the "
+      "embedding least.", 13, INK)],
+    [("COMET / Bio-COMET: ", 13, RUST, True),
+     ("no category survives — all three are near .50 already at k = 2 "
+      "(causality .56, entity .62, number .53) and sink to ~.33–.37 by "
+      "k = 5. The blindness is category-independent.", 13, INK)],
+], size=13, line=1.2)
+footer(s, 17)
+
+# ════════════════════════════════════════════════════════════════════════════
+# 18 — PART II · POSITION SENSITIVITY
+# ════════════════════════════════════════════════════════════════════════════
+s = slide()
+eyebrow(s, "Part II · sensitivity by error position")
+title(s, "Where the error sits barely matters — depth does", size=27)
+s.shapes.add_picture(str(DPLOTS / "beat_by_position.png"), I(0.6), I(1.85), width=I(6.6))
+bullets(s, I(7.55), I(2.0), I(5.2), I(4.4), [
+    [("Aligners show a mild late-position penalty. ", 13.5, TEAL, True),
+     ("LaBSE at k = 5 detects .86 of first-sentence errors but .76 of "
+      "last-sentence ones; E5 drifts .87 → .82. Errors buried deep in the "
+      "block are slightly harder.", 13.5, INK)],
+    "",
+    [("COMET is uniformly blind. ", 13.5, RUST, True),
+     ("Detection is flat across positions (~.45–.48 at k = 3, ~.30–.36 at "
+      "k = 5): the failure is not a positional artefact — the whole block is "
+      "averaged into one vector that one sentence cannot move.", 13.5, INK)],
+    "",
+    [("Takeaway: ", 13.5, INK, True),
+     ("length itself, not error placement, drives the dilution.", 13.5, INK)],
+], size=13.5, line=1.2)
+footer(s, 18)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--out", default="docs/FDTEM_length_sensitivity.pptx")
+    args = ap.parse_args()
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    prs.save(str(out))
+    print(f"deck → {out}  ({TOTAL} slides)")
+>>>>>>> d577e684a7810cfeb6e396acf73cacf66e453cf4
 
 
 if __name__ == "__main__":

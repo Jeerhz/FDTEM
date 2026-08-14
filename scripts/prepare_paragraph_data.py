@@ -28,6 +28,8 @@ Usage:
 Outputs (in --output_dir):
     {lp}_train.csv / {lp}_val.csv   COMET-ready (src, mt, ref, score) + extras
                                     (lp, k, system, doc_id, seg_start, penalty_*)
+    {lp}_trainpool.csv              ALL train windows before length-balancing —
+                                    the sampling pool for make_sentence_mix.py
     all_train.csv / all_val.csv     concatenation across language pairs
     stats.json                      counts, normalisation params, token stats
     plots/*.png                     length distribution / counts / score-by-k
@@ -206,6 +208,9 @@ def main() -> None:
                 "seg_start", "penalty_sum", "penalty_mean",
                 "tok_src", "tok_mt", "tok_ref"]
         train[cols].to_csv(out_dir / f"{lp}_train.csv", index=False)
+        # full (unbalanced) train pool — sampling stock for make_sentence_mix.py
+        df.loc[df["split"] == "train", cols].to_csv(
+            out_dir / f"{lp}_trainpool.csv", index=False)
         val[cols].to_csv(out_dir / f"{lp}_val.csv", index=False)
         all_train.append(train[cols])
         all_val.append(val[cols])
