@@ -8443,6 +8443,4899 @@
           "p_value": 1.0491752332201881e-07
         }
       }
+    },
+    "mix-frac010": {
+      "referenceless": false,
+      "per_cell": {
+        "en-fr|aya23|tense_consistency|w1": {
+          "n_docs": 80,
+          "accuracy": 0.675,
+          "ties": 0,
+          "mean_diff": 0.0010777084728780888,
+          "p_value": 0.01800897375987591
+        },
+        "en-fr|aya23|tense_consistency|w3": {
+          "n_docs": 80,
+          "accuracy": 0.675,
+          "ties": 0,
+          "mean_diff": 0.0017505601015226947,
+          "p_value": 0.005258788834024729
+        },
+        "en-fr|aya23|tense_consistency|w6": {
+          "n_docs": 80,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.0017549479480707582,
+          "p_value": 0.012330397339119763
+        },
+        "en-fr|aya23|tense_consistency|w9": {
+          "n_docs": 80,
+          "accuracy": 0.7375,
+          "ties": 0,
+          "mean_diff": 0.0019222030013002368,
+          "p_value": 0.008867936612607449
+        },
+        "en-fr|aya23|lexical_consistency|w1": {
+          "n_docs": 59,
+          "accuracy": 0.711864406779661,
+          "ties": 0,
+          "mean_diff": 0.0007123503828670827,
+          "p_value": 0.44013413202797125
+        },
+        "en-fr|aya23|lexical_consistency|w3": {
+          "n_docs": 59,
+          "accuracy": 0.6440677966101694,
+          "ties": 0,
+          "mean_diff": 0.0007983987071172937,
+          "p_value": 0.15960839621370074
+        },
+        "en-fr|aya23|lexical_consistency|w6": {
+          "n_docs": 59,
+          "accuracy": 0.5932203389830508,
+          "ties": 0,
+          "mean_diff": 0.0016171722013903827,
+          "p_value": 0.0415618859201662
+        },
+        "en-fr|aya23|lexical_consistency|w9": {
+          "n_docs": 59,
+          "accuracy": 0.6440677966101694,
+          "ties": 0,
+          "mean_diff": 0.0020778881308363257,
+          "p_value": 0.04708474107275797
+        },
+        "en-fr|aya23|conjunction_substitution|w1": {
+          "n_docs": 82,
+          "accuracy": 0.7195121951219512,
+          "ties": 0,
+          "mean_diff": 0.0018478653438038053,
+          "p_value": 0.0003798602002813796
+        },
+        "en-fr|aya23|conjunction_substitution|w3": {
+          "n_docs": 82,
+          "accuracy": 0.6341463414634146,
+          "ties": 0,
+          "mean_diff": 0.0018953781516458414,
+          "p_value": 0.04056163267940445
+        },
+        "en-fr|aya23|conjunction_substitution|w6": {
+          "n_docs": 82,
+          "accuracy": 0.5975609756097561,
+          "ties": 0,
+          "mean_diff": 0.000987203376318475,
+          "p_value": 0.39315112527521157
+        },
+        "en-fr|aya23|conjunction_substitution|w9": {
+          "n_docs": 82,
+          "accuracy": 0.6341463414634146,
+          "ties": 0,
+          "mean_diff": 0.0020831491377931175,
+          "p_value": 0.13002171056268896
+        },
+        "en-fr|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": -0.00024958549656418916,
+          "p_value": 0.8341176794844365
+        },
+        "en-fr|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": -1.4745854106400225e-05,
+          "p_value": 0.998146914932623
+        },
+        "en-fr|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.00472644455730916,
+          "p_value": 0.4576426351834709
+        },
+        "en-fr|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.003869437422809492,
+          "p_value": 0.5341955224494979
+        },
+        "en-fr|aya23|pronoun_swap_plural|w1": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.0024698341326431505,
+          "p_value": 0.12637880667397974
+        },
+        "en-fr|aya23|pronoun_swap_plural|w3": {
+          "n_docs": 10,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.009775854327094819,
+          "p_value": 0.15130240684628896
+        },
+        "en-fr|aya23|pronoun_swap_plural|w6": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.010350124809283812,
+          "p_value": 0.15003677305857477
+        },
+        "en-fr|aya23|pronoun_swap_plural|w9": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.010623901422067344,
+          "p_value": 0.13969717884979838
+        },
+        "en-fr|aya23|sentence_repetition|w1": {
+          "n_docs": 149,
+          "accuracy": 0.8590604026845637,
+          "ties": 0,
+          "mean_diff": 0.011334430068479878,
+          "p_value": 1.9776689368139603e-15
+        },
+        "en-fr|aya23|sentence_repetition|w3": {
+          "n_docs": 149,
+          "accuracy": 0.8456375838926175,
+          "ties": 0,
+          "mean_diff": 0.01593916198663615,
+          "p_value": 8.421191032909566e-12
+        },
+        "en-fr|aya23|sentence_repetition|w6": {
+          "n_docs": 149,
+          "accuracy": 0.7248322147651006,
+          "ties": 0,
+          "mean_diff": 0.016350467813130116,
+          "p_value": 2.5631983452554275e-11
+        },
+        "en-fr|aya23|sentence_repetition|w9": {
+          "n_docs": 149,
+          "accuracy": 0.7583892617449665,
+          "ties": 0,
+          "mean_diff": 0.016018198806033116,
+          "p_value": 6.70487811662983e-11
+        },
+        "en-fr|aya23|sentence_removal|w1": {
+          "n_docs": 149,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.06398277060806569,
+          "p_value": 8.51911792721467e-58
+        },
+        "en-fr|aya23|sentence_removal|w3": {
+          "n_docs": 149,
+          "accuracy": 0.912751677852349,
+          "ties": 0,
+          "mean_diff": 0.03573228722994158,
+          "p_value": 1.1678348605111085e-21
+        },
+        "en-fr|aya23|sentence_removal|w6": {
+          "n_docs": 149,
+          "accuracy": 0.8926174496644296,
+          "ties": 0,
+          "mean_diff": 0.033654319045585586,
+          "p_value": 3.7264569015863114e-17
+        },
+        "en-fr|aya23|sentence_removal|w9": {
+          "n_docs": 149,
+          "accuracy": 0.8523489932885906,
+          "ties": 0,
+          "mean_diff": 0.029856850094910497,
+          "p_value": 2.6008515196155136e-14
+        },
+        "en-fr|aya23|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04078128211136409,
+          "p_value": 2.0007436688428344e-31
+        },
+        "en-fr|aya23|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.03998768881298222,
+          "p_value": 4.690961302424761e-14
+        },
+        "en-fr|aya23|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.02991588979102752,
+          "p_value": 8.538917517084151e-11
+        },
+        "en-fr|aya23|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.8793103448275862,
+          "ties": 0,
+          "mean_diff": 0.02083716176223704,
+          "p_value": 5.82343439320245e-07
+        },
+        "en-fr|aya23|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.5454545454545454,
+          "ties": 0,
+          "mean_diff": 0.00043377266682170535,
+          "p_value": 0.2785710201964351
+        },
+        "en-fr|aya23|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0036898934595890557,
+          "p_value": 0.007046656161886406
+        },
+        "en-fr|aya23|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.8181818181818182,
+          "ties": 0,
+          "mean_diff": 0.004698413410120395,
+          "p_value": 0.013573472298505704
+        },
+        "en-fr|aya23|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.8181818181818182,
+          "ties": 0,
+          "mean_diff": 0.006680452939388701,
+          "p_value": 0.0119134652900179
+        },
+        "en-fr|gemini|tense_consistency|w1": {
+          "n_docs": 60,
+          "accuracy": 0.5833333333333334,
+          "ties": 0,
+          "mean_diff": 9.037755842303911e-05,
+          "p_value": 0.8061093366427265
+        },
+        "en-fr|gemini|tense_consistency|w3": {
+          "n_docs": 60,
+          "accuracy": 0.65,
+          "ties": 1,
+          "mean_diff": 0.0011808121336392623,
+          "p_value": 0.060179399785551604
+        },
+        "en-fr|gemini|tense_consistency|w6": {
+          "n_docs": 60,
+          "accuracy": 0.5833333333333334,
+          "ties": 1,
+          "mean_diff": 0.0010493340164594667,
+          "p_value": 0.24376952685679373
+        },
+        "en-fr|gemini|tense_consistency|w9": {
+          "n_docs": 60,
+          "accuracy": 0.5833333333333334,
+          "ties": 1,
+          "mean_diff": 0.0007107401967605833,
+          "p_value": 0.4077012167003534
+        },
+        "en-fr|gemini|lexical_consistency|w1": {
+          "n_docs": 54,
+          "accuracy": 0.7592592592592593,
+          "ties": 0,
+          "mean_diff": 0.0025292269545457487,
+          "p_value": 0.004975271286171773
+        },
+        "en-fr|gemini|lexical_consistency|w3": {
+          "n_docs": 54,
+          "accuracy": 0.6851851851851852,
+          "ties": 0,
+          "mean_diff": 0.002629646418923107,
+          "p_value": 0.003260076642591682
+        },
+        "en-fr|gemini|lexical_consistency|w6": {
+          "n_docs": 54,
+          "accuracy": 0.7037037037037037,
+          "ties": 0,
+          "mean_diff": 0.0022777051765181912,
+          "p_value": 0.0418887292305155
+        },
+        "en-fr|gemini|lexical_consistency|w9": {
+          "n_docs": 54,
+          "accuracy": 0.7407407407407407,
+          "ties": 0,
+          "mean_diff": 0.0023475833819888653,
+          "p_value": 0.03572987966497455
+        },
+        "en-fr|gemini|conjunction_substitution|w1": {
+          "n_docs": 80,
+          "accuracy": 0.7125,
+          "ties": 0,
+          "mean_diff": 0.0009457734944843026,
+          "p_value": 0.00024389151297690576
+        },
+        "en-fr|gemini|conjunction_substitution|w3": {
+          "n_docs": 80,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.0010561458237524732,
+          "p_value": 0.009606255630749074
+        },
+        "en-fr|gemini|conjunction_substitution|w6": {
+          "n_docs": 80,
+          "accuracy": 0.6125,
+          "ties": 0,
+          "mean_diff": 0.0009790117761177748,
+          "p_value": 0.056208752185435536
+        },
+        "en-fr|gemini|conjunction_substitution|w9": {
+          "n_docs": 80,
+          "accuracy": 0.6125,
+          "ties": 0,
+          "mean_diff": 0.0009015524607529441,
+          "p_value": 0.10192088747598374
+        },
+        "en-fr|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 5,
+          "accuracy": 0.6,
+          "ties": 0,
+          "mean_diff": 0.0008638764980278158,
+          "p_value": 0.21444613993234032
+        },
+        "en-fr|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 5,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0048918092518620004,
+          "p_value": 0.2981447694323608
+        },
+        "en-fr|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.00556594525064742,
+          "p_value": 0.20079713473719396
+        },
+        "en-fr|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.005212740103403712,
+          "p_value": 0.22687523948220906
+        },
+        "en-fr|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0007568899120953959,
+          "p_value": 0.22071827492631776
+        },
+        "en-fr|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0029306942572895622,
+          "p_value": 0.2407275006052464
+        },
+        "en-fr|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0026890236100487325,
+          "p_value": 0.22677212916486716
+        },
+        "en-fr|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0029970775837893926,
+          "p_value": 0.18224388696655242
+        },
+        "en-fr|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.88,
+          "ties": 0,
+          "mean_diff": 0.013120959974538647,
+          "p_value": 1.7664026929966805e-16
+        },
+        "en-fr|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8533333333333334,
+          "ties": 0,
+          "mean_diff": 0.01747250092947477,
+          "p_value": 2.1230688681371974e-13
+        },
+        "en-fr|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8733333333333333,
+          "ties": 1,
+          "mean_diff": 0.0182079810903157,
+          "p_value": 1.5990832882871425e-13
+        },
+        "en-fr|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.82,
+          "ties": 1,
+          "mean_diff": 0.017250762844201097,
+          "p_value": 4.736918007285145e-13
+        },
+        "en-fr|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.98,
+          "ties": 0,
+          "mean_diff": 0.06361904376112622,
+          "p_value": 3.52197265490925e-58
+        },
+        "en-fr|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8866666666666667,
+          "ties": 0,
+          "mean_diff": 0.03402150116797194,
+          "p_value": 2.327429106353673e-19
+        },
+        "en-fr|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8333333333333334,
+          "ties": 0,
+          "mean_diff": 0.027304988355818183,
+          "p_value": 1.4694318261085555e-14
+        },
+        "en-fr|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.82,
+          "ties": 0,
+          "mean_diff": 0.025561743991419934,
+          "p_value": 1.3319089461712753e-12
+        },
+        "en-fr|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04521353921393972,
+          "p_value": 1.6112183031009938e-31
+        },
+        "en-fr|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04046935160725109,
+          "p_value": 2.111631356421351e-16
+        },
+        "en-fr|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9482758620689655,
+          "ties": 0,
+          "mean_diff": 0.03167707816115308,
+          "p_value": 1.490779966906435e-11
+        },
+        "en-fr|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.9310344827586207,
+          "ties": 0,
+          "mean_diff": 0.02419227659757215,
+          "p_value": 3.2799068110908216e-10
+        },
+        "en-fr|gemini|sentence_splitting|w1": {
+          "n_docs": 13,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.0002275057409959907,
+          "p_value": 0.13973959334673994
+        },
+        "en-fr|gemini|sentence_splitting|w3": {
+          "n_docs": 13,
+          "accuracy": 0.6923076923076923,
+          "ties": 0,
+          "mean_diff": 0.0004825992993168386,
+          "p_value": 0.13180655354844145
+        },
+        "en-fr|gemini|sentence_splitting|w6": {
+          "n_docs": 13,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.001159409194631038,
+          "p_value": 0.03465999875042732
+        },
+        "en-fr|gemini|sentence_splitting|w9": {
+          "n_docs": 13,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.001383732920229846,
+          "p_value": 0.029951829321304718
+        },
+        "en-es|aya23|tense_consistency|w1": {
+          "n_docs": 57,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.0015043750110173724,
+          "p_value": 0.0007466745223794921
+        },
+        "en-es|aya23|tense_consistency|w3": {
+          "n_docs": 57,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.00113436612359189,
+          "p_value": 0.05281463465461906
+        },
+        "en-es|aya23|tense_consistency|w6": {
+          "n_docs": 57,
+          "accuracy": 0.6140350877192983,
+          "ties": 0,
+          "mean_diff": 0.0012927160146253976,
+          "p_value": 0.023421474012917116
+        },
+        "en-es|aya23|tense_consistency|w9": {
+          "n_docs": 57,
+          "accuracy": 0.6140350877192983,
+          "ties": 0,
+          "mean_diff": 0.0008398724544785637,
+          "p_value": 0.08554767922278829
+        },
+        "en-es|aya23|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.8142857142857143,
+          "ties": 0,
+          "mean_diff": 0.002431830153925852,
+          "p_value": 3.2026951297740425e-05
+        },
+        "en-es|aya23|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.6857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0030403244789171556,
+          "p_value": 0.0005654860220510875
+        },
+        "en-es|aya23|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.6571428571428571,
+          "ties": 0,
+          "mean_diff": 0.003060666297671052,
+          "p_value": 0.00011904755190453786
+        },
+        "en-es|aya23|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.6571428571428571,
+          "ties": 0,
+          "mean_diff": 0.002858399958140244,
+          "p_value": 6.600007161552267e-05
+        },
+        "en-es|aya23|conjunction_substitution|w1": {
+          "n_docs": 93,
+          "accuracy": 0.7526881720430108,
+          "ties": 0,
+          "mean_diff": 0.0018367882113306429,
+          "p_value": 0.0026907579528661647
+        },
+        "en-es|aya23|conjunction_substitution|w3": {
+          "n_docs": 93,
+          "accuracy": 0.5913978494623656,
+          "ties": 0,
+          "mean_diff": 0.0016191377009982376,
+          "p_value": 0.04820261409974893
+        },
+        "en-es|aya23|conjunction_substitution|w6": {
+          "n_docs": 93,
+          "accuracy": 0.6129032258064516,
+          "ties": 0,
+          "mean_diff": 0.0013560564710272352,
+          "p_value": 0.2228109303167093
+        },
+        "en-es|aya23|conjunction_substitution|w9": {
+          "n_docs": 93,
+          "accuracy": 0.5913978494623656,
+          "ties": 0,
+          "mean_diff": 0.0016231265288914477,
+          "p_value": 0.18880127008923808
+        },
+        "en-es|aya23|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8741258741258742,
+          "ties": 0,
+          "mean_diff": 0.011068370661195131,
+          "p_value": 8.816426538408578e-17
+        },
+        "en-es|aya23|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8181818181818182,
+          "ties": 0,
+          "mean_diff": 0.014011379402819478,
+          "p_value": 1.2654986093297362e-12
+        },
+        "en-es|aya23|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.7832167832167832,
+          "ties": 0,
+          "mean_diff": 0.015796559112026813,
+          "p_value": 7.551974476303554e-11
+        },
+        "en-es|aya23|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.7622377622377622,
+          "ties": 0,
+          "mean_diff": 0.016271291256501372,
+          "p_value": 4.457281298914078e-11
+        },
+        "en-es|aya23|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.059781357197185886,
+          "p_value": 1.3689023007800226e-57
+        },
+        "en-es|aya23|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.9300699300699301,
+          "ties": 0,
+          "mean_diff": 0.03707674604801314,
+          "p_value": 7.949898886610114e-24
+        },
+        "en-es|aya23|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.9090909090909091,
+          "ties": 0,
+          "mean_diff": 0.03609392710152106,
+          "p_value": 3.312385481547187e-19
+        },
+        "en-es|aya23|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8741258741258742,
+          "ties": 0,
+          "mean_diff": 0.03446775801666737,
+          "p_value": 4.2315583011029034e-17
+        },
+        "en-es|aya23|sentence_shuffling|w1": {
+          "n_docs": 57,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04323548367880546,
+          "p_value": 2.5289687448174797e-33
+        },
+        "en-es|aya23|sentence_shuffling|w3": {
+          "n_docs": 57,
+          "accuracy": 0.9649122807017544,
+          "ties": 0,
+          "mean_diff": 0.0387667059558854,
+          "p_value": 2.8485337405642816e-16
+        },
+        "en-es|aya23|sentence_shuffling|w6": {
+          "n_docs": 57,
+          "accuracy": 0.8947368421052632,
+          "ties": 0,
+          "mean_diff": 0.032983375030854974,
+          "p_value": 4.945404901725962e-10
+        },
+        "en-es|aya23|sentence_shuffling|w9": {
+          "n_docs": 57,
+          "accuracy": 0.8596491228070176,
+          "ties": 0,
+          "mean_diff": 0.027238334309921633,
+          "p_value": 4.500450868489682e-09
+        },
+        "en-es|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.0005763039528659848,
+          "p_value": 0.2497863008338025
+        },
+        "en-es|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.7142857142857143,
+          "ties": 0,
+          "mean_diff": 0.005303170690785496,
+          "p_value": 0.0829938721796861
+        },
+        "en-es|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.9285714285714286,
+          "ties": 0,
+          "mean_diff": 0.0042716022438109725,
+          "p_value": 0.023508476980081353
+        },
+        "en-es|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 0.8571428571428571,
+          "ties": 0,
+          "mean_diff": 0.004337095533802404,
+          "p_value": 0.021821260818451083
+        },
+        "en-es|gemini|tense_consistency|w1": {
+          "n_docs": 67,
+          "accuracy": 0.7313432835820896,
+          "ties": 0,
+          "mean_diff": 0.0011972465731264882,
+          "p_value": 0.011715371404186416
+        },
+        "en-es|gemini|tense_consistency|w3": {
+          "n_docs": 67,
+          "accuracy": 0.7761194029850746,
+          "ties": 0,
+          "mean_diff": 0.0013709892955023,
+          "p_value": 0.0007746177056947609
+        },
+        "en-es|gemini|tense_consistency|w6": {
+          "n_docs": 67,
+          "accuracy": 0.6567164179104478,
+          "ties": 0,
+          "mean_diff": 0.0017184343240042534,
+          "p_value": 0.00024184451604290365
+        },
+        "en-es|gemini|tense_consistency|w9": {
+          "n_docs": 67,
+          "accuracy": 0.6417910447761194,
+          "ties": 0,
+          "mean_diff": 0.0015215712182656176,
+          "p_value": 0.0009005381433613412
+        },
+        "en-es|gemini|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0026123948423477667,
+          "p_value": 6.293360126454758e-05
+        },
+        "en-es|gemini|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.6714285714285714,
+          "ties": 0,
+          "mean_diff": 0.0019001320467505539,
+          "p_value": 0.011891453744206165
+        },
+        "en-es|gemini|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.7285714285714285,
+          "ties": 0,
+          "mean_diff": 0.0028610991552435994,
+          "p_value": 1.0807656879289923e-05
+        },
+        "en-es|gemini|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.7142857142857143,
+          "ties": 0,
+          "mean_diff": 0.003008893186771891,
+          "p_value": 4.967794481448081e-06
+        },
+        "en-es|gemini|conjunction_substitution|w1": {
+          "n_docs": 96,
+          "accuracy": 0.8541666666666666,
+          "ties": 0,
+          "mean_diff": 0.0022386464975957202,
+          "p_value": 6.762086099594935e-07
+        },
+        "en-es|gemini|conjunction_substitution|w3": {
+          "n_docs": 96,
+          "accuracy": 0.7708333333333334,
+          "ties": 0,
+          "mean_diff": 0.0032732258841186713,
+          "p_value": 2.3127306477234693e-06
+        },
+        "en-es|gemini|conjunction_substitution|w6": {
+          "n_docs": 96,
+          "accuracy": 0.8020833333333334,
+          "ties": 0,
+          "mean_diff": 0.0033154928702948685,
+          "p_value": 0.0001707601778693094
+        },
+        "en-es|gemini|conjunction_substitution|w9": {
+          "n_docs": 96,
+          "accuracy": 0.6875,
+          "ties": 0,
+          "mean_diff": 0.003190699501594604,
+          "p_value": 0.001747435308032315
+        },
+        "en-es|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0041632155577341345,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0033983439207077026,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.002109050750732422,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.002109050750732422,
+          "p_value": null
+        },
+        "en-es|gemini|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8671328671328671,
+          "ties": 0,
+          "mean_diff": 0.01199666098309306,
+          "p_value": 5.849762425716641e-19
+        },
+        "en-es|gemini|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8671328671328671,
+          "ties": 0,
+          "mean_diff": 0.016075061844044062,
+          "p_value": 2.5498553991493654e-13
+        },
+        "en-es|gemini|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.8881118881118881,
+          "ties": 0,
+          "mean_diff": 0.018560748561898613,
+          "p_value": 2.6457929556781077e-12
+        },
+        "en-es|gemini|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8601398601398601,
+          "ties": 0,
+          "mean_diff": 0.01803562107870818,
+          "p_value": 9.605627750589081e-11
+        },
+        "en-es|gemini|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 0.986013986013986,
+          "ties": 0,
+          "mean_diff": 0.06215108083587341,
+          "p_value": 4.55438896983476e-58
+        },
+        "en-es|gemini|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.9440559440559441,
+          "ties": 0,
+          "mean_diff": 0.03668027582125429,
+          "p_value": 6.891124959881481e-26
+        },
+        "en-es|gemini|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.9230769230769231,
+          "ties": 0,
+          "mean_diff": 0.03610490203661468,
+          "p_value": 2.3533570229623886e-21
+        },
+        "en-es|gemini|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.9230769230769231,
+          "ties": 0,
+          "mean_diff": 0.03535413910420513,
+          "p_value": 4.346071206037013e-21
+        },
+        "en-es|gemini|sentence_shuffling|w1": {
+          "n_docs": 55,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04429876293250945,
+          "p_value": 9.346844834948137e-31
+        },
+        "en-es|gemini|sentence_shuffling|w3": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.043077533190770324,
+          "p_value": 9.875832941074559e-18
+        },
+        "en-es|gemini|sentence_shuffling|w6": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.03342786784396604,
+          "p_value": 4.3760701628571045e-13
+        },
+        "en-es|gemini|sentence_shuffling|w9": {
+          "n_docs": 55,
+          "accuracy": 0.9090909090909091,
+          "ties": 0,
+          "mean_diff": 0.025539076491481315,
+          "p_value": 1.1404107231306506e-09
+        },
+        "en-es|gemini|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.5,
+          "ties": 0,
+          "mean_diff": 0.00020494764176884087,
+          "p_value": 0.16491014438602639
+        },
+        "en-es|gemini|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.001068632112212604,
+          "p_value": 0.06611260502346972
+        },
+        "en-es|gemini|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0009525587795307503,
+          "p_value": 0.04993336644366522
+        },
+        "en-es|gemini|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.8181818181818182,
+          "ties": 0,
+          "mean_diff": 0.0004769572866394572,
+          "p_value": 0.412299404212779
+        },
+        "en-de|aya23|tense_consistency|w1": {
+          "n_docs": 64,
+          "accuracy": 0.765625,
+          "ties": 0,
+          "mean_diff": 0.0017474759790389888,
+          "p_value": 0.004666618834152218
+        },
+        "en-de|aya23|tense_consistency|w3": {
+          "n_docs": 64,
+          "accuracy": 0.796875,
+          "ties": 0,
+          "mean_diff": 0.001824032522954884,
+          "p_value": 0.08269986799440415
+        },
+        "en-de|aya23|tense_consistency|w6": {
+          "n_docs": 64,
+          "accuracy": 0.734375,
+          "ties": 0,
+          "mean_diff": 0.002130602725036221,
+          "p_value": 0.056556202389954374
+        },
+        "en-de|aya23|tense_consistency|w9": {
+          "n_docs": 64,
+          "accuracy": 0.703125,
+          "ties": 0,
+          "mean_diff": 0.00196883063247299,
+          "p_value": 0.10052891449277715
+        },
+        "en-de|aya23|lexical_consistency|w1": {
+          "n_docs": 48,
+          "accuracy": 0.875,
+          "ties": 0,
+          "mean_diff": 0.0016236337733855934,
+          "p_value": 6.495726574465944e-05
+        },
+        "en-de|aya23|lexical_consistency|w3": {
+          "n_docs": 48,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0019435225582159824,
+          "p_value": 0.002509954699343767
+        },
+        "en-de|aya23|lexical_consistency|w6": {
+          "n_docs": 48,
+          "accuracy": 0.7083333333333334,
+          "ties": 0,
+          "mean_diff": 0.002354218403468125,
+          "p_value": 0.008633313912805815
+        },
+        "en-de|aya23|lexical_consistency|w9": {
+          "n_docs": 48,
+          "accuracy": 0.6458333333333334,
+          "ties": 0,
+          "mean_diff": 0.002058717343405904,
+          "p_value": 0.004191606730501194
+        },
+        "en-de|aya23|conjunction_substitution|w1": {
+          "n_docs": 101,
+          "accuracy": 0.7821782178217822,
+          "ties": 0,
+          "mean_diff": 0.001535122661824058,
+          "p_value": 4.603908014307936e-05
+        },
+        "en-de|aya23|conjunction_substitution|w3": {
+          "n_docs": 101,
+          "accuracy": 0.7128712871287128,
+          "ties": 0,
+          "mean_diff": 0.0013315447619448282,
+          "p_value": 0.005210726739041522
+        },
+        "en-de|aya23|conjunction_substitution|w6": {
+          "n_docs": 101,
+          "accuracy": 0.6237623762376238,
+          "ties": 0,
+          "mean_diff": 0.0005530632349265306,
+          "p_value": 0.6291886494229559
+        },
+        "en-de|aya23|conjunction_substitution|w9": {
+          "n_docs": 101,
+          "accuracy": 0.6138613861386139,
+          "ties": 0,
+          "mean_diff": 0.0005199881407165788,
+          "p_value": 0.6567551876684026
+        },
+        "en-de|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0007163465023041216,
+          "p_value": 0.035744212443841995
+        },
+        "en-de|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.011561233136389015,
+          "p_value": 0.45432849847043494
+        },
+        "en-de|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.014429554343223572,
+          "p_value": 0.45388627802295944
+        },
+        "en-de|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.014530119796593965,
+          "p_value": 0.4491550315965487
+        },
+        "en-de|aya23|sentence_repetition|w1": {
+          "n_docs": 141,
+          "accuracy": 0.851063829787234,
+          "ties": 0,
+          "mean_diff": 0.013962075967741266,
+          "p_value": 1.6383540612285138e-19
+        },
+        "en-de|aya23|sentence_repetition|w3": {
+          "n_docs": 141,
+          "accuracy": 0.8581560283687943,
+          "ties": 0,
+          "mean_diff": 0.01620389181907981,
+          "p_value": 5.973862883691355e-16
+        },
+        "en-de|aya23|sentence_repetition|w6": {
+          "n_docs": 141,
+          "accuracy": 0.8865248226950354,
+          "ties": 0,
+          "mean_diff": 0.016250451939965185,
+          "p_value": 4.4433255928133125e-14
+        },
+        "en-de|aya23|sentence_repetition|w9": {
+          "n_docs": 141,
+          "accuracy": 0.8581560283687943,
+          "ties": 0,
+          "mean_diff": 0.016043080729187913,
+          "p_value": 2.005351069968606e-12
+        },
+        "en-de|aya23|sentence_removal|w1": {
+          "n_docs": 141,
+          "accuracy": 0.9787234042553191,
+          "ties": 0,
+          "mean_diff": 0.06755629460654665,
+          "p_value": 3.2646745963775643e-56
+        },
+        "en-de|aya23|sentence_removal|w3": {
+          "n_docs": 141,
+          "accuracy": 0.9078014184397163,
+          "ties": 0,
+          "mean_diff": 0.029385799548023877,
+          "p_value": 5.796464004908315e-22
+        },
+        "en-de|aya23|sentence_removal|w6": {
+          "n_docs": 141,
+          "accuracy": 0.8723404255319149,
+          "ties": 0,
+          "mean_diff": 0.023011798744043764,
+          "p_value": 5.684553489657878e-13
+        },
+        "en-de|aya23|sentence_removal|w9": {
+          "n_docs": 141,
+          "accuracy": 0.8723404255319149,
+          "ties": 0,
+          "mean_diff": 0.021832749566677783,
+          "p_value": 3.037956921882641e-11
+        },
+        "en-de|aya23|sentence_shuffling|w1": {
+          "n_docs": 54,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04062456500888882,
+          "p_value": 1.912890855507935e-25
+        },
+        "en-de|aya23|sentence_shuffling|w3": {
+          "n_docs": 54,
+          "accuracy": 0.9259259259259259,
+          "ties": 0,
+          "mean_diff": 0.03591374248065305,
+          "p_value": 4.225475845275713e-12
+        },
+        "en-de|aya23|sentence_shuffling|w6": {
+          "n_docs": 54,
+          "accuracy": 0.9259259259259259,
+          "ties": 0,
+          "mean_diff": 0.03083042502003011,
+          "p_value": 4.2087420691725053e-10
+        },
+        "en-de|aya23|sentence_shuffling|w9": {
+          "n_docs": 54,
+          "accuracy": 0.8703703703703703,
+          "ties": 0,
+          "mean_diff": 0.0238557687528754,
+          "p_value": 1.3024716885721114e-08
+        },
+        "en-de|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.7857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0008158893419358747,
+          "p_value": 0.0869580751300617
+        },
+        "en-de|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.002147680423152998,
+          "p_value": 0.1270989866494307
+        },
+        "en-de|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.5714285714285714,
+          "ties": 0,
+          "mean_diff": 0.0025146876014560233,
+          "p_value": 0.15998416581357608
+        },
+        "en-de|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.0030384457990169527,
+          "p_value": 0.15580652181232446
+        },
+        "en-de|gemini|tense_consistency|w1": {
+          "n_docs": 76,
+          "accuracy": 0.7236842105263158,
+          "ties": 0,
+          "mean_diff": 0.0019372244822115643,
+          "p_value": 0.010224855110542731
+        },
+        "en-de|gemini|tense_consistency|w3": {
+          "n_docs": 76,
+          "accuracy": 0.6052631578947368,
+          "ties": 0,
+          "mean_diff": 0.0014221152222292557,
+          "p_value": 0.04265093895950719
+        },
+        "en-de|gemini|tense_consistency|w6": {
+          "n_docs": 76,
+          "accuracy": 0.6710526315789473,
+          "ties": 0,
+          "mean_diff": 0.0013654442402270216,
+          "p_value": 0.04750487012046574
+        },
+        "en-de|gemini|tense_consistency|w9": {
+          "n_docs": 76,
+          "accuracy": 0.6052631578947368,
+          "ties": 0,
+          "mean_diff": 0.0015564779004919587,
+          "p_value": 0.025301045896982517
+        },
+        "en-de|gemini|lexical_consistency|w1": {
+          "n_docs": 55,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.001255054195086357,
+          "p_value": 0.018964773386703444
+        },
+        "en-de|gemini|lexical_consistency|w3": {
+          "n_docs": 55,
+          "accuracy": 0.7636363636363637,
+          "ties": 0,
+          "mean_diff": 0.001774168543832131,
+          "p_value": 0.0010701807163886667
+        },
+        "en-de|gemini|lexical_consistency|w6": {
+          "n_docs": 55,
+          "accuracy": 0.6,
+          "ties": 0,
+          "mean_diff": 0.0016008807953919123,
+          "p_value": 0.018054303352464628
+        },
+        "en-de|gemini|lexical_consistency|w9": {
+          "n_docs": 55,
+          "accuracy": 0.6181818181818182,
+          "ties": 0,
+          "mean_diff": 0.0015303336786283816,
+          "p_value": 0.024900091760184952
+        },
+        "en-de|gemini|conjunction_substitution|w1": {
+          "n_docs": 110,
+          "accuracy": 0.7363636363636363,
+          "ties": 0,
+          "mean_diff": 0.0010044085034595735,
+          "p_value": 0.012739781306822963
+        },
+        "en-de|gemini|conjunction_substitution|w3": {
+          "n_docs": 110,
+          "accuracy": 0.6909090909090909,
+          "ties": 0,
+          "mean_diff": 0.0012790502817550445,
+          "p_value": 0.00038934570324627115
+        },
+        "en-de|gemini|conjunction_substitution|w6": {
+          "n_docs": 110,
+          "accuracy": 0.6363636363636364,
+          "ties": 0,
+          "mean_diff": 0.0010019731389872273,
+          "p_value": 0.05539396381919677
+        },
+        "en-de|gemini|conjunction_substitution|w9": {
+          "n_docs": 110,
+          "accuracy": 0.6545454545454545,
+          "ties": 0,
+          "mean_diff": 0.001326761649215599,
+          "p_value": 0.021643396509234542
+        },
+        "en-de|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 4,
+          "accuracy": 0.5,
+          "ties": 0,
+          "mean_diff": 0.0005803745315999254,
+          "p_value": 0.3708876604863062
+        },
+        "en-de|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0017889310758739119,
+          "p_value": 0.15285517475747076
+        },
+        "en-de|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0031502696736292607,
+          "p_value": 0.14399596138858844
+        },
+        "en-de|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0026943747342777213,
+          "p_value": 0.17113043185708002
+        },
+        "en-de|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.8866666666666667,
+          "ties": 0,
+          "mean_diff": 0.01096161391603041,
+          "p_value": 8.40620314605908e-20
+        },
+        "en-de|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8666666666666667,
+          "ties": 0,
+          "mean_diff": 0.012455753105411896,
+          "p_value": 3.668091254459879e-15
+        },
+        "en-de|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.86,
+          "ties": 0,
+          "mean_diff": 0.01140495521470291,
+          "p_value": 6.144436665898753e-18
+        },
+        "en-de|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8466666666666667,
+          "ties": 0,
+          "mean_diff": 0.011545705187857748,
+          "p_value": 2.7111479675513898e-18
+        },
+        "en-de|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.9933333333333333,
+          "ties": 0,
+          "mean_diff": 0.06710400687712212,
+          "p_value": 1.2486931019407795e-60
+        },
+        "en-de|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.9266666666666666,
+          "ties": 0,
+          "mean_diff": 0.027353547650296198,
+          "p_value": 3.101075046595588e-19
+        },
+        "en-de|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8733333333333333,
+          "ties": 0,
+          "mean_diff": 0.0226108461339385,
+          "p_value": 1.1288752752253765e-12
+        },
+        "en-de|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8266666666666667,
+          "ties": 0,
+          "mean_diff": 0.022530212146965822,
+          "p_value": 9.618621416903944e-12
+        },
+        "en-de|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0420703331744583,
+          "p_value": 3.11395596375292e-32
+        },
+        "en-de|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.036095804110362444,
+          "p_value": 1.8596137205321945e-14
+        },
+        "en-de|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9482758620689655,
+          "ties": 0,
+          "mean_diff": 0.02838117467893515,
+          "p_value": 1.8587643952527148e-10
+        },
+        "en-de|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.020772427005053728,
+          "p_value": 3.5244804765152555e-11
+        },
+        "en-de|gemini|sentence_splitting|w1": {
+          "n_docs": 15,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.001411870868073458,
+          "p_value": 0.1157689026104688
+        },
+        "en-de|gemini|sentence_splitting|w3": {
+          "n_docs": 15,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0022999273270580675,
+          "p_value": 0.3270426826809498
+        },
+        "en-de|gemini|sentence_splitting|w6": {
+          "n_docs": 15,
+          "accuracy": 0.7333333333333333,
+          "ties": 0,
+          "mean_diff": 0.0029083147088497983,
+          "p_value": 0.22671903139337554
+        },
+        "en-de|gemini|sentence_splitting|w9": {
+          "n_docs": 15,
+          "accuracy": 0.8666666666666667,
+          "ties": 0,
+          "mean_diff": 0.004142249452004473,
+          "p_value": 0.26528875896948967
+        }
+      },
+      "micro": {
+        "tense_consistency|w1": {
+          "n_docs": 404,
+          "accuracy": 0.7103960396039604,
+          "ties": 0,
+          "mean_diff": 0.001278890471954625,
+          "p_value": 1.2846842393777716e-08
+        },
+        "tense_consistency|w3": {
+          "n_docs": 404,
+          "accuracy": 0.6881188118811881,
+          "ties": 1,
+          "mean_diff": 0.001465909718668562,
+          "p_value": 1.9316623633383152e-07
+        },
+        "tense_consistency|w6": {
+          "n_docs": 404,
+          "accuracy": 0.6633663366336634,
+          "ties": 1,
+          "mean_diff": 0.0015651191238483491,
+          "p_value": 4.473498995666491e-07
+        },
+        "tense_consistency|w9": {
+          "n_docs": 404,
+          "accuracy": 0.650990099009901,
+          "ties": 1,
+          "mean_diff": 0.0014617231048375957,
+          "p_value": 3.6130920533551677e-06
+        },
+        "lexical_consistency|w1": {
+          "n_docs": 356,
+          "accuracy": 0.7921348314606742,
+          "ties": 0,
+          "mean_diff": 0.0019063625835001117,
+          "p_value": 1.9584942134188494e-11
+        },
+        "lexical_consistency|w3": {
+          "n_docs": 356,
+          "accuracy": 0.6966292134831461,
+          "ties": 0,
+          "mean_diff": 0.0020387829770888823,
+          "p_value": 2.1973293975003424e-11
+        },
+        "lexical_consistency|w6": {
+          "n_docs": 356,
+          "accuracy": 0.6657303370786517,
+          "ties": 0,
+          "mean_diff": 0.0023426509781771508,
+          "p_value": 1.8791122355694462e-12
+        },
+        "lexical_consistency|w9": {
+          "n_docs": 356,
+          "accuracy": 0.6713483146067416,
+          "ties": 0,
+          "mean_diff": 0.0023681522676927973,
+          "p_value": 2.3091240069296883e-12
+        },
+        "conjunction_substitution|w1": {
+          "n_docs": 562,
+          "accuracy": 0.7615658362989324,
+          "ties": 0,
+          "mean_diff": 0.0015630792338049435,
+          "p_value": 1.9982386448716443e-17
+        },
+        "conjunction_substitution|w3": {
+          "n_docs": 562,
+          "accuracy": 0.6743772241992882,
+          "ties": 0,
+          "mean_diff": 0.0017436009205567043,
+          "p_value": 1.1234759817652213e-11
+        },
+        "conjunction_substitution|w6": {
+          "n_docs": 562,
+          "accuracy": 0.6494661921708185,
+          "ties": 0,
+          "mean_diff": 0.0013696594631984905,
+          "p_value": 0.0002795091003494776
+        },
+        "conjunction_substitution|w9": {
+          "n_docs": 562,
+          "accuracy": 0.6334519572953736,
+          "ties": 0,
+          "mean_diff": 0.0015990443578742849,
+          "p_value": 0.00012579611535367525
+        },
+        "pronoun_swap_singular|w1": {
+          "n_docs": 19,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.0003198362972965005,
+          "p_value": 0.5386083897207574
+        },
+        "pronoun_swap_singular|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.0028746984211964464,
+          "p_value": 0.33592341124105307
+        },
+        "pronoun_swap_singular|w6": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.005636919478561819,
+          "p_value": 0.0651900162962738
+        },
+        "pronoun_swap_singular|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.005097733601568069,
+          "p_value": 0.09040894864071651
+        },
+        "pronoun_swap_plural|w1": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.001837719798996253,
+          "p_value": 0.03787344554137209
+        },
+        "pronoun_swap_plural|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.006558023223682757,
+          "p_value": 0.07147518549947579
+        },
+        "pronoun_swap_plural|w6": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.006690657248629495,
+          "p_value": 0.07874866397549157
+        },
+        "pronoun_swap_plural|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.006964457139037948,
+          "p_value": 0.06753406259485911
+        },
+        "sentence_repetition|w1": {
+          "n_docs": 876,
+          "accuracy": 0.8698630136986302,
+          "ties": 0,
+          "mean_diff": 0.012064119178508664,
+          "p_value": 1.6515867079031586e-97
+        },
+        "sentence_repetition|w3": {
+          "n_docs": 876,
+          "accuracy": 0.8515981735159818,
+          "ties": 0,
+          "mean_diff": 0.015355345988622747,
+          "p_value": 2.750084463452458e-72
+        },
+        "sentence_repetition|w6": {
+          "n_docs": 876,
+          "accuracy": 0.8356164383561644,
+          "ties": 1,
+          "mean_diff": 0.01607599186166165,
+          "p_value": 5.746008823958688e-67
+        },
+        "sentence_repetition|w9": {
+          "n_docs": 876,
+          "accuracy": 0.817351598173516,
+          "ties": 1,
+          "mean_diff": 0.015838064695956874,
+          "p_value": 4.0361515820549374e-63
+        },
+        "sentence_removal|w1": {
+          "n_docs": 876,
+          "accuracy": 0.9897260273972602,
+          "ties": 0,
+          "mean_diff": 0.06404528150067305,
+          "p_value": 0.0
+        },
+        "sentence_removal|w3": {
+          "n_docs": 876,
+          "accuracy": 0.9178082191780822,
+          "ties": 0,
+          "mean_diff": 0.03335732874837685,
+          "p_value": 5.565144094194327e-122
+        },
+        "sentence_removal|w6": {
+          "n_docs": 876,
+          "accuracy": 0.8835616438356164,
+          "ties": 0,
+          "mean_diff": 0.029761375457670478,
+          "p_value": 6.309431381279308e-89
+        },
+        "sentence_removal|w9": {
+          "n_docs": 876,
+          "accuracy": 0.860730593607306,
+          "ties": 0,
+          "mean_diff": 0.028225357376810346,
+          "p_value": 5.988733429026067e-79
+        },
+        "sentence_shuffling|w1": {
+          "n_docs": 340,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.042712823536606256,
+          "p_value": 1.9413419054050214e-177
+        },
+        "sentence_shuffling|w3": {
+          "n_docs": 340,
+          "accuracy": 0.9735294117647059,
+          "ties": 0,
+          "mean_diff": 0.039054040122669574,
+          "p_value": 1.9378589684122496e-83
+        },
+        "sentence_shuffling|w6": {
+          "n_docs": 340,
+          "accuracy": 0.9352941176470588,
+          "ties": 0,
+          "mean_diff": 0.031182142152538842,
+          "p_value": 1.0147705655648817e-58
+        },
+        "sentence_shuffling|w9": {
+          "n_docs": 340,
+          "accuracy": 0.8941176470588236,
+          "ties": 0,
+          "mean_diff": 0.023711629313277433,
+          "p_value": 2.021341786936703e-47
+        },
+        "sentence_splitting|w1": {
+          "n_docs": 100,
+          "accuracy": 0.63,
+          "ties": 0,
+          "mean_diff": 0.000576781905702678,
+          "p_value": 0.0019484657619994721
+        },
+        "sentence_splitting|w3": {
+          "n_docs": 100,
+          "accuracy": 0.71,
+          "ties": 0,
+          "mean_diff": 0.0024977217897176533,
+          "p_value": 0.00014312906511883852
+        },
+        "sentence_splitting|w6": {
+          "n_docs": 100,
+          "accuracy": 0.77,
+          "ties": 0,
+          "mean_diff": 0.002780264861690136,
+          "p_value": 2.4020200296898903e-05
+        },
+        "sentence_splitting|w9": {
+          "n_docs": 100,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0034084287337514557,
+          "p_value": 0.00014215916301695477
+        }
+      }
+    },
+    "mix-frac020-frozen": {
+      "referenceless": false,
+      "per_cell": {
+        "en-fr|aya23|tense_consistency|w1": {
+          "n_docs": 80,
+          "accuracy": 0.675,
+          "ties": 0,
+          "mean_diff": 0.00047123423051869117,
+          "p_value": 0.10162749371547329
+        },
+        "en-fr|aya23|tense_consistency|w3": {
+          "n_docs": 80,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.001545364507419257,
+          "p_value": 0.00042844460392638584
+        },
+        "en-fr|aya23|tense_consistency|w6": {
+          "n_docs": 80,
+          "accuracy": 0.6875,
+          "ties": 0,
+          "mean_diff": 0.0014112267424300502,
+          "p_value": 0.005174217343296819
+        },
+        "en-fr|aya23|tense_consistency|w9": {
+          "n_docs": 80,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.0014935289534632145,
+          "p_value": 0.003008527009859684
+        },
+        "en-fr|aya23|lexical_consistency|w1": {
+          "n_docs": 59,
+          "accuracy": 0.711864406779661,
+          "ties": 0,
+          "mean_diff": 0.0007314601701676993,
+          "p_value": 0.38005015553089405
+        },
+        "en-fr|aya23|lexical_consistency|w3": {
+          "n_docs": 59,
+          "accuracy": 0.7288135593220338,
+          "ties": 0,
+          "mean_diff": 0.00115218450687973,
+          "p_value": 0.058883614325198244
+        },
+        "en-fr|aya23|lexical_consistency|w6": {
+          "n_docs": 59,
+          "accuracy": 0.711864406779661,
+          "ties": 0,
+          "mean_diff": 0.0015941648623517132,
+          "p_value": 0.027120980883190385
+        },
+        "en-fr|aya23|lexical_consistency|w9": {
+          "n_docs": 59,
+          "accuracy": 0.7288135593220338,
+          "ties": 0,
+          "mean_diff": 0.001791180136688562,
+          "p_value": 0.020531764923157492
+        },
+        "en-fr|aya23|conjunction_substitution|w1": {
+          "n_docs": 82,
+          "accuracy": 0.6707317073170732,
+          "ties": 0,
+          "mean_diff": 0.0013604470816926991,
+          "p_value": 0.0010687476176737061
+        },
+        "en-fr|aya23|conjunction_substitution|w3": {
+          "n_docs": 82,
+          "accuracy": 0.6585365853658537,
+          "ties": 0,
+          "mean_diff": 0.0014142783311750344,
+          "p_value": 0.029431704721409827
+        },
+        "en-fr|aya23|conjunction_substitution|w6": {
+          "n_docs": 82,
+          "accuracy": 0.5853658536585366,
+          "ties": 0,
+          "mean_diff": 0.0012445837208640584,
+          "p_value": 0.10523233495526191
+        },
+        "en-fr|aya23|conjunction_substitution|w9": {
+          "n_docs": 82,
+          "accuracy": 0.6585365853658537,
+          "ties": 0,
+          "mean_diff": 0.0019210529413222288,
+          "p_value": 0.02342962105675068
+        },
+        "en-fr|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.0003810903121136272,
+          "p_value": 0.5367383320082564
+        },
+        "en-fr|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.0019259128783797388,
+          "p_value": 0.5734051243284397
+        },
+        "en-fr|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.00414269608868794,
+          "p_value": 0.2521559279359177
+        },
+        "en-fr|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.003455213512395798,
+          "p_value": 0.31406515969286897
+        },
+        "en-fr|aya23|pronoun_swap_plural|w1": {
+          "n_docs": 10,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0023675939503120637,
+          "p_value": 0.18257374390364647
+        },
+        "en-fr|aya23|pronoun_swap_plural|w3": {
+          "n_docs": 10,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.006879008085660593,
+          "p_value": 0.16281079767008294
+        },
+        "en-fr|aya23|pronoun_swap_plural|w6": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.006103549581469275,
+          "p_value": 0.12186868678312603
+        },
+        "en-fr|aya23|pronoun_swap_plural|w9": {
+          "n_docs": 10,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.006286197328293691,
+          "p_value": 0.11388133277022365
+        },
+        "en-fr|aya23|sentence_repetition|w1": {
+          "n_docs": 149,
+          "accuracy": 0.8456375838926175,
+          "ties": 0,
+          "mean_diff": 0.011804185388217283,
+          "p_value": 5.498053027943058e-21
+        },
+        "en-fr|aya23|sentence_repetition|w3": {
+          "n_docs": 149,
+          "accuracy": 0.7718120805369127,
+          "ties": 0,
+          "mean_diff": 0.016106345932110775,
+          "p_value": 2.609431326105e-14
+        },
+        "en-fr|aya23|sentence_repetition|w6": {
+          "n_docs": 149,
+          "accuracy": 0.7718120805369127,
+          "ties": 0,
+          "mean_diff": 0.017022313920955576,
+          "p_value": 2.1055111690212374e-15
+        },
+        "en-fr|aya23|sentence_repetition|w9": {
+          "n_docs": 149,
+          "accuracy": 0.7718120805369127,
+          "ties": 0,
+          "mean_diff": 0.01788417112936048,
+          "p_value": 6.025974217030283e-17
+        },
+        "en-fr|aya23|sentence_removal|w1": {
+          "n_docs": 149,
+          "accuracy": 0.9261744966442953,
+          "ties": 0,
+          "mean_diff": 0.022363306958080063,
+          "p_value": 2.7039577962873454e-37
+        },
+        "en-fr|aya23|sentence_removal|w3": {
+          "n_docs": 149,
+          "accuracy": 0.9060402684563759,
+          "ties": 0,
+          "mean_diff": 0.023699076818227558,
+          "p_value": 3.2934069928853053e-21
+        },
+        "en-fr|aya23|sentence_removal|w6": {
+          "n_docs": 149,
+          "accuracy": 0.8926174496644296,
+          "ties": 0,
+          "mean_diff": 0.025853139625997227,
+          "p_value": 2.043548176256788e-20
+        },
+        "en-fr|aya23|sentence_removal|w9": {
+          "n_docs": 149,
+          "accuracy": 0.8590604026845637,
+          "ties": 0,
+          "mean_diff": 0.02374289409337744,
+          "p_value": 4.0681037670361315e-18
+        },
+        "en-fr|aya23|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.019510869991060956,
+          "p_value": 5.778350377221952e-28
+        },
+        "en-fr|aya23|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.02382466480695417,
+          "p_value": 4.785412856070993e-16
+        },
+        "en-fr|aya23|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9310344827586207,
+          "ties": 0,
+          "mean_diff": 0.019621175261554644,
+          "p_value": 2.8581053893735907e-12
+        },
+        "en-fr|aya23|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.896551724137931,
+          "ties": 0,
+          "mean_diff": 0.015520168643215355,
+          "p_value": 2.4779863879404548e-08
+        },
+        "en-fr|aya23|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0009717361152324709,
+          "p_value": 0.017056595880336332
+        },
+        "en-fr|aya23|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.8636363636363636,
+          "ties": 0,
+          "mean_diff": 0.00392941424667193,
+          "p_value": 0.001625768396509975
+        },
+        "en-fr|aya23|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.8636363636363636,
+          "ties": 0,
+          "mean_diff": 0.004446347931220048,
+          "p_value": 0.0005782606114556245
+        },
+        "en-fr|aya23|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.8636363636363636,
+          "ties": 0,
+          "mean_diff": 0.005603734571188177,
+          "p_value": 0.0008530048167087075
+        },
+        "en-fr|gemini|tense_consistency|w1": {
+          "n_docs": 60,
+          "accuracy": 0.5833333333333334,
+          "ties": 0,
+          "mean_diff": 0.0003974982252676479,
+          "p_value": 0.28651607372174215
+        },
+        "en-fr|gemini|tense_consistency|w3": {
+          "n_docs": 60,
+          "accuracy": 0.6166666666666667,
+          "ties": 1,
+          "mean_diff": 0.0011729525790130136,
+          "p_value": 0.03299246924227411
+        },
+        "en-fr|gemini|tense_consistency|w6": {
+          "n_docs": 60,
+          "accuracy": 0.7,
+          "ties": 1,
+          "mean_diff": 0.0014995733302765667,
+          "p_value": 0.032182191212109953
+        },
+        "en-fr|gemini|tense_consistency|w9": {
+          "n_docs": 60,
+          "accuracy": 0.6833333333333333,
+          "ties": 1,
+          "mean_diff": 0.0013434937064116664,
+          "p_value": 0.03082619548132311
+        },
+        "en-fr|gemini|lexical_consistency|w1": {
+          "n_docs": 54,
+          "accuracy": 0.7407407407407407,
+          "ties": 0,
+          "mean_diff": 0.002229668202805166,
+          "p_value": 0.007296020313473408
+        },
+        "en-fr|gemini|lexical_consistency|w3": {
+          "n_docs": 54,
+          "accuracy": 0.7592592592592593,
+          "ties": 0,
+          "mean_diff": 0.002385534392016889,
+          "p_value": 0.00047324610237487364
+        },
+        "en-fr|gemini|lexical_consistency|w6": {
+          "n_docs": 54,
+          "accuracy": 0.7222222222222222,
+          "ties": 0,
+          "mean_diff": 0.0021480712706456926,
+          "p_value": 0.007026766788882978
+        },
+        "en-fr|gemini|lexical_consistency|w9": {
+          "n_docs": 54,
+          "accuracy": 0.7777777777777778,
+          "ties": 0,
+          "mean_diff": 0.0023746322250675837,
+          "p_value": 0.00292185638631759
+        },
+        "en-fr|gemini|conjunction_substitution|w1": {
+          "n_docs": 80,
+          "accuracy": 0.6625,
+          "ties": 0,
+          "mean_diff": 0.0008319324675798316,
+          "p_value": 0.0016753750366344257
+        },
+        "en-fr|gemini|conjunction_substitution|w3": {
+          "n_docs": 80,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.0007363427415046003,
+          "p_value": 0.03819927944596001
+        },
+        "en-fr|gemini|conjunction_substitution|w6": {
+          "n_docs": 80,
+          "accuracy": 0.65,
+          "ties": 0,
+          "mean_diff": 0.0005494612014647112,
+          "p_value": 0.2356804549201572
+        },
+        "en-fr|gemini|conjunction_substitution|w9": {
+          "n_docs": 80,
+          "accuracy": 0.6125,
+          "ties": 0,
+          "mean_diff": 0.0008241176520368959,
+          "p_value": 0.084055796857322
+        },
+        "en-fr|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 5,
+          "accuracy": 0.4,
+          "ties": 0,
+          "mean_diff": 0.0007695439810744276,
+          "p_value": 0.3095638949918064
+        },
+        "en-fr|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 5,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.004680039719416618,
+          "p_value": 0.2669469612613102
+        },
+        "en-fr|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.004073247242541533,
+          "p_value": 0.15891104122440586
+        },
+        "en-fr|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0037898814153371372,
+          "p_value": 0.18195667706164514
+        },
+        "en-fr|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 8,
+          "accuracy": 0.5,
+          "ties": 0,
+          "mean_diff": -0.00010531208812153414,
+          "p_value": 0.5065651391791233
+        },
+        "en-fr|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.0024189193456019276,
+          "p_value": 0.2571845623960148
+        },
+        "en-fr|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.002457060106700923,
+          "p_value": 0.34505462375065316
+        },
+        "en-fr|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.003003131312677494,
+          "p_value": 0.24243915495619306
+        },
+        "en-fr|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.8733333333333333,
+          "ties": 0,
+          "mean_diff": 0.012905689157379111,
+          "p_value": 1.7305001205205943e-23
+        },
+        "en-fr|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8466666666666667,
+          "ties": 0,
+          "mean_diff": 0.017724703926502685,
+          "p_value": 1.4308293883663405e-21
+        },
+        "en-fr|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.9,
+          "ties": 1,
+          "mean_diff": 0.02051331226098619,
+          "p_value": 3.7332283356195805e-24
+        },
+        "en-fr|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8666666666666667,
+          "ties": 1,
+          "mean_diff": 0.02010217470397655,
+          "p_value": 7.021115158051903e-24
+        },
+        "en-fr|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.9533333333333334,
+          "ties": 0,
+          "mean_diff": 0.022778166784289924,
+          "p_value": 2.182459348794929e-37
+        },
+        "en-fr|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8466666666666667,
+          "ties": 0,
+          "mean_diff": 0.02319803068251761,
+          "p_value": 6.678480926484715e-19
+        },
+        "en-fr|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8066666666666666,
+          "ties": 0,
+          "mean_diff": 0.022950455351834376,
+          "p_value": 1.2397069388518088e-16
+        },
+        "en-fr|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8133333333333334,
+          "ties": 0,
+          "mean_diff": 0.022071403457744807,
+          "p_value": 1.064140448371825e-15
+        },
+        "en-fr|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.021452767444601204,
+          "p_value": 1.513425635580323e-29
+        },
+        "en-fr|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.02488695967203003,
+          "p_value": 2.0477489234643516e-18
+        },
+        "en-fr|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.020639987201463095,
+          "p_value": 4.4612081989583603e-13
+        },
+        "en-fr|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.016206232988361775,
+          "p_value": 4.895106214448434e-11
+        },
+        "en-fr|gemini|sentence_splitting|w1": {
+          "n_docs": 13,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.0004027836325959548,
+          "p_value": 0.04760858582670831
+        },
+        "en-fr|gemini|sentence_splitting|w3": {
+          "n_docs": 13,
+          "accuracy": 0.8461538461538461,
+          "ties": 0,
+          "mean_diff": 0.0006353903670963496,
+          "p_value": 0.053114679743274634
+        },
+        "en-fr|gemini|sentence_splitting|w6": {
+          "n_docs": 13,
+          "accuracy": 0.8461538461538461,
+          "ties": 0,
+          "mean_diff": 0.0016147965657602116,
+          "p_value": 0.01446317579263058
+        },
+        "en-fr|gemini|sentence_splitting|w9": {
+          "n_docs": 13,
+          "accuracy": 0.8461538461538461,
+          "ties": 0,
+          "mean_diff": 0.0017473680932350577,
+          "p_value": 0.0056584489569310266
+        },
+        "en-es|aya23|tense_consistency|w1": {
+          "n_docs": 57,
+          "accuracy": 0.7543859649122807,
+          "ties": 0,
+          "mean_diff": 0.0014581848608262132,
+          "p_value": 2.012032463463309e-05
+        },
+        "en-es|aya23|tense_consistency|w3": {
+          "n_docs": 57,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0015524064298452621,
+          "p_value": 0.0012502252852995797
+        },
+        "en-es|aya23|tense_consistency|w6": {
+          "n_docs": 57,
+          "accuracy": 0.6491228070175439,
+          "ties": 0,
+          "mean_diff": 0.0015046772565145542,
+          "p_value": 0.0009654939473276825
+        },
+        "en-es|aya23|tense_consistency|w9": {
+          "n_docs": 57,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0014117835354245719,
+          "p_value": 0.0012373407349321383
+        },
+        "en-es|aya23|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0020148963203605627,
+          "p_value": 9.662091960514336e-06
+        },
+        "en-es|aya23|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.7428571428571429,
+          "ties": 0,
+          "mean_diff": 0.002660522465943139,
+          "p_value": 0.00047886714684940396
+        },
+        "en-es|aya23|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.0026127265329927746,
+          "p_value": 1.5028787485395939e-05
+        },
+        "en-es|aya23|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.6857142857142857,
+          "ties": 0,
+          "mean_diff": 0.002708382751529312,
+          "p_value": 1.720480867275775e-05
+        },
+        "en-es|aya23|conjunction_substitution|w1": {
+          "n_docs": 93,
+          "accuracy": 0.7311827956989247,
+          "ties": 0,
+          "mean_diff": 0.0015482462233758457,
+          "p_value": 0.0035608282932996747
+        },
+        "en-es|aya23|conjunction_substitution|w3": {
+          "n_docs": 93,
+          "accuracy": 0.6129032258064516,
+          "ties": 0,
+          "mean_diff": 0.001681575150110065,
+          "p_value": 0.0028490772888930286
+        },
+        "en-es|aya23|conjunction_substitution|w6": {
+          "n_docs": 93,
+          "accuracy": 0.6236559139784946,
+          "ties": 0,
+          "mean_diff": 0.0017444018368168476,
+          "p_value": 0.016189178752519066
+        },
+        "en-es|aya23|conjunction_substitution|w9": {
+          "n_docs": 93,
+          "accuracy": 0.6344086021505376,
+          "ties": 0,
+          "mean_diff": 0.0021066413289743667,
+          "p_value": 0.007060271880830083
+        },
+        "en-es|aya23|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8671328671328671,
+          "ties": 0,
+          "mean_diff": 0.011338422154655263,
+          "p_value": 1.921891044727725e-20
+        },
+        "en-es|aya23|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8181818181818182,
+          "ties": 0,
+          "mean_diff": 0.014585843044056539,
+          "p_value": 3.7119122619287143e-16
+        },
+        "en-es|aya23|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.7902097902097902,
+          "ties": 0,
+          "mean_diff": 0.015186932900749092,
+          "p_value": 4.3742641069265685e-16
+        },
+        "en-es|aya23|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.015781613848244277,
+          "p_value": 2.5485222496983103e-17
+        },
+        "en-es|aya23|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 0.916083916083916,
+          "ties": 0,
+          "mean_diff": 0.019822936051343082,
+          "p_value": 2.1632349939417808e-33
+        },
+        "en-es|aya23|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8951048951048951,
+          "ties": 0,
+          "mean_diff": 0.0244124500386711,
+          "p_value": 1.4532140856457409e-21
+        },
+        "en-es|aya23|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.8881118881118881,
+          "ties": 0,
+          "mean_diff": 0.026637815811663,
+          "p_value": 6.777345118586792e-22
+        },
+        "en-es|aya23|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8881118881118881,
+          "ties": 0,
+          "mean_diff": 0.026154814285228683,
+          "p_value": 2.6380184517236863e-20
+        },
+        "en-es|aya23|sentence_shuffling|w1": {
+          "n_docs": 57,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.019634905283141477,
+          "p_value": 1.0472660849841202e-29
+        },
+        "en-es|aya23|sentence_shuffling|w3": {
+          "n_docs": 57,
+          "accuracy": 0.9473684210526315,
+          "ties": 0,
+          "mean_diff": 0.024436972159817636,
+          "p_value": 2.3889308063745998e-17
+        },
+        "en-es|aya23|sentence_shuffling|w6": {
+          "n_docs": 57,
+          "accuracy": 0.9122807017543859,
+          "ties": 0,
+          "mean_diff": 0.02184258029348886,
+          "p_value": 4.500218813946632e-12
+        },
+        "en-es|aya23|sentence_shuffling|w9": {
+          "n_docs": 57,
+          "accuracy": 0.8771929824561403,
+          "ties": 0,
+          "mean_diff": 0.017872315121731857,
+          "p_value": 6.743168402244387e-11
+        },
+        "en-es|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.7857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0007686393547474373,
+          "p_value": 0.13094896603574077
+        },
+        "en-es|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.9285714285714286,
+          "ties": 0,
+          "mean_diff": 0.0038044047573177753,
+          "p_value": 0.06170448053186578
+        },
+        "en-es|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.8571428571428571,
+          "ties": 0,
+          "mean_diff": 0.0030051995734964704,
+          "p_value": 0.04706839541528552
+        },
+        "en-es|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.003191760721477988,
+          "p_value": 0.031853280386789265
+        },
+        "en-es|gemini|tense_consistency|w1": {
+          "n_docs": 67,
+          "accuracy": 0.746268656716418,
+          "ties": 0,
+          "mean_diff": 0.001175743664346848,
+          "p_value": 0.00033207477870475657
+        },
+        "en-es|gemini|tense_consistency|w3": {
+          "n_docs": 67,
+          "accuracy": 0.8059701492537313,
+          "ties": 0,
+          "mean_diff": 0.0015290044130556407,
+          "p_value": 1.8455719204952336e-05
+        },
+        "en-es|gemini|tense_consistency|w6": {
+          "n_docs": 67,
+          "accuracy": 0.7313432835820896,
+          "ties": 0,
+          "mean_diff": 0.0018723871429065994,
+          "p_value": 4.173341786194183e-06
+        },
+        "en-es|gemini|tense_consistency|w9": {
+          "n_docs": 67,
+          "accuracy": 0.7761194029850746,
+          "ties": 0,
+          "mean_diff": 0.0018359697351746412,
+          "p_value": 1.0228451943343617e-05
+        },
+        "en-es|gemini|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0016184325279907914,
+          "p_value": 0.00013850503630243258
+        },
+        "en-es|gemini|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.7285714285714285,
+          "ties": 0,
+          "mean_diff": 0.0016044221976631292,
+          "p_value": 0.005502494679187895
+        },
+        "en-es|gemini|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.7714285714285715,
+          "ties": 0,
+          "mean_diff": 0.0023755038655850374,
+          "p_value": 8.977430353886407e-06
+        },
+        "en-es|gemini|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.7857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0024740276447802047,
+          "p_value": 3.294655914680635e-06
+        },
+        "en-es|gemini|conjunction_substitution|w1": {
+          "n_docs": 96,
+          "accuracy": 0.8541666666666666,
+          "ties": 0,
+          "mean_diff": 0.0019639163629885173,
+          "p_value": 1.1045212829667575e-07
+        },
+        "en-es|gemini|conjunction_substitution|w3": {
+          "n_docs": 96,
+          "accuracy": 0.78125,
+          "ties": 0,
+          "mean_diff": 0.0025827590091366554,
+          "p_value": 4.7403629678566915e-07
+        },
+        "en-es|gemini|conjunction_substitution|w6": {
+          "n_docs": 96,
+          "accuracy": 0.7604166666666666,
+          "ties": 0,
+          "mean_diff": 0.0027472688004690896,
+          "p_value": 2.3660776275988573e-06
+        },
+        "en-es|gemini|conjunction_substitution|w9": {
+          "n_docs": 96,
+          "accuracy": 0.7083333333333334,
+          "ties": 0,
+          "mean_diff": 0.002893280703436254,
+          "p_value": 1.072830078794141e-05
+        },
+        "en-es|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.005845447381337521,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.005501478910446167,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0033621788024902344,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0033621788024902344,
+          "p_value": null
+        },
+        "en-es|gemini|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8041958041958042,
+          "ties": 0,
+          "mean_diff": 0.011066982958254399,
+          "p_value": 5.509908667941879e-19
+        },
+        "en-es|gemini|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8111888111888111,
+          "ties": 0,
+          "mean_diff": 0.01600350062616862,
+          "p_value": 4.355049596332303e-15
+        },
+        "en-es|gemini|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.8391608391608392,
+          "ties": 0,
+          "mean_diff": 0.018609772767504095,
+          "p_value": 2.322436152194766e-17
+        },
+        "en-es|gemini|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8321678321678322,
+          "ties": 0,
+          "mean_diff": 0.01860128572278516,
+          "p_value": 4.4126540643183087e-16
+        },
+        "en-es|gemini|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 0.9230769230769231,
+          "ties": 0,
+          "mean_diff": 0.022192481858157278,
+          "p_value": 3.527827717053664e-38
+        },
+        "en-es|gemini|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.9300699300699301,
+          "ties": 0,
+          "mean_diff": 0.025973941010821927,
+          "p_value": 3.283140580737615e-27
+        },
+        "en-es|gemini|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.9020979020979021,
+          "ties": 0,
+          "mean_diff": 0.027859594815567493,
+          "p_value": 7.835614781166046e-24
+        },
+        "en-es|gemini|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.916083916083916,
+          "ties": 0,
+          "mean_diff": 0.027104539932697104,
+          "p_value": 2.2703668695032223e-23
+        },
+        "en-es|gemini|sentence_shuffling|w1": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.0201720217484737,
+          "p_value": 7.335055070237054e-25
+        },
+        "en-es|gemini|sentence_shuffling|w3": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.027243984677032478,
+          "p_value": 2.142654705441042e-18
+        },
+        "en-es|gemini|sentence_shuffling|w6": {
+          "n_docs": 55,
+          "accuracy": 0.9636363636363636,
+          "ties": 0,
+          "mean_diff": 0.022700348004672112,
+          "p_value": 1.8850565999388245e-13
+        },
+        "en-es|gemini|sentence_shuffling|w9": {
+          "n_docs": 55,
+          "accuracy": 0.9272727272727272,
+          "ties": 0,
+          "mean_diff": 0.01763421551535432,
+          "p_value": 2.963512357679438e-11
+        },
+        "en-es|gemini|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.00033091518324451026,
+          "p_value": 0.04929916590058377
+        },
+        "en-es|gemini|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.0012211111854738604,
+          "p_value": 0.010345058535538123
+        },
+        "en-es|gemini|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.8636363636363636,
+          "ties": 0,
+          "mean_diff": 0.0018521228408080838,
+          "p_value": 0.004805272638763815
+        },
+        "en-es|gemini|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.9090909090909091,
+          "ties": 0,
+          "mean_diff": 0.0018709237786929248,
+          "p_value": 0.001778445517417731
+        },
+        "en-de|aya23|tense_consistency|w1": {
+          "n_docs": 64,
+          "accuracy": 0.796875,
+          "ties": 0,
+          "mean_diff": 0.002059628792058986,
+          "p_value": 0.0013882991651291312
+        },
+        "en-de|aya23|tense_consistency|w3": {
+          "n_docs": 64,
+          "accuracy": 0.8125,
+          "ties": 0,
+          "mean_diff": 0.0024568665183223167,
+          "p_value": 0.005941827273538941
+        },
+        "en-de|aya23|tense_consistency|w6": {
+          "n_docs": 64,
+          "accuracy": 0.65625,
+          "ties": 0,
+          "mean_diff": 0.0026364801329845887,
+          "p_value": 0.004990272973144211
+        },
+        "en-de|aya23|tense_consistency|w9": {
+          "n_docs": 64,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": 0.002509216749029948,
+          "p_value": 0.0089362787674134
+        },
+        "en-de|aya23|lexical_consistency|w1": {
+          "n_docs": 48,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0014395663375492765,
+          "p_value": 8.630505363775635e-05
+        },
+        "en-de|aya23|lexical_consistency|w3": {
+          "n_docs": 48,
+          "accuracy": 0.7083333333333334,
+          "ties": 0,
+          "mean_diff": 0.0014046711418339481,
+          "p_value": 0.0005169266102799803
+        },
+        "en-de|aya23|lexical_consistency|w6": {
+          "n_docs": 48,
+          "accuracy": 0.6458333333333334,
+          "ties": 0,
+          "mean_diff": 0.0012963447383407035,
+          "p_value": 0.009120923969248407
+        },
+        "en-de|aya23|lexical_consistency|w9": {
+          "n_docs": 48,
+          "accuracy": 0.5416666666666666,
+          "ties": 0,
+          "mean_diff": 0.0010664931546722396,
+          "p_value": 0.011648276698272756
+        },
+        "en-de|aya23|conjunction_substitution|w1": {
+          "n_docs": 101,
+          "accuracy": 0.7425742574257426,
+          "ties": 0,
+          "mean_diff": 0.0014880845859862326,
+          "p_value": 6.0647129436598215e-06
+        },
+        "en-de|aya23|conjunction_substitution|w3": {
+          "n_docs": 101,
+          "accuracy": 0.7128712871287128,
+          "ties": 0,
+          "mean_diff": 0.0014471431750956883,
+          "p_value": 7.066045825965718e-05
+        },
+        "en-de|aya23|conjunction_substitution|w6": {
+          "n_docs": 101,
+          "accuracy": 0.7326732673267327,
+          "ties": 0,
+          "mean_diff": 0.0014277401141435393,
+          "p_value": 0.010072408784761391
+        },
+        "en-de|aya23|conjunction_substitution|w9": {
+          "n_docs": 101,
+          "accuracy": 0.6831683168316832,
+          "ties": 0,
+          "mean_diff": 0.0014997997783330892,
+          "p_value": 0.01574174893215656
+        },
+        "en-de|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0008656084537506104,
+          "p_value": 0.0004602862072700793
+        },
+        "en-de|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.011557279361618877,
+          "p_value": 0.40154951231362973
+        },
+        "en-de|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.01549989183743794,
+          "p_value": 0.4177098968780575
+        },
+        "en-de|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.015516179303328187,
+          "p_value": 0.41696664645239023
+        },
+        "en-de|aya23|sentence_repetition|w1": {
+          "n_docs": 141,
+          "accuracy": 0.8652482269503546,
+          "ties": 0,
+          "mean_diff": 0.014618490812327863,
+          "p_value": 4.61082258917786e-23
+        },
+        "en-de|aya23|sentence_repetition|w3": {
+          "n_docs": 141,
+          "accuracy": 0.8368794326241135,
+          "ties": 0,
+          "mean_diff": 0.018761662426060827,
+          "p_value": 2.1172239411595174e-19
+        },
+        "en-de|aya23|sentence_repetition|w6": {
+          "n_docs": 141,
+          "accuracy": 0.8652482269503546,
+          "ties": 0,
+          "mean_diff": 0.0184174478876207,
+          "p_value": 1.4259608741401433e-18
+        },
+        "en-de|aya23|sentence_repetition|w9": {
+          "n_docs": 141,
+          "accuracy": 0.8581560283687943,
+          "ties": 0,
+          "mean_diff": 0.018561441988675938,
+          "p_value": 2.2554299192155278e-17
+        },
+        "en-de|aya23|sentence_removal|w1": {
+          "n_docs": 141,
+          "accuracy": 0.9432624113475178,
+          "ties": 0,
+          "mean_diff": 0.028606132571624837,
+          "p_value": 6.147293416407838e-39
+        },
+        "en-de|aya23|sentence_removal|w3": {
+          "n_docs": 141,
+          "accuracy": 0.8723404255319149,
+          "ties": 0,
+          "mean_diff": 0.024394815109580772,
+          "p_value": 2.2947743793101404e-24
+        },
+        "en-de|aya23|sentence_removal|w6": {
+          "n_docs": 141,
+          "accuracy": 0.8297872340425532,
+          "ties": 0,
+          "mean_diff": 0.021566263051351217,
+          "p_value": 4.1699329418275475e-17
+        },
+        "en-de|aya23|sentence_removal|w9": {
+          "n_docs": 141,
+          "accuracy": 0.8014184397163121,
+          "ties": 0,
+          "mean_diff": 0.02057922457331256,
+          "p_value": 1.0320524328516076e-15
+        },
+        "en-de|aya23|sentence_shuffling|w1": {
+          "n_docs": 54,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.019980454627766302,
+          "p_value": 3.7381111824598494e-25
+        },
+        "en-de|aya23|sentence_shuffling|w3": {
+          "n_docs": 54,
+          "accuracy": 0.9444444444444444,
+          "ties": 0,
+          "mean_diff": 0.023910791086287804,
+          "p_value": 2.7716348182687332e-14
+        },
+        "en-de|aya23|sentence_shuffling|w6": {
+          "n_docs": 54,
+          "accuracy": 0.9074074074074074,
+          "ties": 0,
+          "mean_diff": 0.021577129172570507,
+          "p_value": 7.870634864266062e-12
+        },
+        "en-de|aya23|sentence_shuffling|w9": {
+          "n_docs": 54,
+          "accuracy": 0.8703703703703703,
+          "ties": 0,
+          "mean_diff": 0.017089812383825082,
+          "p_value": 2.98132380226615e-10
+        },
+        "en-de|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.7857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0013729519328491027,
+          "p_value": 0.023858257712265858
+        },
+        "en-de|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.7142857142857143,
+          "ties": 0,
+          "mean_diff": 0.0021432040650792494,
+          "p_value": 0.045487714265745854
+        },
+        "en-de|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.5714285714285714,
+          "ties": 0,
+          "mean_diff": 0.002064763472140078,
+          "p_value": 0.14426735423979356
+        },
+        "en-de|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.002568155854619257,
+          "p_value": 0.2310418284841761
+        },
+        "en-de|gemini|tense_consistency|w1": {
+          "n_docs": 76,
+          "accuracy": 0.7236842105263158,
+          "ties": 0,
+          "mean_diff": 0.0022727304027198325,
+          "p_value": 0.003247984087109442
+        },
+        "en-de|gemini|tense_consistency|w3": {
+          "n_docs": 76,
+          "accuracy": 0.7368421052631579,
+          "ties": 0,
+          "mean_diff": 0.002311924605237205,
+          "p_value": 0.0006414982975339181
+        },
+        "en-de|gemini|tense_consistency|w6": {
+          "n_docs": 76,
+          "accuracy": 0.7368421052631579,
+          "ties": 0,
+          "mean_diff": 0.0022277059305938663,
+          "p_value": 0.0010227918302137798
+        },
+        "en-de|gemini|tense_consistency|w9": {
+          "n_docs": 76,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.002436414064153426,
+          "p_value": 0.00042968330167206714
+        },
+        "en-de|gemini|lexical_consistency|w1": {
+          "n_docs": 55,
+          "accuracy": 0.6363636363636364,
+          "ties": 0,
+          "mean_diff": 0.0010795015646151342,
+          "p_value": 0.09390891269878814
+        },
+        "en-de|gemini|lexical_consistency|w3": {
+          "n_docs": 55,
+          "accuracy": 0.6545454545454545,
+          "ties": 0,
+          "mean_diff": 0.0018047621655783936,
+          "p_value": 0.0007424973341159932
+        },
+        "en-de|gemini|lexical_consistency|w6": {
+          "n_docs": 55,
+          "accuracy": 0.6181818181818182,
+          "ties": 0,
+          "mean_diff": 0.001746402289404745,
+          "p_value": 0.005960321921910117
+        },
+        "en-de|gemini|lexical_consistency|w9": {
+          "n_docs": 55,
+          "accuracy": 0.6181818181818182,
+          "ties": 0,
+          "mean_diff": 0.0016320993928896036,
+          "p_value": 0.01041825541449782
+        },
+        "en-de|gemini|conjunction_substitution|w1": {
+          "n_docs": 110,
+          "accuracy": 0.6636363636363637,
+          "ties": 0,
+          "mean_diff": 0.0012032470628087215,
+          "p_value": 0.003794580251008629
+        },
+        "en-de|gemini|conjunction_substitution|w3": {
+          "n_docs": 110,
+          "accuracy": 0.7181818181818181,
+          "ties": 0,
+          "mean_diff": 0.0015756992413350677,
+          "p_value": 1.0415152729462506e-05
+        },
+        "en-de|gemini|conjunction_substitution|w6": {
+          "n_docs": 110,
+          "accuracy": 0.7090909090909091,
+          "ties": 0,
+          "mean_diff": 0.0017869151130414788,
+          "p_value": 6.406444981033786e-05
+        },
+        "en-de|gemini|conjunction_substitution|w9": {
+          "n_docs": 110,
+          "accuracy": 0.7636363636363637,
+          "ties": 0,
+          "mean_diff": 0.0020870780887602674,
+          "p_value": 2.7022452857561773e-05
+        },
+        "en-de|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0004490068234185296,
+          "p_value": 0.5525389830223629
+        },
+        "en-de|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0022120164296289685,
+          "p_value": 0.14252373317622108
+        },
+        "en-de|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.004589479911056432,
+          "p_value": 0.1638255867288466
+        },
+        "en-de|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 4,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.004061387431361724,
+          "p_value": 0.19279063884179437
+        },
+        "en-de|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.84,
+          "ties": 0,
+          "mean_diff": 0.01353483027761041,
+          "p_value": 2.152408594692375e-24
+        },
+        "en-de|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8666666666666667,
+          "ties": 0,
+          "mean_diff": 0.01719202862199495,
+          "p_value": 1.9004219320782336e-18
+        },
+        "en-de|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.86,
+          "ties": 0,
+          "mean_diff": 0.016565141589189286,
+          "p_value": 1.4498725367206485e-21
+        },
+        "en-de|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8733333333333333,
+          "ties": 0,
+          "mean_diff": 0.016857902130943694,
+          "p_value": 2.173940240267566e-21
+        },
+        "en-de|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.9533333333333334,
+          "ties": 0,
+          "mean_diff": 0.028981354897175845,
+          "p_value": 1.569467927894351e-42
+        },
+        "en-de|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.8733333333333333,
+          "ties": 0,
+          "mean_diff": 0.0216465442139299,
+          "p_value": 9.977046825145799e-23
+        },
+        "en-de|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.84,
+          "ties": 0,
+          "mean_diff": 0.02070009393787661,
+          "p_value": 3.41343860532095e-15
+        },
+        "en-de|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.7733333333333333,
+          "ties": 0,
+          "mean_diff": 0.020332228303218246,
+          "p_value": 2.2544162688063786e-14
+        },
+        "en-de|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.021248726897595015,
+          "p_value": 2.9990410040701373e-31
+        },
+        "en-de|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.026593098388356714,
+          "p_value": 1.6971162213763977e-15
+        },
+        "en-de|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.896551724137931,
+          "ties": 0,
+          "mean_diff": 0.023019636065890157,
+          "p_value": 9.719031367267493e-11
+        },
+        "en-de|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.896551724137931,
+          "ties": 0,
+          "mean_diff": 0.017223213020769124,
+          "p_value": 1.3465025985720683e-11
+        },
+        "en-de|gemini|sentence_splitting|w1": {
+          "n_docs": 15,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0014270590999283296,
+          "p_value": 0.05892053278671991
+        },
+        "en-de|gemini|sentence_splitting|w3": {
+          "n_docs": 15,
+          "accuracy": 0.9333333333333333,
+          "ties": 0,
+          "mean_diff": 0.001882111176827487,
+          "p_value": 0.11076358790437242
+        },
+        "en-de|gemini|sentence_splitting|w6": {
+          "n_docs": 15,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.002314720276083822,
+          "p_value": 0.10844904355362778
+        },
+        "en-de|gemini|sentence_splitting|w9": {
+          "n_docs": 15,
+          "accuracy": 0.8666666666666667,
+          "ties": 0,
+          "mean_diff": 0.0032549607217323842,
+          "p_value": 0.12220647050483016
+        }
+      },
+      "micro": {
+        "tense_consistency|w1": {
+          "n_docs": 404,
+          "accuracy": 0.7128712871287128,
+          "ties": 0,
+          "mean_diff": 0.0013068904649365582,
+          "p_value": 3.0048741988309e-10
+        },
+        "tense_consistency|w3": {
+          "n_docs": 404,
+          "accuracy": 0.7252475247524752,
+          "ties": 1,
+          "mean_diff": 0.001776936892774468,
+          "p_value": 1.4500190490536213e-13
+        },
+        "tense_consistency|w6": {
+          "n_docs": 404,
+          "accuracy": 0.6955445544554455,
+          "ties": 1,
+          "mean_diff": 0.0018617065857505378,
+          "p_value": 6.170194146751267e-13
+        },
+        "tense_consistency|w9": {
+          "n_docs": 404,
+          "accuracy": 0.7029702970297029,
+          "ties": 1,
+          "mean_diff": 0.0018547794882456331,
+          "p_value": 5.587005653358002e-13
+        },
+        "lexical_consistency|w1": {
+          "n_docs": 356,
+          "accuracy": 0.7331460674157303,
+          "ties": 0,
+          "mean_diff": 0.0015347275916633865,
+          "p_value": 5.903526288546455e-10
+        },
+        "lexical_consistency|w3": {
+          "n_docs": 356,
+          "accuracy": 0.7219101123595506,
+          "ties": 0,
+          "mean_diff": 0.0018596348411294833,
+          "p_value": 3.3170726393130553e-13
+        },
+        "lexical_consistency|w6": {
+          "n_docs": 356,
+          "accuracy": 0.699438202247191,
+          "ties": 0,
+          "mean_diff": 0.0020154617324485394,
+          "p_value": 7.23534294309767e-15
+        },
+        "lexical_consistency|w9": {
+          "n_docs": 356,
+          "accuracy": 0.6966292134831461,
+          "ties": 0,
+          "mean_diff": 0.0020720102078458894,
+          "p_value": 3.58673551326124e-15
+        },
+        "conjunction_substitution|w1": {
+          "n_docs": 562,
+          "accuracy": 0.7224199288256228,
+          "ties": 0,
+          "mean_diff": 0.0014115442132021495,
+          "p_value": 5.718342271851524e-18
+        },
+        "conjunction_substitution|w3": {
+          "n_docs": 562,
+          "accuracy": 0.699288256227758,
+          "ties": 0,
+          "mean_diff": 0.0015991067144939463,
+          "p_value": 8.178522979333601e-17
+        },
+        "conjunction_substitution|w6": {
+          "n_docs": 562,
+          "accuracy": 0.6814946619217082,
+          "ties": 0,
+          "mean_diff": 0.0016240967097154615,
+          "p_value": 1.829668193026552e-11
+        },
+        "conjunction_substitution|w9": {
+          "n_docs": 562,
+          "accuracy": 0.6814946619217082,
+          "ties": 0,
+          "mean_diff": 0.0019184816936853066,
+          "p_value": 5.183612463665418e-13
+        },
+        "pronoun_swap_singular|w1": {
+          "n_docs": 19,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.000548615084392447,
+          "p_value": 0.09979763632025883
+        },
+        "pronoun_swap_singular|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7368421052631579,
+          "ties": 0,
+          "mean_diff": 0.0037247434771512963,
+          "p_value": 0.06012806813747754
+        },
+        "pronoun_swap_singular|w6": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.005413974117963832,
+          "p_value": 0.012897218273079986
+        },
+        "pronoun_swap_singular|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8947368421052632,
+          "ties": 0,
+          "mean_diff": 0.0049404749214713335,
+          "p_value": 0.02013216403312235
+        },
+        "pronoun_swap_plural|w1": {
+          "n_docs": 19,
+          "accuracy": 0.6842105263157895,
+          "ties": 0,
+          "mean_diff": 0.0015094152726045202,
+          "p_value": 0.11863894866101411
+        },
+        "pronoun_swap_plural|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7368421052631579,
+          "ties": 0,
+          "mean_diff": 0.004928574449045659,
+          "p_value": 0.06479795387059642
+        },
+        "pronoun_swap_plural|w6": {
+          "n_docs": 19,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.004423902919515283,
+          "p_value": 0.05159299401470609
+        },
+        "pronoun_swap_plural|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8947368421052632,
+          "ties": 0,
+          "mean_diff": 0.004749958030886689,
+          "p_value": 0.03695873592693671
+        },
+        "sentence_repetition|w1": {
+          "n_docs": 876,
+          "accuracy": 0.8493150684931506,
+          "ties": 0,
+          "mean_diff": 0.012545755335362,
+          "p_value": 4.65666725213142e-123
+        },
+        "sentence_repetition|w3": {
+          "n_docs": 876,
+          "accuracy": 0.8253424657534246,
+          "ties": 0,
+          "mean_diff": 0.0167317648094474,
+          "p_value": 6.317399361482182e-96
+        },
+        "sentence_repetition|w6": {
+          "n_docs": 876,
+          "accuracy": 0.8378995433789954,
+          "ties": 1,
+          "mean_diff": 0.017725892596419438,
+          "p_value": 1.785976288251106e-103
+        },
+        "sentence_repetition|w9": {
+          "n_docs": 876,
+          "accuracy": 0.8287671232876712,
+          "ties": 1,
+          "mean_diff": 0.017971085596544825,
+          "p_value": 2.7272892963807177e-103
+        },
+        "sentence_removal|w1": {
+          "n_docs": 876,
+          "accuracy": 0.9360730593607306,
+          "ties": 0,
+          "mean_diff": 0.02412982927241033,
+          "p_value": 6.692382339053818e-215
+        },
+        "sentence_removal|w3": {
+          "n_docs": 876,
+          "accuracy": 0.886986301369863,
+          "ties": 0,
+          "mean_diff": 0.023861611336656874,
+          "p_value": 2.050411696251935e-126
+        },
+        "sentence_removal|w6": {
+          "n_docs": 876,
+          "accuracy": 0.8595890410958904,
+          "ties": 0,
+          "mean_diff": 0.024239352748475704,
+          "p_value": 4.72674133001389e-106
+        },
+        "sentence_removal|w9": {
+          "n_docs": 876,
+          "accuracy": 0.841324200913242,
+          "ties": 0,
+          "mean_diff": 0.023305929568559543,
+          "p_value": 1.5289693622979633e-98
+        },
+        "sentence_shuffling|w1": {
+          "n_docs": 340,
+          "accuracy": 0.9970588235294118,
+          "ties": 0,
+          "mean_diff": 0.02034091905451004,
+          "p_value": 1.794700480016797e-161
+        },
+        "sentence_shuffling|w3": {
+          "n_docs": 340,
+          "accuracy": 0.9705882352941176,
+          "ties": 0,
+          "mean_diff": 0.02514759769209325,
+          "p_value": 1.7472957587553453e-92
+        },
+        "sentence_shuffling|w6": {
+          "n_docs": 340,
+          "accuracy": 0.9205882352941176,
+          "ties": 0,
+          "mean_diff": 0.021555875020533227,
+          "p_value": 8.735792148476524e-66
+        },
+        "sentence_shuffling|w9": {
+          "n_docs": 340,
+          "accuracy": 0.8970588235294118,
+          "ties": 0,
+          "mean_diff": 0.016913327452487765,
+          "p_value": 4.085600454531183e-56
+        },
+        "sentence_splitting|w1": {
+          "n_docs": 100,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.000852826803155175,
+          "p_value": 3.126863024157014e-06
+        },
+        "sentence_splitting|w3": {
+          "n_docs": 100,
+          "accuracy": 0.83,
+          "ties": 0,
+          "mean_diff": 0.0023306982544543057,
+          "p_value": 5.019457998331393e-07
+        },
+        "sentence_splitting|w6": {
+          "n_docs": 100,
+          "accuracy": 0.81,
+          "ties": 0,
+          "mean_diff": 0.0026525899911967066,
+          "p_value": 2.9114786689644985e-08
+        },
+        "sentence_splitting|w9": {
+          "n_docs": 100,
+          "accuracy": 0.86,
+          "ties": 0,
+          "mean_diff": 0.0031662151180078717,
+          "p_value": 2.478927232188927e-07
+        }
+      }
+    },
+    "mix-frac020": {
+      "referenceless": false,
+      "per_cell": {
+        "en-fr|aya23|tense_consistency|w1": {
+          "n_docs": 80,
+          "accuracy": 0.65,
+          "ties": 0,
+          "mean_diff": 0.0008512527489200984,
+          "p_value": 0.04149703067682684
+        },
+        "en-fr|aya23|tense_consistency|w3": {
+          "n_docs": 80,
+          "accuracy": 0.65,
+          "ties": 0,
+          "mean_diff": 0.0015954653452207334,
+          "p_value": 0.00945604097085353
+        },
+        "en-fr|aya23|tense_consistency|w6": {
+          "n_docs": 80,
+          "accuracy": 0.675,
+          "ties": 0,
+          "mean_diff": 0.0015452533566022505,
+          "p_value": 0.01958424409245299
+        },
+        "en-fr|aya23|tense_consistency|w9": {
+          "n_docs": 80,
+          "accuracy": 0.6875,
+          "ties": 0,
+          "mean_diff": 0.0016478012316166347,
+          "p_value": 0.021461170111350347
+        },
+        "en-fr|aya23|lexical_consistency|w1": {
+          "n_docs": 59,
+          "accuracy": 0.6949152542372882,
+          "ties": 0,
+          "mean_diff": 0.000721535953286129,
+          "p_value": 0.36234069779582656
+        },
+        "en-fr|aya23|lexical_consistency|w3": {
+          "n_docs": 59,
+          "accuracy": 0.6271186440677966,
+          "ties": 0,
+          "mean_diff": 0.0008045665835038319,
+          "p_value": 0.1323281566702588
+        },
+        "en-fr|aya23|lexical_consistency|w6": {
+          "n_docs": 59,
+          "accuracy": 0.6101694915254238,
+          "ties": 0,
+          "mean_diff": 0.0016456238076937334,
+          "p_value": 0.029903436318406015
+        },
+        "en-fr|aya23|lexical_consistency|w9": {
+          "n_docs": 59,
+          "accuracy": 0.6440677966101694,
+          "ties": 0,
+          "mean_diff": 0.0020574452687168944,
+          "p_value": 0.04228133505426439
+        },
+        "en-fr|aya23|conjunction_substitution|w1": {
+          "n_docs": 82,
+          "accuracy": 0.6951219512195121,
+          "ties": 0,
+          "mean_diff": 0.0016628193112412629,
+          "p_value": 0.0004938128137160529
+        },
+        "en-fr|aya23|conjunction_substitution|w3": {
+          "n_docs": 82,
+          "accuracy": 0.6585365853658537,
+          "ties": 0,
+          "mean_diff": 0.0017968132533556552,
+          "p_value": 0.048044993978095925
+        },
+        "en-fr|aya23|conjunction_substitution|w6": {
+          "n_docs": 82,
+          "accuracy": 0.5853658536585366,
+          "ties": 0,
+          "mean_diff": 0.0009825271243116,
+          "p_value": 0.3918984494846669
+        },
+        "en-fr|aya23|conjunction_substitution|w9": {
+          "n_docs": 82,
+          "accuracy": 0.6341463414634146,
+          "ties": 0,
+          "mean_diff": 0.001991006574692372,
+          "p_value": 0.14183183723283002
+        },
+        "en-fr|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 8,
+          "accuracy": 0.625,
+          "ties": 0,
+          "mean_diff": -0.0002501946468001781,
+          "p_value": 0.8320237767731218
+        },
+        "en-fr|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": -0.00015262755568912906,
+          "p_value": 0.980081682943637
+        },
+        "en-fr|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.004126467578338844,
+          "p_value": 0.4916318522054254
+        },
+        "en-fr|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.003778251432204137,
+          "p_value": 0.5235297306274103
+        },
+        "en-fr|aya23|pronoun_swap_plural|w1": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.0022033099333922668,
+          "p_value": 0.12619481539905014
+        },
+        "en-fr|aya23|pronoun_swap_plural|w3": {
+          "n_docs": 10,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.00948218659073074,
+          "p_value": 0.15253773246985025
+        },
+        "en-fr|aya23|pronoun_swap_plural|w6": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.010241639441851247,
+          "p_value": 0.1641648221844556
+        },
+        "en-fr|aya23|pronoun_swap_plural|w9": {
+          "n_docs": 10,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.010495398124066057,
+          "p_value": 0.15364912120285332
+        },
+        "en-fr|aya23|sentence_repetition|w1": {
+          "n_docs": 149,
+          "accuracy": 0.8657718120805369,
+          "ties": 0,
+          "mean_diff": 0.012842868505249311,
+          "p_value": 1.3649069855444148e-17
+        },
+        "en-fr|aya23|sentence_repetition|w3": {
+          "n_docs": 149,
+          "accuracy": 0.8523489932885906,
+          "ties": 0,
+          "mean_diff": 0.019171326318151712,
+          "p_value": 1.2965822350788352e-13
+        },
+        "en-fr|aya23|sentence_repetition|w6": {
+          "n_docs": 149,
+          "accuracy": 0.8053691275167785,
+          "ties": 0,
+          "mean_diff": 0.019420516132247337,
+          "p_value": 2.7163233768221133e-13
+        },
+        "en-fr|aya23|sentence_repetition|w9": {
+          "n_docs": 149,
+          "accuracy": 0.7785234899328859,
+          "ties": 0,
+          "mean_diff": 0.019217571525223454,
+          "p_value": 3.136893291044141e-13
+        },
+        "en-fr|aya23|sentence_removal|w1": {
+          "n_docs": 149,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.061114721117911074,
+          "p_value": 2.802468201050492e-58
+        },
+        "en-fr|aya23|sentence_removal|w3": {
+          "n_docs": 149,
+          "accuracy": 0.912751677852349,
+          "ties": 0,
+          "mean_diff": 0.03167963756535546,
+          "p_value": 2.719348342506374e-19
+        },
+        "en-fr|aya23|sentence_removal|w6": {
+          "n_docs": 149,
+          "accuracy": 0.8657718120805369,
+          "ties": 0,
+          "mean_diff": 0.030794171250857476,
+          "p_value": 7.828651452537121e-16
+        },
+        "en-fr|aya23|sentence_removal|w9": {
+          "n_docs": 149,
+          "accuracy": 0.8523489932885906,
+          "ties": 0,
+          "mean_diff": 0.02769333968611671,
+          "p_value": 2.497087792263026e-13
+        },
+        "en-fr|aya23|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.037933520096677574,
+          "p_value": 5.304734836439897e-31
+        },
+        "en-fr|aya23|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.03757552458168142,
+          "p_value": 1.0123642244442689e-13
+        },
+        "en-fr|aya23|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.028215563064070477,
+          "p_value": 2.465776300033013e-10
+        },
+        "en-fr|aya23|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.8620689655172413,
+          "ties": 0,
+          "mean_diff": 0.01988420837630542,
+          "p_value": 1.433953849847994e-06
+        },
+        "en-fr|aya23|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.5454545454545454,
+          "ties": 0,
+          "mean_diff": 0.00043120769848190526,
+          "p_value": 0.2616191005309044
+        },
+        "en-fr|aya23|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0037016069164382197,
+          "p_value": 0.007570940873958545
+        },
+        "en-fr|aya23|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.004860586001966632,
+          "p_value": 0.015225762192213757
+        },
+        "en-fr|aya23|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.8636363636363636,
+          "ties": 0,
+          "mean_diff": 0.006603901592307418,
+          "p_value": 0.01306910321076973
+        },
+        "en-fr|gemini|tense_consistency|w1": {
+          "n_docs": 60,
+          "accuracy": 0.5333333333333333,
+          "ties": 1,
+          "mean_diff": 6.343814639399129e-05,
+          "p_value": 0.8487948283903937
+        },
+        "en-fr|gemini|tense_consistency|w3": {
+          "n_docs": 60,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0010743799808637636,
+          "p_value": 0.06229784209518018
+        },
+        "en-fr|gemini|tense_consistency|w6": {
+          "n_docs": 60,
+          "accuracy": 0.5833333333333334,
+          "ties": 1,
+          "mean_diff": 0.0013351552684963315,
+          "p_value": 0.18306263747996587
+        },
+        "en-fr|gemini|tense_consistency|w9": {
+          "n_docs": 60,
+          "accuracy": 0.6,
+          "ties": 1,
+          "mean_diff": 0.001035281724543155,
+          "p_value": 0.29225966744468046
+        },
+        "en-fr|gemini|lexical_consistency|w1": {
+          "n_docs": 54,
+          "accuracy": 0.7407407407407407,
+          "ties": 0,
+          "mean_diff": 0.002137563783598358,
+          "p_value": 0.004193790899663334
+        },
+        "en-fr|gemini|lexical_consistency|w3": {
+          "n_docs": 54,
+          "accuracy": 0.6481481481481481,
+          "ties": 0,
+          "mean_diff": 0.0023664929687252944,
+          "p_value": 0.00541589675682984
+        },
+        "en-fr|gemini|lexical_consistency|w6": {
+          "n_docs": 54,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0019237792267405615,
+          "p_value": 0.07404832903160381
+        },
+        "en-fr|gemini|lexical_consistency|w9": {
+          "n_docs": 54,
+          "accuracy": 0.7407407407407407,
+          "ties": 0,
+          "mean_diff": 0.0020813931108611375,
+          "p_value": 0.05505268386184812
+        },
+        "en-fr|gemini|conjunction_substitution|w1": {
+          "n_docs": 80,
+          "accuracy": 0.7125,
+          "ties": 0,
+          "mean_diff": 0.0008745039902689613,
+          "p_value": 0.00020638449262911878
+        },
+        "en-fr|gemini|conjunction_substitution|w3": {
+          "n_docs": 80,
+          "accuracy": 0.675,
+          "ties": 0,
+          "mean_diff": 0.0011188989181621812,
+          "p_value": 0.006238855515620197
+        },
+        "en-fr|gemini|conjunction_substitution|w6": {
+          "n_docs": 80,
+          "accuracy": 0.6125,
+          "ties": 0,
+          "mean_diff": 0.0009640401477880187,
+          "p_value": 0.0569116067865332
+        },
+        "en-fr|gemini|conjunction_substitution|w9": {
+          "n_docs": 80,
+          "accuracy": 0.6125,
+          "ties": 0,
+          "mean_diff": 0.0010023562127153384,
+          "p_value": 0.06648519878114288
+        },
+        "en-fr|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 5,
+          "accuracy": 0.6,
+          "ties": 0,
+          "mean_diff": 0.0008441190576292778,
+          "p_value": 0.2063289545655919
+        },
+        "en-fr|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 5,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.004579223856382042,
+          "p_value": 0.29446037309090656
+        },
+        "en-fr|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0056924865643183335,
+          "p_value": 0.18944647989428828
+        },
+        "en-fr|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 5,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.005330450973420775,
+          "p_value": 0.2146138016236792
+        },
+        "en-fr|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0005744630042121557,
+          "p_value": 0.2225316261286074
+        },
+        "en-fr|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0026712377029597598,
+          "p_value": 0.24114834584243805
+        },
+        "en-fr|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.002862443650218746,
+          "p_value": 0.24154768857569006
+        },
+        "en-fr|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 8,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0030477781584228453,
+          "p_value": 0.21587921212905106
+        },
+        "en-fr|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.9,
+          "ties": 0,
+          "mean_diff": 0.014401218500795792,
+          "p_value": 2.6749895943999436e-18
+        },
+        "en-fr|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.88,
+          "ties": 0,
+          "mean_diff": 0.020209313329815123,
+          "p_value": 1.1417249685985995e-14
+        },
+        "en-fr|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.9066666666666666,
+          "ties": 1,
+          "mean_diff": 0.02112758384582279,
+          "p_value": 5.491642989013217e-15
+        },
+        "en-fr|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.86,
+          "ties": 1,
+          "mean_diff": 0.020086794436938005,
+          "p_value": 1.0937327020558804e-14
+        },
+        "en-fr|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.98,
+          "ties": 0,
+          "mean_diff": 0.060671104825861646,
+          "p_value": 4.132979679247503e-58
+        },
+        "en-fr|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.86,
+          "ties": 0,
+          "mean_diff": 0.0300814310566998,
+          "p_value": 5.346461609498387e-17
+        },
+        "en-fr|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8133333333333334,
+          "ties": 0,
+          "mean_diff": 0.024174962598818628,
+          "p_value": 1.0155460967791265e-12
+        },
+        "en-fr|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8133333333333334,
+          "ties": 0,
+          "mean_diff": 0.022655464926041393,
+          "p_value": 5.052492440494923e-11
+        },
+        "en-fr|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.04213773763302582,
+          "p_value": 1.6442644785799496e-31
+        },
+        "en-fr|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.038098568336540774,
+          "p_value": 6.076834588225587e-16
+        },
+        "en-fr|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9482758620689655,
+          "ties": 0,
+          "mean_diff": 0.030014469754529028,
+          "p_value": 3.654522606497237e-11
+        },
+        "en-fr|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.9137931034482759,
+          "ties": 0,
+          "mean_diff": 0.023107803071721545,
+          "p_value": 6.5974415576154e-10
+        },
+        "en-fr|gemini|sentence_splitting|w1": {
+          "n_docs": 13,
+          "accuracy": 0.7692307692307693,
+          "ties": 0,
+          "mean_diff": 0.00021822121778914278,
+          "p_value": 0.15207693374281278
+        },
+        "en-fr|gemini|sentence_splitting|w3": {
+          "n_docs": 13,
+          "accuracy": 0.6923076923076923,
+          "ties": 0,
+          "mean_diff": 0.0005491559309938182,
+          "p_value": 0.11513095016472091
+        },
+        "en-fr|gemini|sentence_splitting|w6": {
+          "n_docs": 13,
+          "accuracy": 0.8461538461538461,
+          "ties": 0,
+          "mean_diff": 0.0013289350894827472,
+          "p_value": 0.027571957474826107
+        },
+        "en-fr|gemini|sentence_splitting|w9": {
+          "n_docs": 13,
+          "accuracy": 0.8461538461538461,
+          "ties": 0,
+          "mean_diff": 0.0015370316376577308,
+          "p_value": 0.022851640779561783
+        },
+        "en-es|aya23|tense_consistency|w1": {
+          "n_docs": 57,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.0013605328330860555,
+          "p_value": 0.00182143517491198
+        },
+        "en-es|aya23|tense_consistency|w3": {
+          "n_docs": 57,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.00126094526543911,
+          "p_value": 0.04151781133360426
+        },
+        "en-es|aya23|tense_consistency|w6": {
+          "n_docs": 57,
+          "accuracy": 0.5789473684210527,
+          "ties": 0,
+          "mean_diff": 0.0013857257812235882,
+          "p_value": 0.02250952967148103
+        },
+        "en-es|aya23|tense_consistency|w9": {
+          "n_docs": 57,
+          "accuracy": 0.6140350877192983,
+          "ties": 0,
+          "mean_diff": 0.0009527560834559303,
+          "p_value": 0.06869392274370885
+        },
+        "en-es|aya23|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.8142857142857143,
+          "ties": 0,
+          "mean_diff": 0.002105600795023982,
+          "p_value": 5.7739689326953046e-05
+        },
+        "en-es|aya23|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.6714285714285714,
+          "ties": 0,
+          "mean_diff": 0.0028163326445948987,
+          "p_value": 0.0008675275992777939
+        },
+        "en-es|aya23|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.6285714285714286,
+          "ties": 0,
+          "mean_diff": 0.002775928011928244,
+          "p_value": 0.00036942355617091435
+        },
+        "en-es|aya23|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.0025857571064654312,
+          "p_value": 0.00024822411504046686
+        },
+        "en-es|aya23|conjunction_substitution|w1": {
+          "n_docs": 93,
+          "accuracy": 0.7311827956989247,
+          "ties": 0,
+          "mean_diff": 0.0017402114327189464,
+          "p_value": 0.0037904355453702186
+        },
+        "en-es|aya23|conjunction_substitution|w3": {
+          "n_docs": 93,
+          "accuracy": 0.6236559139784946,
+          "ties": 0,
+          "mean_diff": 0.001701874827769649,
+          "p_value": 0.04266547528788872
+        },
+        "en-es|aya23|conjunction_substitution|w6": {
+          "n_docs": 93,
+          "accuracy": 0.6236559139784946,
+          "ties": 0,
+          "mean_diff": 0.0013492926036341832,
+          "p_value": 0.2270556786550854
+        },
+        "en-es|aya23|conjunction_substitution|w9": {
+          "n_docs": 93,
+          "accuracy": 0.5913978494623656,
+          "ties": 0,
+          "mean_diff": 0.0015438889099962207,
+          "p_value": 0.22060306655716772
+        },
+        "en-es|aya23|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8741258741258742,
+          "ties": 0,
+          "mean_diff": 0.012296104133332162,
+          "p_value": 1.1688079416345563e-18
+        },
+        "en-es|aya23|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8251748251748252,
+          "ties": 0,
+          "mean_diff": 0.016733514320953078,
+          "p_value": 7.911231146086018e-15
+        },
+        "en-es|aya23|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.8041958041958042,
+          "ties": 0,
+          "mean_diff": 0.018776077887005704,
+          "p_value": 1.099280643841159e-12
+        },
+        "en-es|aya23|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.7902097902097902,
+          "ties": 0,
+          "mean_diff": 0.019049131970852694,
+          "p_value": 6.720552459850432e-13
+        },
+        "en-es|aya23|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 0.993006993006993,
+          "ties": 0,
+          "mean_diff": 0.056522693997919336,
+          "p_value": 7.385756220006051e-57
+        },
+        "en-es|aya23|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.9230769230769231,
+          "ties": 0,
+          "mean_diff": 0.03329744541731269,
+          "p_value": 8.385247569070342e-22
+        },
+        "en-es|aya23|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.8881118881118881,
+          "ties": 0,
+          "mean_diff": 0.033289307542257764,
+          "p_value": 8.08435252565564e-18
+        },
+        "en-es|aya23|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8671328671328671,
+          "ties": 0,
+          "mean_diff": 0.03186689030171587,
+          "p_value": 8.023522184432213e-16
+        },
+        "en-es|aya23|sentence_shuffling|w1": {
+          "n_docs": 57,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.040463937853990904,
+          "p_value": 3.629593885748985e-33
+        },
+        "en-es|aya23|sentence_shuffling|w3": {
+          "n_docs": 57,
+          "accuracy": 0.9649122807017544,
+          "ties": 0,
+          "mean_diff": 0.03665378447477556,
+          "p_value": 1.1662300353432507e-15
+        },
+        "en-es|aya23|sentence_shuffling|w6": {
+          "n_docs": 57,
+          "accuracy": 0.8947368421052632,
+          "ties": 0,
+          "mean_diff": 0.03147147541347533,
+          "p_value": 1.1247451081840385e-09
+        },
+        "en-es|aya23|sentence_shuffling|w9": {
+          "n_docs": 57,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.026093077790057047,
+          "p_value": 8.135843170807136e-09
+        },
+        "en-es|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.0005640789142753058,
+          "p_value": 0.2287443032192929
+        },
+        "en-es|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.005140245282896797,
+          "p_value": 0.08349738995018963
+        },
+        "en-es|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.8571428571428571,
+          "ties": 0,
+          "mean_diff": 0.0043971765769895655,
+          "p_value": 0.02467891619322242
+        },
+        "en-es|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 0.8571428571428571,
+          "ties": 0,
+          "mean_diff": 0.004440829626231276,
+          "p_value": 0.02314865467340728
+        },
+        "en-es|gemini|tense_consistency|w1": {
+          "n_docs": 67,
+          "accuracy": 0.7313432835820896,
+          "ties": 0,
+          "mean_diff": 0.0010326255589866787,
+          "p_value": 0.022693120770544802
+        },
+        "en-es|gemini|tense_consistency|w3": {
+          "n_docs": 67,
+          "accuracy": 0.7761194029850746,
+          "ties": 0,
+          "mean_diff": 0.0012308389421187796,
+          "p_value": 0.0017792436636882428
+        },
+        "en-es|gemini|tense_consistency|w6": {
+          "n_docs": 67,
+          "accuracy": 0.6567164179104478,
+          "ties": 0,
+          "mean_diff": 0.0015607194438858043,
+          "p_value": 0.000592383705498547
+        },
+        "en-es|gemini|tense_consistency|w9": {
+          "n_docs": 67,
+          "accuracy": 0.6417910447761194,
+          "ties": 0,
+          "mean_diff": 0.0014375041750223807,
+          "p_value": 0.0011716119815929104
+        },
+        "en-es|gemini|lexical_consistency|w1": {
+          "n_docs": 70,
+          "accuracy": 0.7714285714285715,
+          "ties": 0,
+          "mean_diff": 0.0022843348820971404,
+          "p_value": 7.305891922120533e-05
+        },
+        "en-es|gemini|lexical_consistency|w3": {
+          "n_docs": 70,
+          "accuracy": 0.6571428571428571,
+          "ties": 0,
+          "mean_diff": 0.0016244699447749843,
+          "p_value": 0.03216269375930929
+        },
+        "en-es|gemini|lexical_consistency|w6": {
+          "n_docs": 70,
+          "accuracy": 0.7285714285714285,
+          "ties": 0,
+          "mean_diff": 0.002685197607838765,
+          "p_value": 2.7602546501814923e-05
+        },
+        "en-es|gemini|lexical_consistency|w9": {
+          "n_docs": 70,
+          "accuracy": 0.7428571428571429,
+          "ties": 0,
+          "mean_diff": 0.002793859476074764,
+          "p_value": 1.0948591204723582e-05
+        },
+        "en-es|gemini|conjunction_substitution|w1": {
+          "n_docs": 96,
+          "accuracy": 0.8541666666666666,
+          "ties": 0,
+          "mean_diff": 0.0020516062619738407,
+          "p_value": 3.1118533401240166e-06
+        },
+        "en-es|gemini|conjunction_substitution|w3": {
+          "n_docs": 96,
+          "accuracy": 0.78125,
+          "ties": 0,
+          "mean_diff": 0.0031474737652156647,
+          "p_value": 3.1034550897156912e-06
+        },
+        "en-es|gemini|conjunction_substitution|w6": {
+          "n_docs": 96,
+          "accuracy": 0.7708333333333334,
+          "ties": 0,
+          "mean_diff": 0.00320444568367702,
+          "p_value": 0.0001597691899037775
+        },
+        "en-es|gemini|conjunction_substitution|w9": {
+          "n_docs": 96,
+          "accuracy": 0.6458333333333334,
+          "ties": 0,
+          "mean_diff": 0.003048987230483597,
+          "p_value": 0.0021242672388918416
+        },
+        "en-es|gemini|pronoun_swap_plural|w1": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0036431153615316125,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w3": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.003159046173095703,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w6": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.002269566059112549,
+          "p_value": null
+        },
+        "en-es|gemini|pronoun_swap_plural|w9": {
+          "n_docs": 1,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.002269566059112549,
+          "p_value": null
+        },
+        "en-es|gemini|sentence_repetition|w1": {
+          "n_docs": 143,
+          "accuracy": 0.8741258741258742,
+          "ties": 0,
+          "mean_diff": 0.013148247299763617,
+          "p_value": 4.695816327397426e-20
+        },
+        "en-es|gemini|sentence_repetition|w3": {
+          "n_docs": 143,
+          "accuracy": 0.8741258741258742,
+          "ties": 0,
+          "mean_diff": 0.018918107073845697,
+          "p_value": 2.919668703476079e-15
+        },
+        "en-es|gemini|sentence_repetition|w6": {
+          "n_docs": 143,
+          "accuracy": 0.9090909090909091,
+          "ties": 0,
+          "mean_diff": 0.021469382983867934,
+          "p_value": 5.813679122309275e-14
+        },
+        "en-es|gemini|sentence_repetition|w9": {
+          "n_docs": 143,
+          "accuracy": 0.8881118881118881,
+          "ties": 0,
+          "mean_diff": 0.020943331037944286,
+          "p_value": 1.3510677184366958e-12
+        },
+        "en-es|gemini|sentence_removal|w1": {
+          "n_docs": 143,
+          "accuracy": 0.9790209790209791,
+          "ties": 0,
+          "mean_diff": 0.05873984946915633,
+          "p_value": 8.210764917017209e-58
+        },
+        "en-es|gemini|sentence_removal|w3": {
+          "n_docs": 143,
+          "accuracy": 0.9440559440559441,
+          "ties": 0,
+          "mean_diff": 0.03331259517757394,
+          "p_value": 4.126568507294578e-24
+        },
+        "en-es|gemini|sentence_removal|w6": {
+          "n_docs": 143,
+          "accuracy": 0.9020979020979021,
+          "ties": 0,
+          "mean_diff": 0.03356934695957135,
+          "p_value": 2.5753778323047115e-20
+        },
+        "en-es|gemini|sentence_removal|w9": {
+          "n_docs": 143,
+          "accuracy": 0.916083916083916,
+          "ties": 0,
+          "mean_diff": 0.0328596264518586,
+          "p_value": 5.886432201183141e-20
+        },
+        "en-es|gemini|sentence_shuffling|w1": {
+          "n_docs": 55,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.041300328583418824,
+          "p_value": 5.444128672685878e-31
+        },
+        "en-es|gemini|sentence_shuffling|w3": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.04068541177149711,
+          "p_value": 2.3652091664353156e-17
+        },
+        "en-es|gemini|sentence_shuffling|w6": {
+          "n_docs": 55,
+          "accuracy": 0.9818181818181818,
+          "ties": 0,
+          "mean_diff": 0.0318419866324132,
+          "p_value": 1.4210909165623097e-12
+        },
+        "en-es|gemini|sentence_shuffling|w9": {
+          "n_docs": 55,
+          "accuracy": 0.9090909090909091,
+          "ties": 0,
+          "mean_diff": 0.02434714789399769,
+          "p_value": 2.4348281466708733e-09
+        },
+        "en-es|gemini|sentence_splitting|w1": {
+          "n_docs": 22,
+          "accuracy": 0.5,
+          "ties": 0,
+          "mean_diff": 0.0002278607523163016,
+          "p_value": 0.12158952544748698
+        },
+        "en-es|gemini|sentence_splitting|w3": {
+          "n_docs": 22,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.0010777381322566448,
+          "p_value": 0.05975895211707049
+        },
+        "en-es|gemini|sentence_splitting|w6": {
+          "n_docs": 22,
+          "accuracy": 0.7727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0009177063801205491,
+          "p_value": 0.05105311623991295
+        },
+        "en-es|gemini|sentence_splitting|w9": {
+          "n_docs": 22,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.0005763343225516801,
+          "p_value": 0.2814845935779702
+        },
+        "en-de|aya23|tense_consistency|w1": {
+          "n_docs": 64,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0016926813342158361,
+          "p_value": 0.005934566832895801
+        },
+        "en-de|aya23|tense_consistency|w3": {
+          "n_docs": 64,
+          "accuracy": 0.78125,
+          "ties": 0,
+          "mean_diff": 0.0018573230223675645,
+          "p_value": 0.0765971660307524
+        },
+        "en-de|aya23|tense_consistency|w6": {
+          "n_docs": 64,
+          "accuracy": 0.703125,
+          "ties": 0,
+          "mean_diff": 0.002410049730377153,
+          "p_value": 0.032979490993726206
+        },
+        "en-de|aya23|tense_consistency|w9": {
+          "n_docs": 64,
+          "accuracy": 0.65625,
+          "ties": 0,
+          "mean_diff": 0.0022783986157201303,
+          "p_value": 0.0576773301374923
+        },
+        "en-de|aya23|lexical_consistency|w1": {
+          "n_docs": 48,
+          "accuracy": 0.8125,
+          "ties": 0,
+          "mean_diff": 0.0013517425832754008,
+          "p_value": 0.00016389457634406445
+        },
+        "en-de|aya23|lexical_consistency|w3": {
+          "n_docs": 48,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0018217303763441324,
+          "p_value": 0.0039998055388118774
+        },
+        "en-de|aya23|lexical_consistency|w6": {
+          "n_docs": 48,
+          "accuracy": 0.7708333333333334,
+          "ties": 0,
+          "mean_diff": 0.0022705364726520456,
+          "p_value": 0.009610087075848728
+        },
+        "en-de|aya23|lexical_consistency|w9": {
+          "n_docs": 48,
+          "accuracy": 0.6458333333333334,
+          "ties": 0,
+          "mean_diff": 0.0019444804401205368,
+          "p_value": 0.005269147745290605
+        },
+        "en-de|aya23|conjunction_substitution|w1": {
+          "n_docs": 101,
+          "accuracy": 0.7623762376237624,
+          "ties": 0,
+          "mean_diff": 0.0013599735157797737,
+          "p_value": 0.0001232834929846043
+        },
+        "en-de|aya23|conjunction_substitution|w3": {
+          "n_docs": 101,
+          "accuracy": 0.7227722772277227,
+          "ties": 0,
+          "mean_diff": 0.0013068434943494214,
+          "p_value": 0.005824235619100177
+        },
+        "en-de|aya23|conjunction_substitution|w6": {
+          "n_docs": 101,
+          "accuracy": 0.6336633663366337,
+          "ties": 0,
+          "mean_diff": 0.0005652650913582408,
+          "p_value": 0.6165659219827522
+        },
+        "en-de|aya23|conjunction_substitution|w9": {
+          "n_docs": 101,
+          "accuracy": 0.6138613861386139,
+          "ties": 0,
+          "mean_diff": 0.00047347299899526423,
+          "p_value": 0.6808297896585889
+        },
+        "en-de|aya23|pronoun_swap_singular|w1": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.0010827794671058322,
+          "p_value": 0.24063706933507387
+        },
+        "en-de|aya23|pronoun_swap_singular|w3": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.011707024441825059,
+          "p_value": 0.4561609145270253
+        },
+        "en-de|aya23|pronoun_swap_singular|w6": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.015702354907989546,
+          "p_value": 0.4585012315128507
+        },
+        "en-de|aya23|pronoun_swap_singular|w9": {
+          "n_docs": 2,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.01578124115864432,
+          "p_value": 0.45510983972461916
+        },
+        "en-de|aya23|sentence_repetition|w1": {
+          "n_docs": 141,
+          "accuracy": 0.8794326241134752,
+          "ties": 0,
+          "mean_diff": 0.015247278624332058,
+          "p_value": 4.6763278800159e-20
+        },
+        "en-de|aya23|sentence_repetition|w3": {
+          "n_docs": 141,
+          "accuracy": 0.8723404255319149,
+          "ties": 0,
+          "mean_diff": 0.01883056911470631,
+          "p_value": 3.2671325557739955e-17
+        },
+        "en-de|aya23|sentence_repetition|w6": {
+          "n_docs": 141,
+          "accuracy": 0.900709219858156,
+          "ties": 0,
+          "mean_diff": 0.018595871473949987,
+          "p_value": 2.7537677428351517e-15
+        },
+        "en-de|aya23|sentence_repetition|w9": {
+          "n_docs": 141,
+          "accuracy": 0.900709219858156,
+          "ties": 0,
+          "mean_diff": 0.018353076374886174,
+          "p_value": 1.3972189083750301e-13
+        },
+        "en-de|aya23|sentence_removal|w1": {
+          "n_docs": 141,
+          "accuracy": 0.9858156028368794,
+          "ties": 0,
+          "mean_diff": 0.06472455631890608,
+          "p_value": 3.366143036635121e-56
+        },
+        "en-de|aya23|sentence_removal|w3": {
+          "n_docs": 141,
+          "accuracy": 0.900709219858156,
+          "ties": 0,
+          "mean_diff": 0.0263474686040222,
+          "p_value": 5.862301187822327e-20
+        },
+        "en-de|aya23|sentence_removal|w6": {
+          "n_docs": 141,
+          "accuracy": 0.8581560283687943,
+          "ties": 0,
+          "mean_diff": 0.02133750985300267,
+          "p_value": 1.3407193296444471e-11
+        },
+        "en-de|aya23|sentence_removal|w9": {
+          "n_docs": 141,
+          "accuracy": 0.8581560283687943,
+          "ties": 0,
+          "mean_diff": 0.020529236641282034,
+          "p_value": 3.215462442954499e-10
+        },
+        "en-de|aya23|sentence_shuffling|w1": {
+          "n_docs": 54,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.037838216913170394,
+          "p_value": 2.7383280955345274e-25
+        },
+        "en-de|aya23|sentence_shuffling|w3": {
+          "n_docs": 54,
+          "accuracy": 0.9259259259259259,
+          "ties": 0,
+          "mean_diff": 0.034163452592645686,
+          "p_value": 7.535940147526208e-12
+        },
+        "en-de|aya23|sentence_shuffling|w6": {
+          "n_docs": 54,
+          "accuracy": 0.9259259259259259,
+          "ties": 0,
+          "mean_diff": 0.030121097719239872,
+          "p_value": 6.597200859859055e-10
+        },
+        "en-de|aya23|sentence_shuffling|w9": {
+          "n_docs": 54,
+          "accuracy": 0.8888888888888888,
+          "ties": 0,
+          "mean_diff": 0.02354126764426368,
+          "p_value": 1.718052982464491e-08
+        },
+        "en-de|aya23|sentence_splitting|w1": {
+          "n_docs": 14,
+          "accuracy": 0.7857142857142857,
+          "ties": 0,
+          "mean_diff": 0.0008373861085181662,
+          "p_value": 0.08646479198390127
+        },
+        "en-de|aya23|sentence_splitting|w3": {
+          "n_docs": 14,
+          "accuracy": 0.6428571428571429,
+          "ties": 0,
+          "mean_diff": 0.0022064314685846798,
+          "p_value": 0.12737591073189142
+        },
+        "en-de|aya23|sentence_splitting|w6": {
+          "n_docs": 14,
+          "accuracy": 0.5714285714285714,
+          "ties": 0,
+          "mean_diff": 0.0028396457246252743,
+          "p_value": 0.13419291917322168
+        },
+        "en-de|aya23|sentence_splitting|w9": {
+          "n_docs": 14,
+          "accuracy": 0.5714285714285714,
+          "ties": 0,
+          "mean_diff": 0.0032466675642843384,
+          "p_value": 0.13282006710206848
+        },
+        "en-de|gemini|tense_consistency|w1": {
+          "n_docs": 76,
+          "accuracy": 0.6973684210526315,
+          "ties": 0,
+          "mean_diff": 0.0017977080811911702,
+          "p_value": 0.014133780851331846
+        },
+        "en-de|gemini|tense_consistency|w3": {
+          "n_docs": 76,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.0014173867547600542,
+          "p_value": 0.039220242940711615
+        },
+        "en-de|gemini|tense_consistency|w6": {
+          "n_docs": 76,
+          "accuracy": 0.7105263157894737,
+          "ties": 0,
+          "mean_diff": 0.0012974430121224848,
+          "p_value": 0.06332972612337778
+        },
+        "en-de|gemini|tense_consistency|w9": {
+          "n_docs": 76,
+          "accuracy": 0.6710526315789473,
+          "ties": 0,
+          "mean_diff": 0.001635889722142289,
+          "p_value": 0.021230469746907923
+        },
+        "en-de|gemini|lexical_consistency|w1": {
+          "n_docs": 55,
+          "accuracy": 0.6909090909090909,
+          "ties": 0,
+          "mean_diff": 0.001078913050360165,
+          "p_value": 0.022292078100823415
+        },
+        "en-de|gemini|lexical_consistency|w3": {
+          "n_docs": 55,
+          "accuracy": 0.6727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0016239589602111875,
+          "p_value": 0.003521519352584391
+        },
+        "en-de|gemini|lexical_consistency|w6": {
+          "n_docs": 55,
+          "accuracy": 0.5454545454545454,
+          "ties": 0,
+          "mean_diff": 0.0016291230335638517,
+          "p_value": 0.03355727464584285
+        },
+        "en-de|gemini|lexical_consistency|w9": {
+          "n_docs": 55,
+          "accuracy": 0.5818181818181818,
+          "ties": 0,
+          "mean_diff": 0.0014694259501569602,
+          "p_value": 0.05455345639217706
+        },
+        "en-de|gemini|conjunction_substitution|w1": {
+          "n_docs": 110,
+          "accuracy": 0.7272727272727273,
+          "ties": 0,
+          "mean_diff": 0.000857966503042556,
+          "p_value": 0.03004149970535584
+        },
+        "en-de|gemini|conjunction_substitution|w3": {
+          "n_docs": 110,
+          "accuracy": 0.6909090909090909,
+          "ties": 0,
+          "mean_diff": 0.0012218885157913163,
+          "p_value": 0.0006823545826731411
+        },
+        "en-de|gemini|conjunction_substitution|w6": {
+          "n_docs": 110,
+          "accuracy": 0.6363636363636364,
+          "ties": 0,
+          "mean_diff": 0.0010667334058198305,
+          "p_value": 0.03885412530127031
+        },
+        "en-de|gemini|conjunction_substitution|w9": {
+          "n_docs": 110,
+          "accuracy": 0.6727272727272727,
+          "ties": 0,
+          "mean_diff": 0.0014103364530299947,
+          "p_value": 0.011839200249792967
+        },
+        "en-de|gemini|pronoun_swap_singular|w1": {
+          "n_docs": 4,
+          "accuracy": 0.5,
+          "ties": 0,
+          "mean_diff": 0.00053773484709424,
+          "p_value": 0.39099207477444636
+        },
+        "en-de|gemini|pronoun_swap_singular|w3": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0016630177931837575,
+          "p_value": 0.13984138806154048
+        },
+        "en-de|gemini|pronoun_swap_singular|w6": {
+          "n_docs": 4,
+          "accuracy": 0.75,
+          "ties": 0,
+          "mean_diff": 0.0031186304715546675,
+          "p_value": 0.14471882486757254
+        },
+        "en-de|gemini|pronoun_swap_singular|w9": {
+          "n_docs": 4,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.002604938030521281,
+          "p_value": 0.1791427888977747
+        },
+        "en-de|gemini|sentence_repetition|w1": {
+          "n_docs": 150,
+          "accuracy": 0.8933333333333333,
+          "ties": 0,
+          "mean_diff": 0.011973249256457982,
+          "p_value": 2.1688328170693308e-20
+        },
+        "en-de|gemini|sentence_repetition|w3": {
+          "n_docs": 150,
+          "accuracy": 0.9133333333333333,
+          "ties": 0,
+          "mean_diff": 0.014235878286720037,
+          "p_value": 1.091318039936552e-15
+        },
+        "en-de|gemini|sentence_repetition|w6": {
+          "n_docs": 150,
+          "accuracy": 0.8466666666666667,
+          "ties": 0,
+          "mean_diff": 0.01303508547441106,
+          "p_value": 1.2078077786843439e-18
+        },
+        "en-de|gemini|sentence_repetition|w9": {
+          "n_docs": 150,
+          "accuracy": 0.8533333333333334,
+          "ties": 0,
+          "mean_diff": 0.013054620291051765,
+          "p_value": 4.88832727068707e-19
+        },
+        "en-de|gemini|sentence_removal|w1": {
+          "n_docs": 150,
+          "accuracy": 0.9866666666666667,
+          "ties": 0,
+          "mean_diff": 0.06416769327882443,
+          "p_value": 1.7173729151517234e-60
+        },
+        "en-de|gemini|sentence_removal|w3": {
+          "n_docs": 150,
+          "accuracy": 0.9133333333333333,
+          "ties": 0,
+          "mean_diff": 0.024404846682069905,
+          "p_value": 2.9986260684464215e-17
+        },
+        "en-de|gemini|sentence_removal|w6": {
+          "n_docs": 150,
+          "accuracy": 0.84,
+          "ties": 0,
+          "mean_diff": 0.0203564874290687,
+          "p_value": 1.7559196918422318e-11
+        },
+        "en-de|gemini|sentence_removal|w9": {
+          "n_docs": 150,
+          "accuracy": 0.7933333333333333,
+          "ties": 0,
+          "mean_diff": 0.020806742651753952,
+          "p_value": 5.758568954994206e-11
+        },
+        "en-de|gemini|sentence_shuffling|w1": {
+          "n_docs": 58,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.039184135513247946,
+          "p_value": 4.067965815721467e-32
+        },
+        "en-de|gemini|sentence_shuffling|w3": {
+          "n_docs": 58,
+          "accuracy": 0.9827586206896551,
+          "ties": 0,
+          "mean_diff": 0.03394145014259036,
+          "p_value": 2.145493585762155e-14
+        },
+        "en-de|gemini|sentence_shuffling|w6": {
+          "n_docs": 58,
+          "accuracy": 0.9482758620689655,
+          "ties": 0,
+          "mean_diff": 0.02717420138899386,
+          "p_value": 3.956905784235263e-10
+        },
+        "en-de|gemini|sentence_shuffling|w9": {
+          "n_docs": 58,
+          "accuracy": 0.8793103448275862,
+          "ties": 0,
+          "mean_diff": 0.01994976902853657,
+          "p_value": 7.887717662165204e-11
+        },
+        "en-de|gemini|sentence_splitting|w1": {
+          "n_docs": 15,
+          "accuracy": 0.5333333333333333,
+          "ties": 0,
+          "mean_diff": 0.0014695196177832918,
+          "p_value": 0.12847948989121058
+        },
+        "en-de|gemini|sentence_splitting|w3": {
+          "n_docs": 15,
+          "accuracy": 0.6666666666666666,
+          "ties": 0,
+          "mean_diff": 0.0024333621745614635,
+          "p_value": 0.3125200689233036
+        },
+        "en-de|gemini|sentence_splitting|w6": {
+          "n_docs": 15,
+          "accuracy": 0.8,
+          "ties": 0,
+          "mean_diff": 0.0029232372372402873,
+          "p_value": 0.24680809932438805
+        },
+        "en-de|gemini|sentence_splitting|w9": {
+          "n_docs": 15,
+          "accuracy": 0.8666666666666667,
+          "ties": 0,
+          "mean_diff": 0.004480457579352282,
+          "p_value": 0.23950153880150982
+        }
+      },
+      "micro": {
+        "tense_consistency|w1": {
+          "n_docs": 404,
+          "accuracy": 0.6905940594059405,
+          "ties": 1,
+          "mean_diff": 0.0011475252777118873,
+          "p_value": 1.1288149561376305e-07
+        },
+        "tense_consistency|w3": {
+          "n_docs": 404,
+          "accuracy": 0.6881188118811881,
+          "ties": 0,
+          "mean_diff": 0.0014183915408781194,
+          "p_value": 3.1983458252272036e-07
+        },
+        "tense_consistency|w6": {
+          "n_docs": 404,
+          "accuracy": 0.655940594059406,
+          "ties": 1,
+          "mean_diff": 0.0015844876449839108,
+          "p_value": 5.422697957296028e-07
+        },
+        "tense_consistency|w9": {
+          "n_docs": 404,
+          "accuracy": 0.6485148514851485,
+          "ties": 1,
+          "mean_diff": 0.0015215495266690839,
+          "p_value": 2.5284987313153277e-06
+        },
+        "lexical_consistency|w1": {
+          "n_docs": 356,
+          "accuracy": 0.7556179775280899,
+          "ties": 0,
+          "mean_diff": 0.0016559506312463475,
+          "p_value": 1.6445923024262016e-11
+        },
+        "lexical_consistency|w3": {
+          "n_docs": 356,
+          "accuracy": 0.6685393258426966,
+          "ties": 0,
+          "mean_diff": 0.0018620141316570715,
+          "p_value": 3.3904957567194864e-10
+        },
+        "lexical_consistency|w6": {
+          "n_docs": 356,
+          "accuracy": 0.6573033707865169,
+          "ties": 0,
+          "mean_diff": 0.002196185937682363,
+          "p_value": 2.2720838841959757e-11
+        },
+        "lexical_consistency|w9": {
+          "n_docs": 356,
+          "accuracy": 0.6685393258426966,
+          "ties": 0,
+          "mean_diff": 0.0022036830000085124,
+          "p_value": 3.6295911826308207e-11
+        },
+        "conjunction_substitution|w1": {
+          "n_docs": 562,
+          "accuracy": 0.7491103202846975,
+          "ties": 0,
+          "mean_diff": 0.0014178630027830773,
+          "p_value": 1.1546475124048322e-15
+        },
+        "conjunction_substitution|w3": {
+          "n_docs": 562,
+          "accuracy": 0.693950177935943,
+          "ties": 0,
+          "mean_diff": 0.001714735534408818,
+          "p_value": 1.9752963611831036e-11
+        },
+        "conjunction_substitution|w6": {
+          "n_docs": 562,
+          "accuracy": 0.6459074733096085,
+          "ties": 0,
+          "mean_diff": 0.001361626125720515,
+          "p_value": 0.00025520300794386845
+        },
+        "conjunction_substitution|w9": {
+          "n_docs": 562,
+          "accuracy": 0.6298932384341637,
+          "ties": 0,
+          "mean_diff": 0.0015706285794126274,
+          "p_value": 0.0001425885464374103
+        },
+        "pronoun_swap_singular|w1": {
+          "n_docs": 19,
+          "accuracy": 0.631578947368421,
+          "ties": 0,
+          "mean_diff": 0.00034397560191229415,
+          "p_value": 0.5057276031438548
+        },
+        "pronoun_swap_singular|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.0027232220469885437,
+          "p_value": 0.3455597297300055
+        },
+        "pronoun_swap_singular|w6": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.005544916060552641,
+          "p_value": 0.06521637822660042
+        },
+        "pronoun_swap_singular|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8947368421052632,
+          "ties": 0,
+          "mean_diff": 0.00520318425074267,
+          "p_value": 0.08076156979573536
+        },
+        "pronoun_swap_plural|w1": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.0015932588804816593,
+          "p_value": 0.041602511192110135
+        },
+        "pronoun_swap_plural|w3": {
+          "n_docs": 19,
+          "accuracy": 0.7894736842105263,
+          "ties": 0,
+          "mean_diff": 0.006281621773899009,
+          "p_value": 0.07481540829848578
+        },
+        "pronoun_swap_plural|w6": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.006715026825230262,
+          "p_value": 0.08550840725021361
+        },
+        "pronoun_swap_plural|w9": {
+          "n_docs": 19,
+          "accuracy": 0.8421052631578947,
+          "ties": 0,
+          "mean_diff": 0.006926619608797678,
+          "p_value": 0.07615782138308215
+        },
+        "sentence_repetition|w1": {
+          "n_docs": 876,
+          "accuracy": 0.8812785388127854,
+          "ties": 0,
+          "mean_diff": 0.013308408803463161,
+          "p_value": 5.57913690985044e-106
+        },
+        "sentence_repetition|w3": {
+          "n_docs": 876,
+          "accuracy": 0.8698630136986302,
+          "ties": 0,
+          "mean_diff": 0.018009815603327275,
+          "p_value": 2.0462546916058846e-81
+        },
+        "sentence_repetition|w6": {
+          "n_docs": 876,
+          "accuracy": 0.8618721461187214,
+          "ties": 1,
+          "mean_diff": 0.018715954433906175,
+          "p_value": 3.093141098938224e-76
+        },
+        "sentence_repetition|w9": {
+          "n_docs": 876,
+          "accuracy": 0.8447488584474886,
+          "ties": 1,
+          "mean_diff": 0.018426183042892324,
+          "p_value": 3.58975567020067e-73
+        },
+        "sentence_removal|w1": {
+          "n_docs": 876,
+          "accuracy": 0.9874429223744292,
+          "ties": 0,
+          "mean_diff": 0.06100527319523886,
+          "p_value": 0.0
+        },
+        "sentence_removal|w3": {
+          "n_docs": 876,
+          "accuracy": 0.908675799086758,
+          "ties": 0,
+          "mean_diff": 0.029832690109919336,
+          "p_value": 1.7673894981424924e-109
+        },
+        "sentence_removal|w6": {
+          "n_docs": 876,
+          "accuracy": 0.860730593607306,
+          "ties": 0,
+          "mean_diff": 0.02721167294931028,
+          "p_value": 7.813048975530353e-81
+        },
+        "sentence_removal|w9": {
+          "n_docs": 876,
+          "accuracy": 0.8493150684931506,
+          "ties": 0,
+          "mean_diff": 0.02602300572155549,
+          "p_value": 3.2687955145057454e-72
+        },
+        "sentence_shuffling|w1": {
+          "n_docs": 340,
+          "accuracy": 1.0,
+          "ties": 0,
+          "mean_diff": 0.039817761915199694,
+          "p_value": 8.409562641577222e-177
+        },
+        "sentence_shuffling|w3": {
+          "n_docs": 340,
+          "accuracy": 0.9705882352941176,
+          "ties": 0,
+          "mean_diff": 0.03685144500007218,
+          "p_value": 2.1217958291564793e-81
+        },
+        "sentence_shuffling|w6": {
+          "n_docs": 340,
+          "accuracy": 0.9352941176470588,
+          "ties": 0,
+          "mean_diff": 0.029779906541853494,
+          "p_value": 1.6738504058778868e-56
+        },
+        "sentence_shuffling|w9": {
+          "n_docs": 340,
+          "accuracy": 0.8823529411764706,
+          "ties": 0,
+          "mean_diff": 0.022788971437158967,
+          "p_value": 1.1860089377955993e-45
+        },
+        "sentence_splitting|w1": {
+          "n_docs": 100,
+          "accuracy": 0.61,
+          "ties": 0,
+          "mean_diff": 0.0005899968633467739,
+          "p_value": 0.0019953400721544282
+        },
+        "sentence_splitting|w3": {
+          "n_docs": 100,
+          "accuracy": 0.7,
+          "ties": 0,
+          "mean_diff": 0.0025163852531336927,
+          "p_value": 0.00012660334961375766
+        },
+        "sentence_splitting|w6": {
+          "n_docs": 100,
+          "accuracy": 0.77,
+          "ties": 0,
+          "mean_diff": 0.0028956265935040576,
+          "p_value": 2.7008006694203666e-05
+        },
+        "sentence_splitting|w9": {
+          "n_docs": 100,
+          "accuracy": 0.79,
+          "ties": 0,
+          "mean_diff": 0.0035277842577395345,
+          "p_value": 9.862742754259702e-05
+        }
+      }
     }
   }
 }
