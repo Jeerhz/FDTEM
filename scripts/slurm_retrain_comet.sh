@@ -53,6 +53,7 @@
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
 #SBATCH --partition=gpu
+#SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
@@ -83,15 +84,17 @@ VARIANT="${VARIANT:-paragraph}"
 DATA_DIR="${DATA_DIR:-$HOME/scratch/paragraph_mqm}"
 MIX_DIR="${MIX_DIR:-$DATA_DIR/mixes}"
 FROZEN="${FROZEN:-0}"
+MODEL="${MODEL:-da}"   # da = wmt22-comet-da (ref-based) | qe = wmt22-cometkiwi-da (ref-free)
 
 ARM_NAME="$VARIANT"
 if [[ "$VARIANT" == "mix" ]]; then
   [[ -n "${MIX:-}" ]] || { echo "VARIANT=mix requires MIX=fracNNN"; exit 1; }
   ARM_NAME="mix-$MIX"
 fi
+[[ "$MODEL" == "qe" ]] && ARM_NAME="kiwi-$ARM_NAME"
 [[ "$FROZEN" == "1" ]] && ARM_NAME="$ARM_NAME-frozen"
 
-CKPT_DIR="$HOME/scratch/checkpoints/retrain/$ARM_NAME"
+CKPT_DIR="$HOME/scratch/checkpoints/${CKPT_ROOT:-retrain}/$ARM_NAME"
 mkdir -p "$CKPT_DIR"
 
 export WANDB_PROJECT="${WANDB_PROJECT:-comet-retrain}"
@@ -105,7 +108,7 @@ fi
 
 echo "═══════════════════════════════════════════════════════════"
 echo " Node     : $(hostname)  GPU: ${CUDA_VISIBLE_DEVICES:-none}"
-echo " Variant  : $VARIANT (arm: $ARM_NAME, frozen=$FROZEN)"
+echo " Variant  : $VARIANT (arm: $ARM_NAME, model=$MODEL, frozen=$FROZEN)"
 echo " Data     : $DATA_DIR"
 echo " Ckpts    : $CKPT_DIR"
 echo " W&B      : project=$WANDB_PROJECT run=$WANDB_RUN_NAME mode=${WANDB_MODE:-online}"
@@ -163,16 +166,24 @@ EOF
     [[ -n "${ENCODER_MODEL:-}" ]] && EXTRA_ARGS+=(--regression_metric.init_args.encoder_model "$ENCODER_MODEL")
     ;;
   mix)
-    # same recipe as `paragraph` (continue wmt22-comet-da), only the train CSVs
-    # point at one sentence-fraction mix; validation stays the shared val set
-    CFG=configs/models/comet_paragraph_continue.yaml
+    # same recipe as `paragraph` (continue the public base metric), only the
+    # train CSVs point at one sentence-fraction mix; validation stays shared.
+    # MODEL=da → wmt22-comet-da (ref-based); MODEL=qe → wmt22-cometkiwi-da.
+    if [[ "$MODEL" == "qe" ]]; then
+      CFG=configs/models/comet_kiwi_paragraph_continue.yaml
+      BASE_ID="Unbabel/wmt22-cometkiwi-da"
+    else
+      CFG=configs/models/comet_paragraph_continue.yaml
+      BASE_ID="Unbabel/wmt22-comet-da"
+    fi
     if [[ -z "${RESUME:-}" ]]; then
-      BASE_CKPT=$(python - 2>/dev/null <<'EOF'
+      BASE_CKPT=$(BASE_ID="$BASE_ID" python - 2>/dev/null <<'EOF'
+import os
 from comet import download_model
-print(download_model("Unbabel/wmt22-comet-da"))
+print(download_model(os.environ["BASE_ID"]))
 EOF
 )
-      [[ -f "$BASE_CKPT" ]] || { echo "ERROR: could not download wmt22-comet-da"; exit 1; }
+      [[ -f "$BASE_CKPT" ]] || { echo "ERROR: could not download $BASE_ID"; exit 1; }
       echo "Base checkpoint: $BASE_CKPT"
       EXTRA_ARGS+=(--load_from_checkpoint "$BASE_CKPT")
     fi
@@ -184,15 +195,15 @@ esac
 # Overrides go through a generated YAML rather than CLI flags: jsonargparse
 # 3.13.1 is unreliable for list-valued init_args, and the generated file doubles
 # as the exact record of what this run trained on ($CKPT_DIR/config.yaml).
-if [[ "$VARIANT" == "mix" || "$FROZEN" == "1" ]]; then
+if [[ "$VARIANT" == "mix" || "$FROZEN" == "1" || -n "${VAL_FILES:-}" ]]; then
   GEN_CFG="$CKPT_DIR/config.yaml"
   MIX_PATH=""
   [[ "$VARIANT" == "mix" ]] && MIX_PATH="$MIX_DIR/$MIX"
-  python - "$CFG" "$GEN_CFG" "$MIX_PATH" "$FROZEN" <<'EOF'
+  python - "$CFG" "$GEN_CFG" "$MIX_PATH" "$FROZEN" "${VAL_FILES:-}" <<'EOF'
 import sys, glob, os
 import yaml
 
-base_cfg, out_cfg, mix_path, frozen = sys.argv[1:5]
+base_cfg, out_cfg, mix_path, frozen, val_files = sys.argv[1:6]
 cfg = yaml.safe_load(open(base_cfg))
 base_dir = os.path.dirname(os.path.abspath(base_cfg))
 
@@ -221,6 +232,11 @@ if frozen == "1":
     init["keep_embeddings_frozen"] = True
     print("encoder frozen for the whole run (nr_frozen_epochs=1000)")
 
+if val_files:
+    init["validation_data"] = sorted(os.path.expanduser(p)
+                                     for p in val_files.split())
+    print(f"validation_data → {len(init['validation_data'])} file(s) (override)")
+
 os.makedirs(os.path.dirname(os.path.abspath(out_cfg)), exist_ok=True)
 with open(out_cfg, "w") as fh:
     yaml.safe_dump(cfg, fh, sort_keys=False, default_flow_style=False)
@@ -241,6 +257,32 @@ srun python scripts/train_wandb.py \
     --seed_everything "${SEED:-42}" \
     "${EXTRA_ARGS[@]}" \
     2>&1 | tee "$CKPT_DIR/$WANDB_RUN_NAME.log"
+
+# comet.load_from_checkpoint requires <run-dir>/hparams.yaml, which the
+# WandbLogger layout does not write — generate it from the checkpoint itself
+# so evaluation scripts can load every arm without manual repair.
+srun python - "$CKPT_DIR" <<'EOF'
+import glob, os, sys, yaml, torch
+for ck in glob.glob(os.path.join(sys.argv[1], "*", "*", "checkpoints", "last.ckpt")):
+    run_dir = os.path.dirname(os.path.dirname(ck))
+    hp_file = os.path.join(run_dir, "hparams.yaml")
+    if os.path.exists(hp_file):
+        continue
+    c = torch.load(ck, map_location="cpu", weights_only=False, mmap=True)
+    hp = {}
+    for k, v in dict(c["hyper_parameters"]).items():
+        if isinstance(v, torch.Tensor):
+            v = v.item()
+        try:
+            yaml.safe_dump({k: v}); hp[k] = v
+        except Exception:
+            hp[k] = str(v)
+    hp.setdefault("class_identifier",
+                  "unified_metric" if "input_segments" in hp else "regression_metric")
+    with open(hp_file, "w") as fh:
+        yaml.safe_dump(hp, fh, sort_keys=False)
+    print(f"wrote {hp_file}")
+EOF
 
 echo; echo "Done. Checkpoints under $CKPT_DIR (see wandb/<run>/checkpoints/)."
 echo "Next: compare correlation-vs-length across models with scripts/eval_length_correlation.py"

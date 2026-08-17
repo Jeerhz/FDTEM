@@ -25,6 +25,7 @@
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
 #SBATCH --partition=gpu
+#SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
@@ -65,7 +66,8 @@ DEFAULT_MODELS="wmt22=Unbabel/wmt22-comet-da kiwi=Unbabel/wmt22-cometkiwi-da"
 MODEL_ARGS="${MODELS:-$DEFAULT_MODELS}"
 
 if [[ "${SWEEP:-0}" == "1" ]]; then
-  for d in "$HOME"/scratch/checkpoints/retrain/mix-*/; do
+  SWEEP_ROOT="${SWEEP_ROOT:-$HOME/scratch/checkpoints/retrain}"
+  for d in "$SWEEP_ROOT"/mix-*/ "$SWEEP_ROOT"/kiwi-mix-*/; do
     [[ -d "$d" ]] || continue
     arm=$(basename "$d")
     # Lightning nests as $CKPT_DIR/<wandb-project>/<run-id>/checkpoints/last.ckpt,
