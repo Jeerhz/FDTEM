@@ -485,6 +485,7 @@ class CometModel(ptl.LightningModule, metaclass=abc.ABCMeta):
         stage (str): either 'fit', 'validate', 'test', or 'predict'
         """
         if stage in (None, "fit"):
+            self._warn_on_unreachable_train_data()
             train_dataset = self.read_training_data(self.hparams.train_data[0])
 
             self.validation_sets = [
@@ -499,6 +500,38 @@ class CometModel(ptl.LightningModule, metaclass=abc.ABCMeta):
                 a=len(train_dataset), size=min(1000, int(len(train_dataset) * 0.2))
             )
             self.train_subset = Subset(train_dataset, train_subset)
+
+    def _warn_on_unreachable_train_data(self) -> None:
+        """`train_dataloader` serves ONE file per epoch, chosen as
+        `train_data[current_epoch % len(train_data)]`. Lightning only calls it
+        again when `reload_dataloaders_every_n_epochs >= 1`; with the default 0
+        the loader is built once and every file after the first is never read.
+
+        A multi-file `train_data` is therefore either a per-epoch rotation (so
+        an "epoch" is one file, not the whole corpus) or — with reloading off —
+        silent data loss. Both are easy to miss, so say so loudly.
+        """
+        n_files = len(self.hparams.train_data)
+        if n_files < 2:
+            return
+        reload_every = getattr(self.trainer, "reload_dataloaders_every_n_epochs", 0) or 0
+        if reload_every >= 1:
+            logger.warning(
+                f"train_data lists {n_files} files and dataloaders reload every "
+                f"{reload_every} epoch(s): ONE epoch = ONE file, not the whole "
+                "corpus. Epoch-based budgets and early-stopping patience are "
+                "not comparable across runs whose train_data differ in length. "
+                "Concatenate the files if you want an epoch to mean a full pass."
+            )
+        else:
+            logger.warning(
+                f"train_data lists {n_files} files but "
+                "reload_dataloaders_every_n_epochs=0, so the train dataloader is "
+                f"built once: ONLY {self.hparams.train_data[0]} will be read and "
+                f"the other {n_files - 1} file(s) are silently ignored. "
+                "Concatenate them into a single CSV, or set "
+                "reload_dataloaders_every_n_epochs=1 to rotate."
+            )
 
     def train_dataloader(self) -> DataLoader:
         """Method that loads the train dataloader. Can be called every epoch to load a

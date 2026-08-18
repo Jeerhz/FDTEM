@@ -1,5 +1,14 @@
 # Protocol — impact of training-data length on learned MT metrics (DA + QE)
 
+> **Correction (2026-08-18).** The runs this protocol describes trained on one
+> language pair's slice of their mix, not on the mix, because COMET reads a
+> single file per epoch and the dataloader was never rebuilt. Arm rankings from
+> those runs track training-set size, not composition, and must not be reported.
+> The defect, the fix and the corrected protocol are in
+> [`experiments/length_training/README.md`](../experiments/length_training/README.md).
+> The WMT sweep described there (36 arms) supersedes the 28-arm Bio-MQM grid below.
+
+
 Status: **running** (DA arms since 2026-08-14, QE arms submitted 2026-08-17).
 Companion docs: `docs/RETRAIN_AND_BLOCK_XSIM.md` (original DA design),
 cluster runbook for operations. This document is the full experimental

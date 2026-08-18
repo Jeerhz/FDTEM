@@ -1,0 +1,71 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# CometKiwi (QE, reference-free) continued training for the length-composition
+# sweep — mirror of comet_da.yaml for Unbabel/wmt22-cometkiwi-da
+# (UnifiedMetric, infoxlm-large, inputs mt+src).
+#
+# Same conservative continue-training schedule and the same CSVs as the DA arms
+# (the `ref` column is present but unused), so the sweep is comparable across
+# base metrics.
+#
+# NOTE layer_transformation: the released kiwi hparams say `sparsemax_patch`,
+# which comet ≥ 2.2.4 resolves to SOFTMAX at load time (upstream issue #244).
+# We therefore continue with `softmax` — the transformation the weights were
+# actually trained with — NOT sparsemax.
+#
+# Usage (one arm):
+#   MODEL=qe MIX=frac040 FROZEN=0 sbatch experiments/length_training/slurm/train.sh
+#
+# License note: wmt22-cometkiwi-da is CC-BY-NC-SA-4.0 — any published
+# fine-tune of it must carry the same license (non-commercial, share-alike).
+# ──────────────────────────────────────────────────────────────────────────────
+
+unified_metric:
+  class_path: comet.models.UnifiedMetric
+  init_args:
+    # ── encoder (kiwi's own backbone — unchanged, this arm isolates DATA) ─────
+    encoder_model: XLM-RoBERTa
+    pretrained_model: microsoft/infoxlm-large
+
+    # ── architecture (mirrors wmt22-cometkiwi-da hparams) ─────────────────────
+    sent_layer: mix
+    layer_transformation: softmax   # == kiwi's `sparsemax_patch` at runtime
+    layer_norm: false
+    word_layer: 24
+    word_level_training: false
+    loss_lambda: 0.65
+    hidden_sizes:
+      - 3072
+      - 1024
+    activations: Tanh
+    final_activation: null
+    dropout: 0.1
+    loss: mse
+    input_segments:
+      - mt
+      - src
+
+    # ── learning rates (same continue-training schedule as the DA arms) ───────
+    nr_frozen_epochs: 0.3
+    keep_embeddings_frozen: true    # kiwi convention
+    optimizer: AdamW
+    encoder_learning_rate: 5.0e-07
+    learning_rate: 1.0e-05
+    layerwise_decay: 0.95
+    warmup_steps: 100
+
+    # ── batch (inputs are up to ~480 tokens — 4×8 accum = effective 32) ────────
+    batch_size: 4
+
+    # ── data (same CSVs as the DA arms; `ref` column present but unused) ───────
+    train_data:
+      # ONE file — the mix's all_train.csv. COMET reads train_data[epoch % len]
+      # and Lightning does not rebuild the loader (reload_dataloaders_every_n_epochs
+      # = 0), so a per-language-pair list silently trains on the first file only.
+      # slurm/train.sh overwrites this with the selected mix.
+      - ~/scratch/wmt_length_data/mixes/frac000/all_train.csv
+    validation_data:
+      - ~/scratch/wmt_length_data/all_val.csv
+
+trainer: ../../../configs/trainer_wandb.yaml
+early_stopping: ../../../configs/early_stopping.yaml
+model_checkpoint: ../../../configs/model_checkpoint.yaml

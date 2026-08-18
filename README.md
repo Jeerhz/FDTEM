@@ -1,3 +1,7 @@
+> **This fork is the FDTEM research repository.**
+> The COMET library below is vendored and patched; the experiments live in
+> [`EXPERIMENTS.md`](EXPERIMENTS.md) and under `experiments/`.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/Unbabel/COMET/master/docs/source/_static/img/COMET_lockup-dark.png">
   <br />

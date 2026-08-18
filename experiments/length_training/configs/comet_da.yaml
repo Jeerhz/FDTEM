@@ -1,0 +1,68 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# COMET-DA continued training for the length-composition sweep (WMT pools).
+#
+# Question: does continuing wmt22-comet-da on longer inputs make its scores
+# correlate better with human quality on long text, and what fraction of
+# sentence-level data is needed to keep the sentence-level skill?
+#
+# Data: one sentence-fraction mix built by
+# experiments/length_training/make_mixtures.py over the pools of
+# experiments/length_training/prepare_data.py (sent = WMT22 segments,
+# agg = aggregated WMT22 windows, native = WMT25 whole documents).
+# Every mix holds the same total number of rows, so the only moving part
+# across arms is composition.
+#
+# `train_data` MUST stay a single file — see the comment on it below and
+# experiments/length_training/make_config.py for why.
+#
+# Usage (one arm):
+#   MODEL=da MIX=frac040 FROZEN=0 sbatch experiments/length_training/slurm/train.sh
+# ──────────────────────────────────────────────────────────────────────────────
+
+regression_metric:
+  class_path: comet.models.RegressionMetric
+  init_args:
+    # ── encoder (unchanged — this sweep isolates the DATA effect) ─────────────
+    encoder_model: XLM-RoBERTa
+    pretrained_model: xlm-roberta-large
+
+    # ── layer pooling ─────────────────────────────────────────────────────────
+    pool: avg
+    layer: mix
+    layer_transformation: sparsemax
+    layer_norm: False
+
+    # ── top-layer regression head ─────────────────────────────────────────────
+    hidden_sizes:
+      - 3072
+      - 1024
+    activations: Tanh
+    final_activation: null
+    dropout: 0.1
+    loss: mse
+
+    # ── learning rates (conservative: continued training, avoid forgetting) ───
+    nr_frozen_epochs: 0.3
+    keep_embeddings_frozen: False
+    optimizer: AdamW
+    encoder_learning_rate: 5.0e-07
+    learning_rate: 1.0e-05
+    layerwise_decay: 0.95
+    warmup_steps: 100
+
+    # ── batch (inputs are up to ~480 tokens — 4×8 accum = effective 32) ────────
+    batch_size: 4
+
+    # ── data (one sentence-fraction mix; see make_config.py) ──────────────────
+    train_data:
+      # ONE file — the mix's all_train.csv. COMET reads train_data[epoch % len]
+      # and Lightning does not rebuild the loader (reload_dataloaders_every_n_epochs
+      # = 0), so a per-language-pair list silently trains on the first file only.
+      # slurm/train.sh overwrites this with the selected mix.
+      - ~/scratch/wmt_length_data/mixes/frac000/all_train.csv
+    validation_data:
+      - ~/scratch/wmt_length_data/all_val.csv
+
+trainer: ../../../configs/trainer_wandb.yaml
+early_stopping: ../../../configs/early_stopping.yaml
+model_checkpoint: ../../../configs/model_checkpoint.yaml
