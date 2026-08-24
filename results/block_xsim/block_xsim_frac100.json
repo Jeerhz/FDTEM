@@ -1,0 +1,932 @@
+{
+  "experiment": "block_xsim++",
+  "timestamp": "2026-08-23T21:41:24.979044+00:00",
+  "config": {
+    "encoders": [
+      "comet:/home/abensale/scratch/checkpoints/retrain-wmt/mix-frac100/comet-retrain-wmt/4cnnyi3x/checkpoints/epoch=5-step=4500-val_kendall=0.310.ckpt"
+    ],
+    "langs": [
+      "de",
+      "es",
+      "fr",
+      "ru"
+    ],
+    "pivot": "en",
+    "direction": "en2xx",
+    "k_list": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "categories": [
+      "causality",
+      "entity",
+      "number"
+    ],
+    "variants_per_position": 2,
+    "flores_source": "plus",
+    "splits": [
+      "dev",
+      "devtest"
+    ],
+    "max_sents": null,
+    "max_blocks": null,
+    "batch_size": 32,
+    "device": null,
+    "seed": 42,
+    "cache_dir": "results/block_xsim/emb_cache",
+    "output": "results/block_xsim/block_xsim_frac100.json",
+    "wandb_project": null,
+    "run_name": null,
+    "dry_run": false
+  },
+  "encoders": {
+    "comet:4cnnyi3x-epoch=5-step=4500-val_kendall=0.310": {
+      "de": {
+        "2": {
+          "n_blocks": 846,
+          "pool_size": 7225,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.8983451536643026,
+          "error_breakdown": {
+            "correct": 0.1016548463356974,
+            "misaligned": 0.0,
+            "causality": 0.29550827423167847,
+            "entity": 0.5508274231678487,
+            "number": 0.05200945626477541
+          },
+          "per_category_err": {
+            "causality": 0.74822695035461,
+            "entity": 0.7919621749408984,
+            "number": 0.25177304964539005
+          },
+          "category_combos": {
+            "causality+entity": 0.875886524822695,
+            "causality+number": 0.7978723404255319,
+            "entity+number": 0.8392434988179669,
+            "causality+entity+number": 0.8983451536643026
+          },
+          "detection_rate": 0.5027433767048126,
+          "detection_by_category": {
+            "causality": 0.46082337317397076,
+            "entity": 0.5417654028436019,
+            "number": 0.4529569892473118
+          },
+          "detection_by_position": {
+            "0": 0.5109102244389028,
+            "1": 0.49448123620309054
+          },
+          "n_negatives_by_category": {
+            "causality": 2259,
+            "entity": 3376,
+            "number": 744
+          },
+          "margin_vs_best_negative": -0.0006665955879725516,
+          "margin_vs_best_own_perturbation": -0.0006665955879725516,
+          "variant_stats": {
+            "causality": 2259,
+            "entity": 3376,
+            "number": 744,
+            "blocks": 846
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "pool_size": 5755,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9829059829059829,
+          "error_breakdown": {
+            "correct": 0.017094017094017096,
+            "misaligned": 0.0,
+            "causality": 0.23504273504273504,
+            "entity": 0.7264957264957265,
+            "number": 0.021367521367521368
+          },
+          "per_category_err": {
+            "causality": 0.9145299145299145,
+            "entity": 0.9423076923076923,
+            "number": 0.3418803418803419
+          },
+          "category_combos": {
+            "causality+entity": 0.9764957264957265,
+            "causality+number": 0.9401709401709402,
+            "entity+number": 0.9594017094017094,
+            "causality+entity+number": 0.9829059829059829
+          },
+          "detection_rate": 0.3442405901267259,
+          "detection_by_category": {
+            "causality": 0.28602035350830207,
+            "entity": 0.3593861527480371,
+            "number": 0.45145631067961167
+          },
+          "detection_by_position": {
+            "0": 0.35221536735838477,
+            "1": 0.3333333333333333,
+            "2": 0.34689265536723163
+          },
+          "n_negatives_by_category": {
+            "causality": 1867,
+            "entity": 2802,
+            "number": 618
+          },
+          "margin_vs_best_negative": -0.0007817469886504114,
+          "margin_vs_best_own_perturbation": -0.0007817469886504114,
+          "variant_stats": {
+            "causality": 1867,
+            "entity": 2802,
+            "number": 618,
+            "blocks": 468
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "pool_size": 4448,
+          "xsim_err": 0.0,
+          "xsimpp_err": 1.0,
+          "error_breakdown": {
+            "correct": 0.0,
+            "misaligned": 0.0,
+            "causality": 0.19927536231884058,
+            "entity": 0.7934782608695652,
+            "number": 0.007246376811594203
+          },
+          "per_category_err": {
+            "causality": 0.9746376811594203,
+            "entity": 0.9927536231884058,
+            "number": 0.427536231884058
+          },
+          "category_combos": {
+            "causality+entity": 1.0,
+            "causality+number": 0.9782608695652174,
+            "entity+number": 0.9927536231884058,
+            "causality+entity+number": 1.0
+          },
+          "detection_rate": 0.25599232981783315,
+          "detection_by_category": {
+            "causality": 0.2158322056833559,
+            "entity": 0.25362976406533577,
+            "number": 0.3877551020408163
+          },
+          "detection_by_position": {
+            "0": 0.26717557251908397,
+            "1": 0.2633107454017425,
+            "2": 0.2557471264367816,
+            "3": 0.23782234957020057
+          },
+          "n_negatives_by_category": {
+            "causality": 1478,
+            "entity": 2204,
+            "number": 490
+          },
+          "margin_vs_best_negative": -0.0007656652596779168,
+          "margin_vs_best_own_perturbation": -0.0007656652596779168,
+          "variant_stats": {
+            "causality": 1478,
+            "entity": 2204,
+            "number": 490,
+            "blocks": 276
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "pool_size": 2752,
+          "xsim_err": 0.0,
+          "xsimpp_err": 1.0,
+          "error_breakdown": {
+            "correct": 0.0,
+            "misaligned": 0.0,
+            "causality": 0.09929078014184398,
+            "entity": 0.8936170212765957,
+            "number": 0.0070921985815602835
+          },
+          "per_category_err": {
+            "causality": 0.9929078014184397,
+            "entity": 1.0,
+            "number": 0.5035460992907801
+          },
+          "category_combos": {
+            "causality+entity": 1.0,
+            "causality+number": 0.9929078014184397,
+            "entity+number": 1.0,
+            "causality+entity+number": 1.0
+          },
+          "detection_rate": 0.17349674454232095,
+          "detection_by_category": {
+            "causality": 0.14909478168264112,
+            "entity": 0.16335227272727273,
+            "number": 0.3143939393939394
+          },
+          "detection_by_position": {
+            "0": 0.19653179190751446,
+            "1": 0.16893203883495145,
+            "2": 0.1676300578034682,
+            "3": 0.15601503759398497,
+            "4": 0.17870722433460076
+          },
+          "n_negatives_by_category": {
+            "causality": 939,
+            "entity": 1408,
+            "number": 264
+          },
+          "margin_vs_best_negative": -0.000768077268730849,
+          "margin_vs_best_own_perturbation": -0.000768077268730849,
+          "variant_stats": {
+            "causality": 939,
+            "entity": 1408,
+            "number": 264,
+            "blocks": 141
+          }
+        }
+      },
+      "es": {
+        "2": {
+          "n_blocks": 846,
+          "pool_size": 4676,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.5366430260047281,
+          "error_breakdown": {
+            "correct": 0.46335697399527187,
+            "misaligned": 0.0,
+            "causality": 0.24822695035460993,
+            "entity": 0.20803782505910165,
+            "number": 0.08037825059101655
+          },
+          "per_category_err": {
+            "causality": 0.3144208037825059,
+            "entity": 0.2647754137115839,
+            "number": 0.15602836879432624
+          },
+          "category_combos": {
+            "causality+entity": 0.48108747044917255,
+            "causality+number": 0.4101654846335697,
+            "entity+number": 0.34988179669030733,
+            "causality+entity+number": 0.5366430260047281
+          },
+          "detection_rate": 0.7618798955613577,
+          "detection_by_category": {
+            "causality": 0.7613636363636364,
+            "entity": 0.7871165644171779,
+            "number": 0.7045454545454546
+          },
+          "detection_by_position": {
+            "0": 0.7703851925962981,
+            "1": 0.752594210813763
+          },
+          "n_negatives_by_category": {
+            "causality": 1496,
+            "entity": 1630,
+            "number": 704
+          },
+          "margin_vs_best_negative": 0.00025945936795324087,
+          "margin_vs_best_own_perturbation": -1.5774368876009248e-05,
+          "variant_stats": {
+            "causality": 1496,
+            "entity": 1630,
+            "number": 704,
+            "blocks": 846
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "pool_size": 3577,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.7435897435897436,
+          "error_breakdown": {
+            "correct": 0.2564102564102564,
+            "misaligned": 0.0,
+            "causality": 0.3055555555555556,
+            "entity": 0.344017094017094,
+            "number": 0.09401709401709402
+          },
+          "per_category_err": {
+            "causality": 0.4722222222222222,
+            "entity": 0.4423076923076923,
+            "number": 0.2692307692307692
+          },
+          "category_combos": {
+            "causality+entity": 0.6944444444444444,
+            "causality+number": 0.6025641025641025,
+            "entity+number": 0.5470085470085471,
+            "causality+entity+number": 0.7435897435897436
+          },
+          "detection_rate": 0.6828562238661949,
+          "detection_by_category": {
+            "causality": 0.6787181594083813,
+            "entity": 0.7132018209408194,
+            "number": 0.6219512195121951
+          },
+          "detection_by_position": {
+            "0": 0.6984698469846985,
+            "1": 0.6607515657620042,
+            "2": 0.6865384615384615
+          },
+          "n_negatives_by_category": {
+            "causality": 1217,
+            "entity": 1318,
+            "number": 574
+          },
+          "margin_vs_best_negative": -3.337427187943831e-05,
+          "margin_vs_best_own_perturbation": -0.00013139373913872987,
+          "variant_stats": {
+            "causality": 1217,
+            "entity": 1318,
+            "number": 574,
+            "blocks": 468
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "pool_size": 2770,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.8659420289855072,
+          "error_breakdown": {
+            "correct": 0.13405797101449277,
+            "misaligned": 0.0,
+            "causality": 0.37318840579710144,
+            "entity": 0.42028985507246375,
+            "number": 0.07246376811594203
+          },
+          "per_category_err": {
+            "causality": 0.6304347826086957,
+            "entity": 0.5471014492753623,
+            "number": 0.34782608695652173
+          },
+          "category_combos": {
+            "causality+entity": 0.8333333333333334,
+            "causality+number": 0.7644927536231884,
+            "entity+number": 0.6485507246376812,
+            "causality+entity+number": 0.8659420289855072
+          },
+          "detection_rate": 0.6202886928628709,
+          "detection_by_category": {
+            "causality": 0.6140529531568228,
+            "entity": 0.64272030651341,
+            "number": 0.5833333333333334
+          },
+          "detection_by_position": {
+            "0": 0.6071428571428571,
+            "1": 0.5961538461538461,
+            "2": 0.6498371335504886,
+            "3": 0.6273584905660378
+          },
+          "n_negatives_by_category": {
+            "causality": 982,
+            "entity": 1044,
+            "number": 468
+          },
+          "margin_vs_best_negative": -0.0001315372937824577,
+          "margin_vs_best_own_perturbation": -0.00016284812591038644,
+          "variant_stats": {
+            "causality": 982,
+            "entity": 1044,
+            "number": 468,
+            "blocks": 276
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "pool_size": 1634,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9290780141843972,
+          "error_breakdown": {
+            "correct": 0.07092198581560284,
+            "misaligned": 0.0,
+            "causality": 0.3829787234042553,
+            "entity": 0.46808510638297873,
+            "number": 0.07801418439716312
+          },
+          "per_category_err": {
+            "causality": 0.75177304964539,
+            "entity": 0.574468085106383,
+            "number": 0.375886524822695
+          },
+          "category_combos": {
+            "causality+entity": 0.8936170212765957,
+            "causality+number": 0.8439716312056738,
+            "entity+number": 0.6737588652482269,
+            "causality+entity+number": 0.9290780141843972
+          },
+          "detection_rate": 0.5639651707970529,
+          "detection_by_category": {
+            "causality": 0.5472868217054263,
+            "entity": 0.5878378378378378,
+            "number": 0.55078125
+          },
+          "detection_by_position": {
+            "0": 0.6036585365853658,
+            "1": 0.5785714285714286,
+            "2": 0.5616438356164384,
+            "3": 0.5570032573289903,
+            "4": 0.513986013986014
+          },
+          "n_negatives_by_category": {
+            "causality": 645,
+            "entity": 592,
+            "number": 256
+          },
+          "margin_vs_best_negative": -9.600997873349115e-05,
+          "margin_vs_best_own_perturbation": -0.0001540426746942103,
+          "variant_stats": {
+            "causality": 645,
+            "entity": 592,
+            "number": 256,
+            "blocks": 141
+          }
+        }
+      },
+      "fr": {
+        "2": {
+          "n_blocks": 846,
+          "pool_size": 4157,
+          "xsim_err": 0.002364066193853428,
+          "xsimpp_err": 0.6749408983451537,
+          "error_breakdown": {
+            "correct": 0.32505910165484636,
+            "misaligned": 0.0,
+            "causality": 0.24231678486997635,
+            "entity": 0.3144208037825059,
+            "number": 0.1182033096926714
+          },
+          "per_category_err": {
+            "causality": 0.3735224586288416,
+            "entity": 0.36997635933806144,
+            "number": 0.2458628841607565
+          },
+          "category_combos": {
+            "causality+entity": 0.6004728132387707,
+            "causality+number": 0.524822695035461,
+            "entity+number": 0.4846335697399527,
+            "causality+entity+number": 0.6749408983451537
+          },
+          "detection_rate": 0.5919661733615222,
+          "detection_by_category": {
+            "causality": 0.5402792696025779,
+            "entity": 0.6468058968058968,
+            "number": 0.5372340425531915
+          },
+          "detection_by_position": {
+            "0": 0.5886727688787186,
+            "1": 0.5956493921944978
+          },
+          "n_negatives_by_category": {
+            "causality": 931,
+            "entity": 1628,
+            "number": 752
+          },
+          "margin_vs_best_negative": 0.0005971622886136174,
+          "margin_vs_best_own_perturbation": -0.0002023825654760003,
+          "variant_stats": {
+            "causality": 931,
+            "entity": 1628,
+            "number": 752,
+            "blocks": 846
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "pool_size": 3165,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.8397435897435898,
+          "error_breakdown": {
+            "correct": 0.16025641025641027,
+            "misaligned": 0.0,
+            "causality": 0.2799145299145299,
+            "entity": 0.4700854700854701,
+            "number": 0.08974358974358974
+          },
+          "per_category_err": {
+            "causality": 0.5641025641025641,
+            "entity": 0.5726495726495726,
+            "number": 0.3418803418803419
+          },
+          "category_combos": {
+            "causality+entity": 0.7991452991452992,
+            "causality+number": 0.7072649572649573,
+            "entity+number": 0.6517094017094017,
+            "causality+entity+number": 0.8397435897435898
+          },
+          "detection_rate": 0.46162402669632924,
+          "detection_by_category": {
+            "causality": 0.4274300932090546,
+            "entity": 0.49022556390977445,
+            "number": 0.44155844155844154
+          },
+          "detection_by_position": {
+            "0": 0.4632936507936508,
+            "1": 0.4576271186440678,
+            "2": 0.46349942062572425
+          },
+          "n_negatives_by_category": {
+            "causality": 751,
+            "entity": 1330,
+            "number": 616
+          },
+          "margin_vs_best_negative": 0.00019496768072713166,
+          "margin_vs_best_own_perturbation": -0.0003390386118553579,
+          "variant_stats": {
+            "causality": 751,
+            "entity": 1330,
+            "number": 616,
+            "blocks": 468
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "pool_size": 2414,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9311594202898551,
+          "error_breakdown": {
+            "correct": 0.06884057971014493,
+            "misaligned": 0.0,
+            "causality": 0.2971014492753623,
+            "entity": 0.5543478260869565,
+            "number": 0.07971014492753623
+          },
+          "per_category_err": {
+            "causality": 0.7101449275362319,
+            "entity": 0.6702898550724637,
+            "number": 0.4492753623188406
+          },
+          "category_combos": {
+            "causality+entity": 0.9094202898550725,
+            "causality+number": 0.8405797101449275,
+            "entity+number": 0.7427536231884058,
+            "causality+entity+number": 0.9311594202898551
+          },
+          "detection_rate": 0.40130963517305895,
+          "detection_by_category": {
+            "causality": 0.3660130718954248,
+            "entity": 0.4432485322896282,
+            "number": 0.35912698412698413
+          },
+          "detection_by_position": {
+            "0": 0.4110738255033557,
+            "1": 0.4069529652351738,
+            "2": 0.3968565815324165,
+            "3": 0.3897058823529412
+          },
+          "n_negatives_by_category": {
+            "causality": 612,
+            "entity": 1022,
+            "number": 504
+          },
+          "margin_vs_best_negative": -0.00015165473450906575,
+          "margin_vs_best_own_perturbation": -0.00031548913102597,
+          "variant_stats": {
+            "causality": 612,
+            "entity": 1022,
+            "number": 504,
+            "blocks": 276
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "pool_size": 1413,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9432624113475178,
+          "error_breakdown": {
+            "correct": 0.05673758865248227,
+            "misaligned": 0.0,
+            "causality": 0.2978723404255319,
+            "entity": 0.5957446808510638,
+            "number": 0.04964539007092199
+          },
+          "per_category_err": {
+            "causality": 0.7730496453900709,
+            "entity": 0.6808510638297872,
+            "number": 0.46099290780141844
+          },
+          "category_combos": {
+            "causality+entity": 0.9290780141843972,
+            "causality+number": 0.8723404255319149,
+            "entity+number": 0.7659574468085106,
+            "causality+entity+number": 0.9432624113475178
+          },
+          "detection_rate": 0.37971698113207547,
+          "detection_by_category": {
+            "causality": 0.3575,
+            "entity": 0.385,
+            "number": 0.4007352941176471
+          },
+          "detection_by_position": {
+            "0": 0.38144329896907214,
+            "1": 0.3706896551724138,
+            "2": 0.34297520661157027,
+            "3": 0.4444444444444444,
+            "4": 0.3568627450980392
+          },
+          "n_negatives_by_category": {
+            "causality": 400,
+            "entity": 600,
+            "number": 272
+          },
+          "margin_vs_best_negative": -0.00018126194481737912,
+          "margin_vs_best_own_perturbation": -0.0002839342341758311,
+          "variant_stats": {
+            "causality": 400,
+            "entity": 600,
+            "number": 272,
+            "blocks": 141
+          }
+        }
+      },
+      "ru": {
+        "2": {
+          "n_blocks": 846,
+          "pool_size": 4324,
+          "xsim_err": 0.001182033096926714,
+          "xsimpp_err": 0.6619385342789598,
+          "error_breakdown": {
+            "correct": 0.3380614657210402,
+            "misaligned": 0.0,
+            "causality": 0.1595744680851064,
+            "entity": 0.40189125295508277,
+            "number": 0.10047281323877069
+          },
+          "per_category_err": {
+            "causality": 0.31560283687943264,
+            "entity": 0.466903073286052,
+            "number": 0.22576832151300236
+          },
+          "category_combos": {
+            "causality+entity": 0.6040189125295509,
+            "causality+number": 0.4574468085106383,
+            "entity+number": 0.5390070921985816,
+            "causality+entity+number": 0.6619385342789598
+          },
+          "detection_rate": 0.581943645773433,
+          "detection_by_category": {
+            "causality": 0.5883777239709443,
+            "entity": 0.6161825726141079,
+            "number": 0.48342541436464087
+          },
+          "detection_by_position": {
+            "0": 0.5859943977591037,
+            "1": 0.5776727702303603
+          },
+          "n_negatives_by_category": {
+            "causality": 826,
+            "entity": 1928,
+            "number": 724
+          },
+          "margin_vs_best_negative": 0.0003086170763708651,
+          "margin_vs_best_own_perturbation": -0.00029579558758996427,
+          "variant_stats": {
+            "causality": 826,
+            "entity": 1928,
+            "number": 724,
+            "blocks": 846
+          }
+        },
+        "3": {
+          "n_blocks": 468,
+          "pool_size": 3300,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.8418803418803419,
+          "error_breakdown": {
+            "correct": 0.1581196581196581,
+            "misaligned": 0.002136752136752137,
+            "causality": 0.1794871794871795,
+            "entity": 0.5790598290598291,
+            "number": 0.0811965811965812
+          },
+          "per_category_err": {
+            "causality": 0.47649572649572647,
+            "entity": 0.6602564102564102,
+            "number": 0.3247863247863248
+          },
+          "category_combos": {
+            "causality+entity": 0.8076923076923077,
+            "causality+number": 0.6452991452991453,
+            "entity+number": 0.7200854700854701,
+            "causality+entity+number": 0.8418803418803419
+          },
+          "detection_rate": 0.4947033898305085,
+          "detection_by_category": {
+            "causality": 0.5178571428571429,
+            "entity": 0.5101265822784811,
+            "number": 0.42586206896551726
+          },
+          "detection_by_position": {
+            "0": 0.5169660678642715,
+            "1": 0.4798657718120805,
+            "2": 0.48504273504273504
+          },
+          "n_negatives_by_category": {
+            "causality": 672,
+            "entity": 1580,
+            "number": 580
+          },
+          "margin_vs_best_negative": -0.0001754758122842759,
+          "margin_vs_best_own_perturbation": -0.0004122830869164318,
+          "variant_stats": {
+            "causality": 672,
+            "entity": 1580,
+            "number": 580,
+            "blocks": 468
+          }
+        },
+        "4": {
+          "n_blocks": 276,
+          "pool_size": 2512,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9347826086956522,
+          "error_breakdown": {
+            "correct": 0.06521739130434782,
+            "misaligned": 0.0,
+            "causality": 0.15217391304347827,
+            "entity": 0.6847826086956522,
+            "number": 0.09782608695652174
+          },
+          "per_category_err": {
+            "causality": 0.605072463768116,
+            "entity": 0.7753623188405797,
+            "number": 0.43478260869565216
+          },
+          "category_combos": {
+            "causality+entity": 0.8985507246376812,
+            "causality+number": 0.782608695652174,
+            "entity+number": 0.8478260869565217,
+            "causality+entity+number": 0.9347826086956522
+          },
+          "detection_rate": 0.4230769230769231,
+          "detection_by_category": {
+            "causality": 0.4444444444444444,
+            "entity": 0.4312297734627832,
+            "number": 0.3786610878661088
+          },
+          "detection_by_position": {
+            "0": 0.453125,
+            "1": 0.4245810055865922,
+            "2": 0.4450651769087523,
+            "3": 0.3720136518771331
+          },
+          "n_negatives_by_category": {
+            "causality": 522,
+            "entity": 1236,
+            "number": 478
+          },
+          "margin_vs_best_negative": -0.0003824475861620158,
+          "margin_vs_best_own_perturbation": -0.000402437784941867,
+          "variant_stats": {
+            "causality": 522,
+            "entity": 1236,
+            "number": 478,
+            "blocks": 276
+          }
+        },
+        "5": {
+          "n_blocks": 141,
+          "pool_size": 1484,
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.950354609929078,
+          "error_breakdown": {
+            "correct": 0.04964539007092199,
+            "misaligned": 0.0,
+            "causality": 0.1702127659574468,
+            "entity": 0.7092198581560284,
+            "number": 0.07092198581560284
+          },
+          "per_category_err": {
+            "causality": 0.7588652482269503,
+            "entity": 0.7943262411347518,
+            "number": 0.44680851063829785
+          },
+          "category_combos": {
+            "causality+entity": 0.9290780141843972,
+            "causality+number": 0.8297872340425532,
+            "entity+number": 0.8581560283687943,
+            "causality+entity+number": 0.950354609929078
+          },
+          "detection_rate": 0.3730454206999255,
+          "detection_by_category": {
+            "causality": 0.40668523676880225,
+            "entity": 0.37774725274725274,
+            "number": 0.3125
+          },
+          "detection_by_position": {
+            "0": 0.45104895104895104,
+            "1": 0.3657587548638132,
+            "2": 0.3968253968253968,
+            "3": 0.3333333333333333,
+            "4": 0.31636363636363635
+          },
+          "n_negatives_by_category": {
+            "causality": 359,
+            "entity": 728,
+            "number": 256
+          },
+          "margin_vs_best_negative": -0.00034475664142519236,
+          "margin_vs_best_own_perturbation": -0.00039351455052383244,
+          "variant_stats": {
+            "causality": 359,
+            "entity": 728,
+            "number": 256,
+            "blocks": 141
+          }
+        }
+      },
+      "_mean_by_k": {
+        "2": {
+          "xsim_err": 0.0008865248226950354,
+          "xsimpp_err": 0.6929669030732861,
+          "margin_vs_best_negative": 0.00012466078624129295,
+          "detection_rate": 0.6096332728502813,
+          "margin_vs_best_own_perturbation": -0.00029513702747863135,
+          "per_category_err": {
+            "causality": 0.4379432624113475,
+            "entity": 0.4734042553191489,
+            "number": 0.21985815602836878
+          },
+          "error_breakdown": {
+            "correct": 0.30703309692671393,
+            "misaligned": 0.0,
+            "causality": 0.2364066193853428,
+            "entity": 0.36879432624113473,
+            "number": 0.08776595744680851
+          },
+          "detection_by_position": {
+            "0": 0.6139906459182558,
+            "1": 0.6050994023604279
+          }
+        },
+        "3": {
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.8520299145299146,
+          "margin_vs_best_negative": -0.00019890734802174848,
+          "detection_rate": 0.4958560576299396,
+          "margin_vs_best_own_perturbation": -0.0004161156066402327,
+          "per_category_err": {
+            "causality": 0.6068376068376068,
+            "entity": 0.6543803418803419,
+            "number": 0.3194444444444445
+          },
+          "error_breakdown": {
+            "correct": 0.14797008547008547,
+            "misaligned": 0.0005341880341880342,
+            "causality": 0.25,
+            "entity": 0.5299145299145299,
+            "number": 0.07158119658119658
+          },
+          "detection_by_position": {
+            "0": 0.5077362332502514,
+            "1": 0.4828944473878714,
+            "2": 0.49549331814353814
+          }
+        },
+        "4": {
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9329710144927537,
+          "margin_vs_best_negative": -0.000357826218532864,
+          "detection_rate": 0.42516689523267154,
+          "margin_vs_best_own_perturbation": -0.00041161007538903505,
+          "per_category_err": {
+            "causality": 0.730072463768116,
+            "entity": 0.7463768115942029,
+            "number": 0.4148550724637681
+          },
+          "error_breakdown": {
+            "correct": 0.06702898550724638,
+            "misaligned": 0.0,
+            "causality": 0.2554347826086957,
+            "entity": 0.6132246376811594,
+            "number": 0.06431159420289854
+          },
+          "detection_by_position": {
+            "0": 0.4346293137913242,
+            "1": 0.42274964059433867,
+            "2": 0.43687650460710975,
+            "3": 0.40672509359157816
+          }
+        },
+        "5": {
+          "xsim_err": 0.0,
+          "xsimpp_err": 0.9556737588652482,
+          "margin_vs_best_negative": -0.0003475264584267279,
+          "detection_rate": 0.37255607929284373,
+          "margin_vs_best_own_perturbation": -0.0003998921820311807,
+          "per_category_err": {
+            "causality": 0.8191489361702128,
+            "entity": 0.7624113475177305,
+            "number": 0.44680851063829785
+          },
+          "error_breakdown": {
+            "correct": 0.04432624113475178,
+            "misaligned": 0.0,
+            "causality": 0.2375886524822695,
+            "entity": 0.6666666666666666,
+            "number": 0.05141843971631206
+          },
+          "detection_by_position": {
+            "0": 0.40817064462772584,
+            "1": 0.3709879693606518,
+            "2": 0.3672686242142184,
+            "3": 0.3726990181751882,
+            "4": 0.34147990494557257
+          }
+        }
+      }
+    }
+  }
+}
