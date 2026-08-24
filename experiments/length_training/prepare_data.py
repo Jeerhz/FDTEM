@@ -17,7 +17,8 @@ Three pools, one COMET-ready schema (src, mt, ref, score, …):
 Scores are z-normalised per (source_set, lp) on train and sigmoid-squashed —
 monotone, so rank-based evaluation is unaffected. Splits are document-disjoint
 (hash of doc id; 90/10 train/val). Rows longer than --max_tokens XLM-R tokens
-on any side are dropped.
+on any side, or with src+mt > --max_concat_tokens (the CometKiwi concatenated
+input budget), are dropped.
 
 Outputs (--output_dir):
   {pool}_{lp}_train.csv / _val.csv     per pool × lp
@@ -100,6 +101,10 @@ def windows(df: pd.DataFrame, k: int, stride: int) -> pd.DataFrame:
         i = 0
         while i + k <= len(segs):
             w = segs[i:i + k]
+            # unscored segments leave seg_id gaps; never concatenate across one
+            if any(w[j + 1]["seg_id"] != w[j]["seg_id"] + 1 for j in range(k - 1)):
+                i += stride
+                continue
             out.append(dict(
                 system=sys_, doc_id=doc, lp=w[0]["lp"], domain=w[0]["domain"],
                 seg_start=w[0]["seg_id"], k=k,
@@ -147,14 +152,21 @@ def load_wmt25(path: Path) -> pd.DataFrame:
     return df
 
 
-def token_filter(df: pd.DataFrame, tok: Tok, max_tokens: int, tag: str) -> pd.DataFrame:
+def token_filter(df: pd.DataFrame, tok: Tok, max_tokens: int, max_concat: int,
+                 tag: str) -> pd.DataFrame:
+    # The per-side cap protects the DA arm (sides encoded separately, <=510
+    # each). CometKiwi (UnifiedMetric) encodes "<s> mt </s></s> src </s>" as ONE
+    # sequence hard-truncated at 512, so rows must also satisfy
+    # src+mt <= max_concat (508 = 512 - 4 special tokens) or the QE arm silently
+    # loses the tail of the source on exactly the long inputs under study.
     def ok(row):
-        return (tok.n(row["src"]) <= max_tokens and
-                tok.n(row["mt"]) <= max_tokens and
-                tok.n(row["ref"]) <= max_tokens)
+        n_src, n_mt = tok.n(row["src"]), tok.n(row["mt"])
+        return (n_src <= max_tokens and n_mt <= max_tokens and
+                tok.n(row["ref"]) <= max_tokens and
+                n_src + n_mt <= max_concat)
     keep = df.apply(ok, axis=1)
     logger.info(f"  [{tag}] token filter: {keep.sum():,}/{len(df):,} kept "
-                f"(<= {max_tokens} XLM-R tokens per side)")
+                f"(<= {max_tokens} XLM-R tokens per side, src+mt <= {max_concat})")
     return df[keep].copy()
 
 
@@ -175,6 +187,9 @@ def main():
     ap.add_argument("--wmt25", default="~/scratch/wmt_data/wmt25/wmt25-genmt-humeval.jsonl")
     ap.add_argument("--output_dir", default="~/scratch/wmt_length_data")
     ap.add_argument("--max_tokens", type=int, default=480)
+    ap.add_argument("--max_concat_tokens", type=int, default=508,
+                    help="src+mt budget of the QE concatenated input "
+                         "(512 minus 4 special tokens)")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
@@ -221,8 +236,8 @@ def main():
     train = train.drop(columns=[c for c in train.columns if c not in cols])
     val = val.drop(columns=[c for c in val.columns if c not in cols])
 
-    train = token_filter(train, tok, args.max_tokens, "train")
-    val = token_filter(val, tok, args.max_tokens, "val")
+    train = token_filter(train, tok, args.max_tokens, args.max_concat_tokens, "train")
+    val = token_filter(val, tok, args.max_tokens, args.max_concat_tokens, "val")
     normalise(train, val, stats)
 
     # ── write ────────────────────────────────────────────────────────────────

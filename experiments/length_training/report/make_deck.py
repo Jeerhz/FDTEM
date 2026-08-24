@@ -7,8 +7,10 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.util import Emu, Inches, Pt
 
-FIGS = Path("/tmp/claude-679803/-home-abensale-FDTEM/49dda269-ec34-44a9-b6f4-2f5e9153d255/scratchpad/figs")
-OUT = Path("/home/abensale/FDTEM/docs/FDTEM_length_training_experiment.pptx")
+ROOT = Path(__file__).resolve().parents[3]
+FIGS = Path(__file__).resolve().parent / "figs"          # schematics (make_figures.py)
+RESFIGS = ROOT / "report" / "figures"                    # result figures (report)
+OUT = ROOT / "docs" / "FDTEM_length_training_experiment.pptx"
 
 INK = RGBColor(0x0B, 0x0B, 0x0B)
 INK2 = RGBColor(0x52, 0x51, 0x4E)
@@ -67,8 +69,8 @@ def rule(s, y=1.16, x=.7, w=11.9, color=None):
     ln.shadow.inherit = False
 
 
-def pic(s, name, y, height=None, width=None):
-    p = FIGS / name
+def pic(s, name, y, height=None, width=None, root=None):
+    p = (root or FIGS) / name
     if height:
         sh = s.shapes.add_picture(str(p), 0, Inches(y), height=Inches(height))
     else:
@@ -210,18 +212,62 @@ text(s, "MetaDocEval is built on WMT24 documents.  WMT24 is therefore excluded f
         "Uncertainty is measured by bootstrap over documents, not over examples.",
      .7, 4.9, 11.9, 1.6, size=17, color=INK, space=8)
 
-# ── 11. status ───────────────────────────────────────────────────────────────
+# ── 11. what went wrong first ────────────────────────────────────────────────
 s = slide()
-title(s, "Status", "Running on the cluster.")
+title(s, "A silent failure, then a correction",
+      "The first 36-run sweep did not measure composition.")
 rule(s, 1.75)
-tiles(s, [("2", "runs finished"), ("8", "running now"),
-          ("26", "queued"), ("0", "failures")], y=2.35, h=1.7, color=BLUE)
-text(s, "First signal, preliminary:  the long-only COMET-DA run improves its validation\n"
-        "correlation from 0.285 to 0.296.  Two runs out of 36 — not yet a result.",
-     .7, 4.4, 11.9, 1.1, size=18, color=INK, space=8)
-text(s, "Next:  full length-profile table per mixture, restoration point, frozen vs trained,\n"
-        "DA vs QE, real documents vs aggregated sentences, then MetaDocEval accuracy.",
-     .7, 5.7, 11.9, 1.1, size=16, color=INK2, space=8)
+pic(s, "wandb_bell.png", 2.0, height=3.1, root=RESFIGS)
+text(s, "COMET reads ONE training file per epoch — every run trained on 205–6,940 rows\n"
+        "instead of its 24,000-row mixture, on a single language pair.  Budgets differed ~34×.\n"
+        "Fixed: one concatenated file per mixture, 6 epochs everywhere, best-checkpoint selection.",
+     .7, 5.45, 11.9, 1.5, size=16, color=INK, space=6)
+
+# ── 12. wave-1 results ───────────────────────────────────────────────────────
+s = slide()
+title(s, "First corrected wave — correlation",
+      "8 arms: frac000 / frac100 × DA / QE × frozen / trained.  Held-out test sets.")
+rule(s, 1.75)
+pic(s, "wave1_tau.png", 2.0, height=3.2, root=RESFIGS)
+text(s, "Every arm beats its base metric at every length — no catastrophic forgetting.\n"
+        "Long-only training is best on documents; sentence-only on sentences.  The gap is small.",
+     .7, 5.55, 11.9, 1.2, size=17, color=INK, space=6)
+
+# ── 13. discourse errors ─────────────────────────────────────────────────────
+s = slide()
+title(s, "Discourse errors — no progress",
+      "MetaDocEval: original vs perturbed document, accuracy per context window.")
+rule(s, 1.75)
+pic(s, "metadoceval_base.png", 2.0, height=3.2, root=RESFIGS)
+text(s, "No retrained arm improves with context — the gains above are score-level.\n"
+        "Training on longer text does not teach the metric to SEE document-level errors.",
+     .7, 5.55, 11.9, 1.2, size=17, color=INK, space=6)
+
+# ── 14. the QE truncation defect ─────────────────────────────────────────────
+s = slide()
+title(s, "Audit finding — QE trained on truncated inputs",
+      "CometKiwi concatenates mt + src into one 512-token sequence. Our filter capped each side.")
+rule(s, 1.75)
+tiles(s, [("7.8%", "native training rows\noverflowing"),
+          ("10.7%", "k=6 training rows\noverflowing"),
+          ("~52%", "of the source lost\non overflowing eval docs"),
+          ("0%", "DA arms affected\n(sides encoded separately)")],
+      y=2.35, h=1.9, color=ORANGE)
+text(s, "Fix:  rows must now also satisfy  src + mt ≤ 508 tokens  — applied to the shared pools,\n"
+        "so DA and QE keep training on identical rows.  Redeploy:\n"
+        "RUN=1 SUBMIT=1  experiments/length_training/slurm/deploy_concat_fix.sh",
+     .7, 4.75, 11.9, 1.6, size=17, color=INK, space=8)
+
+# ── 15. next ─────────────────────────────────────────────────────────────────
+s = slide()
+title(s, "Next")
+rule(s, 1.75)
+text(s,
+     "1.  Re-run the first wave on the fixed pools (v2) — QE arms without truncation.\n"
+     "2.  The remaining 28 arms: map the restoration point between f=0 and f=100.\n"
+     "3.  Discourse competence needs more than data composition — longer training,\n"
+     "     document-level supervision, or architectural change.",
+     .7, 2.3, 11.9, 2.4, size=20, color=INK, space=10)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 prs.save(str(OUT))

@@ -39,7 +39,9 @@ Fine-tuning \cometda{} in domain moves Pearson slightly ($+0.018$) and rank corr
 Third, we continue \cometda{} and \kiwi{} on WMT training mixes that vary only the fraction of single-sentence data, at constant total size.
 We document a subtle training-pipeline failure that invalidated a first 36-arm sweep, and a corrected protocol with an identical budget in every arm.
 We evaluate the retrained metrics on sentence-level, aggregated, and natively long test sets, on MetaDocEval discourse perturbations, and on the block-alignment task.
-The corrected sweep is running; this report will be updated with its results.
+In the first corrected wave ($f \in \{0,100\}\%$), every arm beats its base metric at every window size, with no catastrophic forgetting; the long-only arm is best on native documents and the sentence-only arm on single sentences, but the composition effect is small.
+MetaDocEval accuracy does not rise with context for any arm: the gains are score-level, not discourse-level.
+An audit of the long-text data path found one genuine defect: CometKiwi's concatenated input silently truncates 7--11\% of the long training rows, an asymmetry to keep in mind for QE-vs-DA comparisons.
 \end{abstract}
 
 \section{Introduction}
@@ -282,8 +284,64 @@ This is the paper's central negative result, and the question for the sweep is w
 
 Following the correction, we first train the eight arms that answer the headline question: $f \in \{0, 100\}\% \times$ \{DA, QE\} $\times$ \{frozen, unfrozen\}.
 Startup checks confirm each arm loads exactly one 24{,}000-row file and the shared budget.
-%% RESULTS-WAVE1-PLACEHOLDER: per-k table, MetaDocEval table, block-xSIM for wave-1 arms.
-\todoresult{Training is running at the time of writing (jobs 5220084--5220091). Results will be inserted here.}
+Under the corrected budget no validation curve is bell-shaped: every arm improves monotonically through epoch 5, and the best checkpoint is the last one.
+
+\paragraph{Per-$k$ correlation.}
+Table~\ref{tab:wave1} shows the held-out lens.
+Every arm beats its base metric at every $k$.
+The composition effect is small but goes the expected way: the long-only arm is best on native documents, the sentence-only arm is best on single sentences.
+At this budget there is no catastrophic forgetting: even $f{=}0$ \emph{gains} $+0.011$ at $k{=}1$ over the base.
+Frozen arms track unfrozen arms closely, a little lower; for QE the frozen gap is larger.
+On the selection-coupled validation lens the document contrast is wider: $\tau(k{=}0) = .259$ for da-frac000 vs.\ $.234$ for da-frac100 and $.216$ for the base.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{l ccccc c}
+\toprule
+& \multicolumn{5}{c}{WMT22 windows} & docs\\
+\cmidrule(lr){2-6}\cmidrule(lr){7-7}
+arm & $k{=}1$ & $k{=}2$ & $k{=}3$ & $k{=}4$ & $k{=}6$ & $k{=}0$\\
+\midrule
+COMET-DA base        & .397 & .347 & .364 & .384 & .401 & .272\\
+\;frac000            & .408 & .360 & .378 & .408 & \textbf{.430} & \textbf{.288}\\
+\;frac000-frozen     & .406 & .358 & .376 & .403 & .419 & .284\\
+\;frac100            & \textbf{.410} & .361 & .378 & .404 & .421 & .284\\
+\;frac100-frozen     & .407 & .356 & .375 & .399 & .413 & .283\\
+\midrule
+CometKiwi base       & .331 & .298 & .341 & .294 & .354 & .239\\
+\;frac000            & .362 & .317 & .353 & .313 & \textbf{.379} & .247\\
+\;frac000-frozen     & .351 & .308 & .343 & .297 & .354 & .248\\
+\;frac100            & \textbf{.380} & .329 & .356 & .322 & \textbf{.379} & \textbf{.249}\\
+\;frac100-frozen     & .354 & .313 & .347 & .301 & .360 & .249\\
+\bottomrule
+\end{tabular}
+\caption{First corrected wave, held-out Kendall $\tau$ (mean over sets). $k \ge 1$: WMT22 en-de/en-ru/zh-en windows. $k{=}0$: WMT23/24 paragraphs and WMT25 documents (different language mix --- compare within a column, not across $k$).}
+\label{tab:wave1}
+\end{table}
+
+\paragraph{MetaDocEval.}
+No arm's lexical-perturbation accuracy rises with the context window $w$; the baseline decay pattern is unchanged.
+The DA arms sit within $\pm .02$ of their base everywhere.
+The QE arms gain modestly at $w{=}1$ on the lexical categories (tense $.658 \to .703$ for frac100, conjunction $.637 \to .678$) but still dilute as $w$ grows.
+The splitting false-positive rate worsens slightly with retraining (DA: $.82 \to .84$ at $w{=}1$; QE: $.67 \to .74$--$.78$).
+So the correlation gains above are score-level, not discourse-level: at this budget, long-text training does not buy detection of document-level errors.
+
+\paragraph{Block alignment.}
+The retrained DA encoders move block-xSIM++ detection only marginally: at $k \in \{3,4,5\}$ both arms stay below chance (frac000: $.48/.42/.36$; frac100: $.50/.43/.37$; base: $.47/.40/.34$).
+The gain is small but directionally consistent --- positive in all 16 (language, $k$) cells, and slightly \emph{larger} for the sentence-only arm.
+Continued training on human-scored data helps the encoder a little; training on long text specifically does not.
+Encoder-level length robustness is not restored, consistent with the tiny encoder learning rate ($5 \times 10^{-7}$) leaving the representation nearly unchanged.
+
+\paragraph{Pipeline audit.}
+Prompted by the counter-intuitive validation curves, we audited the long-text data path end to end.
+Three findings matter for interpretation.
+First, a genuine defect: CometKiwi concatenates \texttt{mt} and \texttt{src} into one sequence truncated at 512 tokens, while our length filter (480 tokens) is applied per side.
+As a result $7.8\%$ of native and $10.7\%$ of $k{=}6$ training rows overflow for the QE arms, losing on average ${\sim}30\%$ of the source; on the WMT25 evaluation documents the loss reaches ${\sim}52\%$ of the source on the $7.1\%$ of rows affected.
+The DA arms are unaffected (sides are encoded separately).
+QE-vs-DA contrasts on long inputs must be read with this asymmetry in mind.
+The filter is now concatenation-aware (rows must also satisfy $\text{src}+\text{mt} \le 508$ tokens); the wave is being re-run on rebuilt pools.
+Second, the training-time \texttt{val\_kendall} is a single Kendall pooled over all 21{,}988 validation rows, mixing pools and score scales; it is dominated by $k{=}1$ rows and is not a long-text metric.
+Third, the aggregated windows, the native pool's score orientation, and the document-disjoint splits check out (window contiguity has one latent gap affecting $11/72{,}447$ zh-en windows).
 
 \subsection{Analysis plan}
 
@@ -304,19 +362,26 @@ Second, cheap fixes at the fine-tuning level are weak: in-domain adaptation bare
 Third, measuring the effect of training composition is easy to get wrong: our first sweep silently trained every arm on a fraction of its data, and its ``findings'' reproduced the budget ranking.
 Constant-budget design, single-file epochs and best-checkpoint selection are prerequisites, not details.
 
-What the corrected sweep can decide: whether long-text training buys genuine document-level competence (MetaDocEval accuracy that rises with $w$; block detection that survives $k$) or only a rescaled score, and how much sentence data must stay in the mix.
+The first corrected wave already answers the headline question in part.
+Six epochs of continued training improve human correlation at every window size, whatever the mix.
+The composition effect is real but second-order: long-only training helps most on documents, sentence-only training on sentences, and neither costs the other much.
+What long-text training does \emph{not} buy, at this budget, is document-level competence: MetaDocEval accuracy never rises with context, and the encoder still cannot find one error in a long block.
+The remaining 28 arms can map the restoration curve between $f{=}0$ and $f{=}100$; the deeper question of discourse competence likely needs more than data composition --- longer training, document-level supervision, or architectural change.
 
 \section{Conclusion}
 
-We isolated length as a failure driver of COMET's encoder, quantified the limits of domain fine-tuning, and set up a corrected, constant-budget sweep over training-mix composition.
-The first corrected wave is training.
-The report will be updated with its per-$k$, MetaDocEval and block-alignment results.
+We isolated length as a failure driver of COMET's encoder, quantified the limits of domain fine-tuning, and ran the first wave of a corrected, constant-budget sweep over training-mix composition.
+Continued training helps at every length; composition fine-tunes where it helps most; discourse-level competence does not emerge.
+Next: the remaining 28 arms to map the restoration curve, and a decision on rebuilding the QE data with a concatenation-aware length filter.
 
 \paragraph{Limitations.}
 One seed per arm; bootstrap CIs quantify sampling noise, not seed noise.
 The sent/agg vs.\ native pools differ in language coverage; $f$ moves both composition and language distribution.
 Aggregated windows use mean segment scores as targets; the mean is itself a modelling choice, which MetaDocEval's contrastive design does not depend on.
 Matched-core numbers use four languages and 120 cores per language; the layer probe is a reduced grid (de/fr, two filler types).
+``Native documents'' are capped at 480 XLM-R tokens per side by the data filter; truly long documents are outside this study's range.
+The QE arms train and evaluate on partially truncated long inputs (the CometKiwi concatenation defect above); their long-input numbers are lower bounds.
+The native pool's document-level ESA signal is weak (within-document contrast $\tau \approx .09$ vs.\ $.26$ for the MQM pools), so native-heavy mixes learn from a noisier target.
 
 \begin{thebibliography}{20}\small
 

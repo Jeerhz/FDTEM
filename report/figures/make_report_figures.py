@@ -27,6 +27,8 @@ plt.rcParams.update({
 
 def save(fig, name):
     fig.savefig(OUT / name, bbox_inches="tight")
+    # PNG twin for the pptx deck (experiments/length_training/report/make_deck.py)
+    fig.savefig((OUT / name).with_suffix(".png"), dpi=200, bbox_inches="tight")
     plt.close(fig)
     print("wrote", name)
 
@@ -164,3 +166,25 @@ axes[0].set_ylabel("detection rate")
 axes[0].set_ylim(0.28, 1.02)
 axes[2].set_xlim(-0.15, 4.2)
 save(fig, "matched_core_report.pdf")
+
+# ── 5. wave-1 results: held-out Kendall vs k, arms vs baselines ──────────────
+held = json.load(open(ROOT / "results/length_training/correlation_heldout.json"))
+ks = ["1", "2", "3", "4", "6"]
+fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.6), sharey=False)
+for ax, fam, title in ((axes[0], "da", "COMET-DA"), (axes[1], "qe", "CometKiwi")):
+    for suffix, c, lab in ((f"{fam}-base", MUTED, "base"),
+                           (f"{fam}-frac000", BLUE, "frac000"),
+                           (f"{fam}-frac100", ORANGE, "frac100")):
+        m = held["models"][suffix]["_mean_by_k"]
+        ax.plot(range(len(ks)), [m[k]["kendall"] for k in ks], "-o",
+                color=c, lw=1.6, ms=4)
+        ax.plot([len(ks) + 0.5], [m["0"]["kendall"]], "s", color=c, ms=5)
+        ax.annotate(lab, (len(ks) + 0.5, m["0"]["kendall"]),
+                    textcoords="offset points", xytext=(7, 0), fontsize=7.5,
+                    color=c, va="center")
+    ax.set_xticks(list(range(len(ks))) + [len(ks) + 0.5])
+    ax.set_xticklabels([f"k={k}" for k in ks] + ["docs"])
+    ax.set_title(title, fontsize=9)
+    ax.set_xlim(-0.3, 7.0)
+axes[0].set_ylabel(r"held-out Kendall $\tau$")
+save(fig, "wave1_tau.pdf")

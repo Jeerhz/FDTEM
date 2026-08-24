@@ -99,6 +99,29 @@ and state the confound. The correction above does not decide this.
 
 ---
 
+## Correction, 2026-08-24 — QE arms trained on truncated long inputs
+
+CometKiwi (UnifiedMetric) encodes `<s> mt </s></s> src </s>` as **one** sequence
+hard-truncated at 512 tokens; the data filter capped each side at 480 tokens
+separately. Result: 7.8% of native and 10.7% of k=6 training rows (and 7.1% of
+the WMT25 eval documents) overflowed for the QE arms, silently dropping the tail
+of the source — on exactly the long inputs the sweep studies. DA arms
+(sides encoded separately) were unaffected.
+
+Fix: `prepare_data.py --max_concat_tokens` (default 508 = 512 − 4 special
+tokens) now also drops rows with src+mt over the QE budget, from the **shared**
+pools, so DA and QE keep training on byte-identical rows. `windows()` also
+gained a seg_id-contiguity guard (11/72,447 zh-en windows spanned a gap).
+
+Redeploy on rebuilt pools (v1 data and checkpoints stay untouched):
+
+```bash
+RUN=1          experiments/length_training/slurm/deploy_concat_fix.sh  # pools+mixes → ~/scratch/wmt_length_data_v2
+RUN=1 SUBMIT=1 experiments/length_training/slurm/deploy_concat_fix.sh  # ... + submit arms (ckpts → retrain-wmt-v2)
+```
+
+---
+
 ## Running it
 
 ```bash

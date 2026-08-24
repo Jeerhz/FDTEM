@@ -29,6 +29,8 @@
 #   NEWER_THAN   skip checkpoints older than this ISO date / file
 #   CKPT_ROOT    checkpoint root             (default ~/scratch/checkpoints/retrain-wmt)
 #   OUT_DIR      results dir                 (default results/length_training)
+#   VAL_DATA_DIR val-lens data dir           (default ~/scratch/wmt_length_data;
+#                                             use the *_v2 dir for v2 arms)
 # ──────────────────────────────────────────────────────────────────────────────
 #SBATCH --job-name=eval-corr
 #SBATCH --output=logs/%x-%j.out
@@ -81,7 +83,7 @@ run_lens () {
       --output "$OUT_DIR/correlation_$name.json"
 }
 
-[[ "$LENS" == "val"     || "$LENS" == "both" ]] && run_lens val     "$HOME/scratch/wmt_length_data"
+[[ "$LENS" == "val"     || "$LENS" == "both" ]] && run_lens val     "${VAL_DATA_DIR:-$HOME/scratch/wmt_length_data}"
 [[ "$LENS" == "heldout" || "$LENS" == "both" ]] && run_lens heldout "$HOME/scratch/wmt_eval_portion"
 
 echo; echo "Done → $OUT_DIR/correlation_*.json"

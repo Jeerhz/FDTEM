@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle
 from pathlib import Path
 
-OUT = Path("/tmp/claude-679803/-home-abensale-FDTEM/49dda269-ec34-44a9-b6f4-2f5e9153d255/scratchpad/figs")
+OUT = Path(__file__).resolve().parent / "figs"
 OUT.mkdir(parents=True, exist_ok=True)
 
 # reference palette, slots 1-3 (validated all-pairs, light mode)
