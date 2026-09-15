@@ -6,7 +6,7 @@ Three experiments. Each is self-contained under `experiments/`, shares
 | # | folder | question |
 |---|--------|----------|
 | 1 | [`experiments/domain_adaptation`](experiments/domain_adaptation) | What does finetuning COMET on an unseen domain (biomedical MQM) change? |
-| 2 | [`experiments/length_isolation`](experiments/length_isolation) | Do encoders still spot a single error once it is buried in a longer block — with length as the *only* variable? |
+| 2 | [`experiments/length_isolation`](experiments/length_isolation) | Do encoders still spot a single error once it is buried in a longer block — with length as the *only* variable? And does the COMET **score** align better than the encoder's cosine (`run_comet_align.py`)? |
 | 3 | [`experiments/length_training`](experiments/length_training) | Does finetuning COMET on longer text help, and how should the mixture be composed? |
 
 Experiment 3 evaluates its finetuned encoders with experiment 2's task, so the
@@ -47,3 +47,12 @@ archive/        superseded code, kept for reference (see archive/README.md)
   one extra model only scores that model.
 - Uncertainty is always bootstrapped over **documents**, never over examples:
   windows of one document share errors and text.
+- A rank correlation is never the whole answer: it is invariant to any monotone
+  squashing of the scale, so `experiments/length_training/eval_length_profile.py`
+  reports the **distribution** of the scores alongside it, and reports both
+  against the input's token count as well as against its sentence count.
+- Any mix built from data an evaluation set also contains carries a
+  `CONTAMINATED` marker file, `contaminated: true` in its manifest, and a tag on
+  its W&B run. There is exactly one such mix
+  (`make_uncontrolled_mix.py`), it exists on purpose, and its correlation
+  numbers are not results.

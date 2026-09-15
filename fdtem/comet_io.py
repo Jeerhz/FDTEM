@@ -120,12 +120,25 @@ def model_fingerprint(ref: str) -> str:
 
 
 def load_comet(ref: str):
-    """Load a COMET model from a local checkpoint path or a Hub id."""
+    """Load a COMET model from a local checkpoint path or a Hub id.
+
+    `slurm/train.sh` writes the run's `hparams.yaml` only when the job ENDS, and
+    `comet.load_from_checkpoint` refuses to load without it. Evaluating a
+    still-training arm — or any run whose job was killed — therefore fails on a
+    file that can be reconstructed from the checkpoint itself. `best_checkpoint`
+    already repairs it; do the same here so an explicitly passed path behaves
+    identically to a discovered one.
+    """
     from comet import download_model, load_from_checkpoint
 
     path = os.path.expanduser(str(ref))
     ckpt = path if os.path.isfile(path) else download_model(ref)
-    model = load_from_checkpoint(os.path.expanduser(ckpt))
+    ckpt = os.path.expanduser(ckpt)
+    run_dir = Path(ckpt).parent.parent
+    if (run_dir / "checkpoints").is_dir() and not (run_dir / "hparams.yaml").exists():
+        if write_hparams(run_dir):
+            logger.info("wrote missing %s", run_dir / "hparams.yaml")
+    model = load_from_checkpoint(ckpt)
     # remembered so `score` can tell a stale cache entry from a fresh one
     model._fdtem_source = str(ref)
     model._fdtem_fingerprint = model_fingerprint(ref)

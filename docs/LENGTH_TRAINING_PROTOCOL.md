@@ -9,7 +9,43 @@
 > The WMT sweep described there (36 arms) supersedes the 28-arm Bio-MQM grid below.
 
 
-Status: **running** (DA arms since 2026-08-14, QE arms submitted 2026-08-17).
+> **Extension (2026-08-29).** The sweep continues with a four-arm grid trained
+> ten times longer, two new lenses, and one deliberately contaminated arm. The
+> additions to the analysis plan of §5 are:
+>
+> * **RQ6 (resolution, not just ranking).** Kendall τ is invariant to any
+>   monotone squashing of the score scale, so an arm can keep its τ on long text
+>   while compressing its scores into a band too narrow to act on.
+>   `eval_length_profile.py` reports the score distribution per k and
+>   `spread_ratio_vs_k1` — the interquartile range at this k over the one at
+>   k=1. Below 1 is a loss of resolution the correlation cannot see.
+> * **RQ7 (length in tokens).** k is a proxy: a k=6 window of short segments and
+>   a native document differ by an order of magnitude in tokens, and the pools
+>   have different sentence-length distributions, so any curve against k
+>   confounds "more sentences" with "more tokens". Every quantity is reported
+>   again against the XLM-R token count of the real input — `n_mt` for the DA
+>   family, `n_concat` for the QE family, whose 512-token budget applies to the
+>   concatenation.
+> * **RQ5 refined — per phenomenon.** Micro-averaging MetaDocEval over a context
+>   window lets a phenomenon that improves cancel one that degrades; a flat
+>   average is not evidence of no effect. Reported per perturbation, and as a
+>   delta against each family's published metric.
+> * **RQ8 (the far end of the axis).** One arm trains on everything, evaluation
+>   sets included (`make_uncontrolled_mix.py`). Its correlation numbers measure
+>   memorisation and are not results; MetaDocEval is a different corpus and
+>   stays a valid lens for it. It bounds how far continued training can move a
+>   metric, which is what makes the controlled arms' effect sizes readable.
+> * **RQ9 (alignment by the metric).** Retrieval on the experiment-2 blocks with
+>   the COMET score in place of the encoder cosine
+>   (`experiments/length_isolation/run_comet_align.py`), reference-free.
+>
+> Operational changes: mixes for the pure arms need
+> `make_mixtures.py --total_policy pure`; arms are chained across the 2-day wall
+> clock with `RESUME=auto`. See
+> [`experiments/length_training/README.md`](../experiments/length_training/README.md).
+
+Status: **running** (DA arms since 2026-08-14, QE arms submitted 2026-08-17;
+four-arm long-budget grid from 2026-08-29).
 Companion docs: `docs/RETRAIN_AND_BLOCK_XSIM.md` (original DA design),
 cluster runbook for operations. This document is the full experimental
 protocol covering **both** base metrics and all evaluation lenses.

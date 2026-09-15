@@ -9,7 +9,11 @@
 # backbone, and the dedicated aligners LaBSE / E5.
 #
 # Produces, in results/block_xsim/:
-#   plots/xsim_vs_xsimpp.png        xsim vs xsim++ error against block length
+#   plots/hard_negative_error.png   HEADLINE — error against block length with a
+#                                   pool of gold + single-edit hard negatives only
+#                                   (no other block's true target is a candidate)
+#   plots/pool_ablation.png         all four pools, incl. the classic-xsim ones,
+#                                   for reference
 #   plots/detection_vs_length.png   P[gold closer than perturbed] vs k
 #   plots/error_by_category.png     which perturbation category fools each model
 #   plots/detection_by_position.png sensitivity vs where the error sits
@@ -29,6 +33,12 @@
 #   SPLITS         FLORES+ splits to pool   (default: dev devtest)
 #   DIRECTION      en2xx | xx2en            (default: en2xx)
 #   VARIANTS       hard negatives per (block, position, category) (default 2)
+#   BACKEND        perturber: spacy (default) | heuristic | auto
+#                  `spacy` needs the small models — install once on a login node:
+#                    python -m spacy download de_core_news_sm   # es/fr/ru likewise
+#                    python -m spacy download en_core_web_sm zh_core_web_sm
+#                  It is also the only backend that yields entity negatives for zh/ja,
+#                  so LANGS may include zh.
 #   WANDB_PROJECT  W&B project              (default comet-block-xsim)
 #
 # FLORES+ is gated: be logged in to the HF Hub and have accepted the terms at
@@ -71,6 +81,7 @@ K_LIST="${K_LIST:-2 3 4 5}"
 SPLITS="${SPLITS:-dev devtest}"
 DIRECTION="${DIRECTION:-en2xx}"
 VARIANTS="${VARIANTS:-2}"
+BACKEND="${BACKEND:-spacy}"
 OUT=results/block_xsim
 mkdir -p "$OUT"
 
@@ -85,6 +96,7 @@ echo "════════════════════════�
 echo " Node      : $(hostname)  GPU: ${CUDA_VISIBLE_DEVICES:-none}"
 echo " Task      : block xSIM++  direction=$DIRECTION"
 echo " FLORES+   : splits=[$SPLITS]  langs=[$LANGS]  k=[$K_LIST]  variants=$VARIANTS"
+echo " Perturber : $BACKEND"
 echo " Encoders  : ${ENCODERS[*]}"
 echo " W&B       : project=$WANDB_PROJECT mode=${WANDB_MODE:-online}"
 echo "═══════════════════════════════════════════════════════════"
@@ -104,7 +116,9 @@ srun python experiments/length_isolation/run_xsim.py \
   --encoders "${ENCODERS[@]}" \
   --langs $LANGS --k_list $K_LIST --splits $SPLITS \
   --direction "$DIRECTION" --variants_per_position "$VARIANTS" \
+  --perturb_backend "$BACKEND" \
   --flores_source plus \
   --output "$OUT/block_xsim.json" --wandb_project "$WANDB_PROJECT"
 
-echo; echo "Done → $OUT/  (headline plot: $OUT/plots/xsim_vs_xsimpp.png)"
+echo; echo "Done → $OUT/  (headline: $OUT/plots/hard_negative_error.png,"
+echo "                 pool ablation: $OUT/plots/pool_ablation.png)"

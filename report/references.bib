@@ -1,0 +1,350 @@
+% ============================================================================
+%  references.bib — bibliographie partagée du rapport
+%
+%  Utilisation (natbib) :
+%      \usepackage[round]{natbib}
+%      ...
+%      \bibliographystyle{plainnat}
+%      \bibliography{references}
+%
+%  Compilation : pdflatex → bibtex → pdflatex → pdflatex
+%  (sur Overleaf, tout est automatique)
+%
+%  Les accolades autour des sigles ({COMET}, {BLEU}, {MT}, ...) protègent les
+%  majuscules : sans elles, plusieurs styles les mettent en minuscules.
+% ============================================================================
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Protocoles de jugement humain
+% ────────────────────────────────────────────────────────────────────────────
+@inproceedings{graham2013da,
+  title     = {Continuous Measurement Scales in Human Evaluation of Machine Translation},
+  author    = {Graham, Yvette and Baldwin, Timothy and Moffat, Alistair and Zobel, Justin},
+  booktitle = {Proceedings of the 7th Linguistic Annotation Workshop and
+               Interoperability with Discourse},
+  pages     = {33--41},
+  year      = {2013},
+}
+
+@article{lommel2014mqm,
+  title   = {Multidimensional Quality Metrics ({MQM}): A Framework for Declaring
+             and Describing Translation Quality Metrics},
+  author  = {Lommel, Arle and Uszkoreit, Hans and Burchardt, Aljoscha},
+  journal = {Tradum\`atica: tecnologies de la traducci\'o},
+  number  = {12},
+  pages   = {455--463},
+  year    = {2014},
+}
+
+@article{freitag2021experts,
+  title   = {Experts, Errors, and Context: A Large-Scale Study of Human
+             Evaluation for Machine Translation},
+  author  = {Freitag, Markus and Foster, George and Grangier, David and
+             Ratnakar, Viresh and Tan, Qijun and Macherey, Wolfgang},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {9},
+  pages   = {1460--1474},
+  year    = {2021},
+}
+
+@inproceedings{kocmi2024esa,
+  title     = {Error Span Annotation: A Balanced Approach for Human Evaluation
+               of Machine Translation},
+  author    = {Kocmi, Tom and Zouhar, Vil\'em and Avramidis, Eleftherios and
+               Grundkiewicz, Roman and Karpinska, Marzena and Popovi\'c, Maja and
+               Sachan, Mrinmaya and Shmatova, Mariya},
+  booktitle = {Proceedings of the Ninth Conference on Machine Translation (WMT)},
+  year      = {2024},
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Métriques automatiques
+% ────────────────────────────────────────────────────────────────────────────
+@inproceedings{papineni2002bleu,
+  title     = {{BLEU}: a Method for Automatic Evaluation of Machine Translation},
+  author    = {Papineni, Kishore and Roukos, Salim and Ward, Todd and Zhu, Wei-Jing},
+  booktitle = {Proceedings of the 40th Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  pages     = {311--318},
+  year      = {2002},
+}
+
+@inproceedings{popovic2015chrf,
+  title     = {{chrF}: character n-gram F-score for automatic {MT} evaluation},
+  author    = {Popovi\'c, Maja},
+  booktitle = {Proceedings of the Tenth Workshop on Statistical Machine
+               Translation (WMT)},
+  pages     = {392--395},
+  year      = {2015},
+}
+
+@inproceedings{zhang2020bertscore,
+  title     = {{BERTScore}: Evaluating Text Generation with {BERT}},
+  author    = {Zhang, Tianyi and Kishore, Varsha and Wu, Felix and
+               Weinberger, Kilian Q. and Artzi, Yoav},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2020},
+}
+
+@inproceedings{sellam2020bleurt,
+  title     = {{BLEURT}: Learning Robust Metrics for Text Generation},
+  author    = {Sellam, Thibault and Das, Dipanjan and Parikh, Ankur P.},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  pages     = {7881--7892},
+  year      = {2020},
+}
+
+@inproceedings{rei2020comet,
+  title     = {{COMET}: A Neural Framework for {MT} Evaluation},
+  author    = {Rei, Ricardo and Stewart, Craig and Farinha, Ana C and Lavie, Alon},
+  booktitle = {Proceedings of the 2020 Conference on Empirical Methods in
+               Natural Language Processing (EMNLP)},
+  pages     = {2685--2702},
+  year      = {2020},
+}
+
+@inproceedings{rei2022comet,
+  title     = {{COMET-22}: Unbabel-{IST} 2022 Submission for the Metrics Shared Task},
+  author    = {Rei, Ricardo and de Souza, Jos\'e G. C. and Alves, Duarte and
+               Zerva, Chrysoula and Farinha, Ana C. and Glushkova, Taisiya and
+               Lavie, Alon and Coheur, Luisa and Martins, Andr\'e F. T.},
+  booktitle = {Proceedings of the Seventh Conference on Machine Translation (WMT)},
+  pages     = {578--585},
+  year      = {2022},
+}
+
+@inproceedings{rei2022cometkiwi,
+  title     = {{CometKiwi}: {IST}-Unbabel 2022 Submission for the Quality
+               Estimation Shared Task},
+  author    = {Rei, Ricardo and Treviso, Marcos and Guerreiro, Nuno M. and
+               Zerva, Chrysoula and Farinha, Ana C. and Maroti, Christine and
+               de Souza, Jos\'e G. C. and Glushkova, Taisiya and Alves, Duarte and
+               Lavie, Alon and Coheur, Luisa and Martins, Andr\'e F. T.},
+  booktitle = {Proceedings of the Seventh Conference on Machine Translation (WMT)},
+  pages     = {634--645},
+  year      = {2022},
+}
+
+@article{guerreiro2024xcomet,
+  title   = {{xCOMET}: Transparent Machine Translation Evaluation through
+             Fine-grained Error Detection},
+  author  = {Guerreiro, Nuno M. and Rei, Ricardo and van Stigt, Daan and
+             Coheur, Luisa and Colombo, Pierre and Martins, Andr\'e F. T.},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {12},
+  pages   = {979--995},
+  year    = {2024},
+}
+
+@inproceedings{kocmi2023gemba,
+  title     = {Large Language Models Are State-of-the-Art Evaluators of
+               Translation Quality},
+  author    = {Kocmi, Tom and Federmann, Christian},
+  booktitle = {Proceedings of the 24th Annual Conference of the European
+               Association for Machine Translation (EAMT)},
+  pages     = {193--203},
+  year      = {2023},
+}
+
+@inproceedings{perrella2024sentinel,
+  title     = {Guardians of the Machine Translation Meta-Evaluation:
+               Sentinel Metrics Fall In!},
+  author    = {Perrella, Stefano and Proietti, Lorenzo and Scir\`e, Alessandro and
+               Barba, Edoardo and Navigli, Roberto},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  year      = {2024},
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Niveau document / paragraphe
+% ────────────────────────────────────────────────────────────────────────────
+@inproceedings{vernikos2022easy,
+  title     = {Embarrassingly Easy Document-Level {MT} Metrics: How to Convert
+               Any Pretrained Metric into a Document-Level Metric},
+  author    = {Vernikos, Giorgos and Thompson, Brian and Mathur, Prashant and
+               Federico, Marcello},
+  booktitle = {Proceedings of the Seventh Conference on Machine Translation (WMT)},
+  pages     = {118--128},
+  year      = {2022},
+}
+
+@inproceedings{raunak2024slide,
+  title     = {{SLIDE}: Reference-free Evaluation for Machine Translation using
+               a Sliding Document Window},
+  author    = {Raunak, Vikas and Kocmi, Tom and Post, Matt},
+  booktitle = {Proceedings of the 2024 Conference of the North American Chapter
+               of the Association for Computational Linguistics (NAACL)},
+  year      = {2024},
+}
+
+@inproceedings{dahan2026metadoceval,
+  title     = {{MetaDocEval}: A Contrastive Framework for Evaluating Machine
+               Translation Metrics at the Document-Level},
+  author    = {Dahan, Nathan and Bawden, Rachel and Yvon, Fran\c{c}ois},
+  booktitle = {Proceedings of the 19th Conference of the European Association
+               for Machine Translation (EAMT)},
+  year      = {2026},
+  note      = {HAL: hal-05663019},
+}
+
+% TODO — remplacer par la référence exacte du survey (document-level MT).
+% L'entrée existe pour que le document compile en attendant ; la citation
+% apparaîtra comme [TODO] dans le PDF, donc elle ne peut pas être oubliée.
+@misc{TODO-survey,
+  author = {{TODO}},
+  title  = {{TODO}: survey document-level {MT} --- r\'ef\'erence \`a compl\'eter},
+  year   = {2025},
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Adaptation au domaine
+% ────────────────────────────────────────────────────────────────────────────
+@inproceedings{zouhar2024biomqm,
+  title     = {Fine-Tuned Machine Translation Metrics Struggle in Unseen Domains},
+  author    = {Zouhar, Vil\'em and Ding, Shuoyang and Currey, Anna and
+               Badeka, Tatyana and Wang, Jenyuan and Thompson, Brian},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  year      = {2024},
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Campagnes WMT
+% ────────────────────────────────────────────────────────────────────────────
+@inproceedings{freitag2022wmt22,
+  title     = {Results of {WMT22} Metrics Shared Task: Stop Using {BLEU} --
+               Neural Metrics Are Better and More Robust},
+  author    = {Freitag, Markus and Rei, Ricardo and Mathur, Nitika and
+               Lo, Chi-kiu and Stewart, Craig and Avramidis, Eleftherios and
+               Kocmi, Tom and Foster, George and Lavie, Alon and
+               Martins, Andr\'e F. T.},
+  booktitle = {Proceedings of the Seventh Conference on Machine Translation (WMT)},
+  pages     = {46--68},
+  year      = {2022},
+}
+
+@inproceedings{kocmi2023wmt23,
+  title     = {Findings of the 2023 Conference on Machine Translation ({WMT23}):
+               {LLMs} Are Here but Not Quite There Yet},
+  author    = {Kocmi, Tom and Avramidis, Eleftherios and Bawden, Rachel and others},
+  booktitle = {Proceedings of the Eighth Conference on Machine Translation (WMT)},
+  year      = {2023},
+}
+
+@inproceedings{kocmi2024wmt24,
+  title     = {Findings of the {WMT24} General Machine Translation Shared Task:
+               The {LLM} Era Is Here but {MT} Is Not Solved Yet},
+  author    = {Kocmi, Tom and Avramidis, Eleftherios and Bawden, Rachel and others},
+  booktitle = {Proceedings of the Ninth Conference on Machine Translation (WMT)},
+  year      = {2024},
+}
+
+@inproceedings{kocmi2025wmt25,
+  title     = {Findings of the {WMT25} General Machine Translation Shared Task:
+               Time to Stop Evaluating on Easy Test Sets},
+  author    = {Kocmi, Tom and others},
+  booktitle = {Proceedings of the Tenth Conference on Machine Translation (WMT)},
+  year      = {2025},
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+%  Corpus, encodeurs, outils  (partie 1)
+% ────────────────────────────────────────────────────────────────────────────
+@article{goyal2022flores,
+  title   = {The {FLORES-101} Evaluation Benchmark for Low-Resource and
+             Multilingual Machine Translation},
+  author  = {Goyal, Naman and Gao, Cynthia and Chaudhary, Vishrav and
+             Chen, Peng-Jen and Wenzek, Guillaume and Ju, Da and
+             Krishnan, Sanjana and Ranzato, Marc'Aurelio and
+             Guzm\'an, Francisco and Fan, Angela},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {10},
+  pages   = {522--538},
+  year    = {2022},
+}
+
+@article{nllb2022,
+  title   = {No Language Left Behind: Scaling Human-Centered Machine Translation},
+  author  = {{NLLB Team} and Costa-juss\`a, Marta R. and others},
+  journal = {arXiv preprint arXiv:2207.04672},
+  year    = {2022},
+}
+
+@inproceedings{oldi2024flores,
+  title     = {Findings of the {WMT} 2024 Shared Task of the Open Language Data
+               Initiative},
+  author    = {Burchell, Laurie and Maillard, Jean and Anastasopoulos, Antonios and
+               Federmann, Christian and Koehn, Philipp and Wang, Skyler},
+  booktitle = {Proceedings of the Ninth Conference on Machine Translation (WMT)},
+  year      = {2024},
+}
+
+@inproceedings{chen2023xsimpp,
+  title     = {{xSIM++}: An Improved Proxy to Bitext Mining Performance for
+               Low-Resource Languages},
+  author    = {Chen, Mingda and Heffernan, Kevin and \c{C}elebi, Onur and
+               Mourachko, Alexandre and Schwenk, Holger},
+  booktitle = {Proceedings of the 61st Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  year      = {2023},
+  note      = {arXiv:2306.12907},
+}
+
+@inproceedings{conneau2020xlmr,
+  title     = {Unsupervised Cross-lingual Representation Learning at Scale},
+  author    = {Conneau, Alexis and Khandelwal, Kartikay and Goyal, Naman and
+               Chaudhary, Vishrav and Wenzek, Guillaume and Guzm\'an, Francisco and
+               Grave, Edouard and Ott, Myle and Zettlemoyer, Luke and
+               Stoyanov, Veselin},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  pages     = {8440--8451},
+  year      = {2020},
+}
+
+@inproceedings{feng2022labse,
+  title     = {Language-agnostic {BERT} Sentence Embedding},
+  author    = {Feng, Fangxiaoyu and Yang, Yinfei and Cer, Daniel and
+               Arivazhagan, Naveen and Wang, Wei},
+  booktitle = {Proceedings of the 60th Annual Meeting of the Association for
+               Computational Linguistics (ACL)},
+  pages     = {878--891},
+  year      = {2022},
+}
+
+@article{wang2022e5,
+  title   = {Text Embeddings by Weakly-Supervised Contrastive Pre-training},
+  author  = {Wang, Liang and Yang, Nan and Huang, Xiaolong and Jiao, Binxing and
+             Yang, Linjun and Jiang, Daxin and Majumder, Rangan and Wei, Furu},
+  journal = {arXiv preprint arXiv:2212.03533},
+  year    = {2022},
+}
+
+@article{wang2024me5,
+  title   = {Multilingual {E5} Text Embeddings: A Technical Report},
+  author  = {Wang, Liang and Yang, Nan and Huang, Xiaolong and Yang, Linjun and
+             Majumder, Rangan and Wei, Furu},
+  journal = {arXiv preprint arXiv:2402.05672},
+  year    = {2024},
+}
+
+@misc{honnibal2020spacy,
+  title     = {{spaCy}: Industrial-strength Natural Language Processing in Python},
+  author    = {Honnibal, Matthew and Montani, Ines and
+               Van Landeghem, Sofie and Boyd, Adriane},
+  year      = {2020},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.1212303},
+}
+
+@article{miller1995wordnet,
+  title   = {{WordNet}: A Lexical Database for English},
+  author  = {Miller, George A.},
+  journal = {Communications of the ACM},
+  volume  = {38},
+  number  = {11},
+  pages   = {39--41},
+  year    = {1995},
+}

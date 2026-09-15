@@ -91,6 +91,19 @@ def main() -> None:
     ap.add_argument("--val_files", nargs="+", default=None)
     ap.add_argument("--frozen", action="store_true",
                     help="Freeze the encoder for the whole run (head-only).")
+    # ── optimisation overrides ────────────────────────────────────────────────
+    # The composition sweep never touches these: keeping the schedule fixed is
+    # what makes composition the only moving part. They exist for the
+    # deliberately uncontrolled arm, which is trying to get as FAR from the
+    # published metric as continued training can take it, and for which a
+    # conservative continue-training schedule is the wrong tool.
+    ap.add_argument("--encoder_lr", type=float, default=None,
+                    help="Override encoder_learning_rate (base: 5e-7).")
+    ap.add_argument("--head_lr", type=float, default=None,
+                    help="Override the head learning_rate (base: 1e-5).")
+    ap.add_argument("--nr_frozen_epochs", type=float, default=None,
+                    help="Override nr_frozen_epochs (base: 0.3). 0 = the encoder "
+                         "trains from the first step. Ignored under --frozen.")
     # ── training budget (identical across arms) ───────────────────────────────
     ap.add_argument("--max_epochs", type=int, default=None,
                     help="Hard budget in passes over the mix. With one train "
@@ -158,6 +171,13 @@ def main() -> None:
         # comet unfreezes once epoch_nr >= nr_frozen_epochs — this never fires
         init["nr_frozen_epochs"] = 1000
         init["keep_embeddings_frozen"] = True
+    elif args.nr_frozen_epochs is not None:
+        init["nr_frozen_epochs"] = args.nr_frozen_epochs
+
+    if args.encoder_lr is not None:
+        init["encoder_learning_rate"] = args.encoder_lr
+    if args.head_lr is not None:
+        init["learning_rate"] = args.head_lr
 
     # ── budget: same number of examples and the same stopping rule everywhere ─
     tr = cfg["trainer"]["init_args"]
@@ -193,7 +213,10 @@ def main() -> None:
     for p in train_files:
         print(f"                  {p}")
     print(f"validation_data → {len(init['validation_data'])} file(s)")
-    print(f"encoder         → {'FROZEN for the whole run' if args.frozen else 'unfrozen (base schedule)'}")
+    print(f"encoder         → {'FROZEN for the whole run' if args.frozen else 'unfrozen'}"
+          f" (nr_frozen_epochs={init.get('nr_frozen_epochs')})")
+    print(f"learning rates  → encoder {init.get('encoder_learning_rate')} "
+          f"head {init.get('learning_rate')}")
     print(f"budget          → max_epochs={tr.get('max_epochs')} "
           f"max_steps={tr.get('max_steps')} "
           f"val_check_interval={tr.get('val_check_interval')} "

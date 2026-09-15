@@ -23,14 +23,23 @@
 # Usage:
 #   MODEL=da MIX=frac040 FROZEN=0 sbatch experiments/length_training/slurm/train.sh
 #   MODEL=qe MIX=frac000 FROZEN=1 sbatch experiments/length_training/slurm/train.sh
-#   # resume after a timeout:
+#   # resume after a timeout, explicitly:
 #   MODEL=da MIX=frac040 RESUME=<ckpt> WANDB_RUN_ID=<id> sbatch .../train.sh
+#   # or let the job find its own last.ckpt and W&B run id (used by chained jobs):
+#   MODEL=da MIX=frac040 RESUME=auto sbatch .../train.sh
+#
+# RESUME=auto is what makes a long budget survive the 2-day wall clock: submit a
+# chain of jobs with --dependency=afterany and each one picks up where the
+# previous stopped, on the SAME W&B run. `max_epochs` counts total epochs
+# including the restored ones, so a chain of N jobs all carrying MAX_EPOCHS=60
+# converges on 60 epochs overall — not 60 per job. See slurm/launch_long.sh.
 #
 # Tunables (env at submit time):
 #   MODEL          da | qe                          (default da)
 #   MIX            mix subdir                       (required)
 #   FROZEN         1 = encoder frozen all run       (default 0)
-#   MAX_EPOCHS     passes over the mix (the budget) (default 6)
+#   MAX_EPOCHS     passes over the mix (the budget) (default 6; 60 for the
+#                  long four-arm grid — see slurm/launch_long.sh)
 #   MAX_STEPS      hard optimizer-step cap          (default -1 = unbounded)
 #   PATIENCE       early-stopping patience (checks) (default 3)
 #   VAL_INTERVAL   validations per epoch as a frac  (default 1.0 = once/epoch)
@@ -42,7 +51,11 @@
 #   CONDA_ENV      conda env                        (default comet-bio)
 #   RUN_NAME       W&B run name                     (default <arm>-<date>)
 #   WANDB_PROJECT  W&B project                      (default comet-retrain-wmt)
-#   RESUME         checkpoint to resume from
+#   RESUME         checkpoint to resume from, or `auto` to find this arm's own
+#                  newest last.ckpt (and its W&B run id) at runtime
+#   ENCODER_LR     override encoder LR              (base 5e-7; uncontrolled arm)
+#   HEAD_LR        override head LR                 (base 1e-5; uncontrolled arm)
+#   NR_FROZEN_EPOCHS  override the unfreeze point   (base 0.3)
 #
 # The Bio-MQM paragraph / encoder-swap variants that used to live here moved to
 # archive/bio_paragraph_pipeline/ along with their data builders.
@@ -102,6 +115,27 @@ esac
 CKPT_DIR="$HOME/scratch/checkpoints/${CKPT_ROOT:-retrain-wmt}/$ARM_NAME"
 mkdir -p "$CKPT_DIR"
 
+# ── RESUME=auto: continue this arm's own newest run ───────────────────────────
+# A chained job cannot name the checkpoint at submit time (it does not exist
+# yet), so it asks for `auto` and the resolution happens here. The W&B run id is
+# read off the checkpoint path — the WandbLogger layout is
+# $CKPT_DIR/<project>/<run-id>/checkpoints/last.ckpt — so the chain continues on
+# ONE run and one set of curves instead of starting a new run per job.
+# If nothing resolves, this is the first link of the chain: fall through to a
+# fresh run, including the move-aside guard below.
+if [[ "${RESUME:-}" == "auto" ]]; then
+  RESUME="$(ls -t "$CKPT_DIR"/*/*/checkpoints/last.ckpt 2>/dev/null | head -1 || true)"
+  if [[ -n "$RESUME" ]]; then
+    RUN_DIR="$(dirname "$(dirname "$RESUME")")"
+    : "${WANDB_RUN_ID:=$(basename "$RUN_DIR")}"
+    export WANDB_RUN_ID
+    [[ -f "$CKPT_DIR/run_name" ]] && : "${RUN_NAME:=$(cat "$CKPT_DIR/run_name")}"
+    echo "RESUME=auto -> $RESUME (W&B run $WANDB_RUN_ID)"
+  else
+    echo "RESUME=auto -> no checkpoint under $CKPT_DIR yet; starting fresh."
+  fi
+fi
+
 # A fresh run must not leave an earlier sweep's runs in the arm directory:
 # checkpoint selection takes the best val_kendall across everything it finds, so
 # a superseded run would silently be the one evaluated. Rename, never delete.
@@ -116,6 +150,9 @@ fi
 
 export WANDB_PROJECT="${WANDB_PROJECT:-comet-retrain-wmt}"
 export WANDB_RUN_NAME="${RUN_NAME:-${ARM_NAME}-$(date +%Y%m%d-%H%M)}"
+# Remembered so the next link of a RESUME=auto chain keeps the same run name:
+# the run id alone would leave every job with a different label in W&B.
+echo "$WANDB_RUN_NAME" > "$CKPT_DIR/run_name"
 export WANDB_TAGS="retrain-wmt,${ARM_NAME},budget${MAX_EPOCHS}ep"
 export WANDB_SAVE_DIR="$CKPT_DIR"
 if ! wandb status &>/dev/null; then
@@ -126,6 +163,7 @@ fi
 echo "═══════════════════════════════════════════════════════════"
 echo " Node     : $(hostname)  GPU: ${CUDA_VISIBLE_DEVICES:-none}"
 echo " Arm      : $ARM_NAME (model=$MODEL, mix=$MIX, frozen=$FROZEN)"
+echo " Resume   : ${RESUME:-none (fresh run from the published base)}"
 echo " Base     : $BASE_ID"
 echo " Data     : $MIX_DIR/$MIX"
 echo " Budget   : max_epochs=$MAX_EPOCHS max_steps=$MAX_STEPS patience=$PATIENCE"
@@ -141,10 +179,28 @@ if [[ ! -f "$DATA_DIR/all_train.csv" ]]; then
   exit 1
 fi
 if [[ ! -f "$MIX_DIR/$MIX/all_train.csv" ]]; then
-  echo; echo "### Building sentence-fraction mixes ###"
-  srun python "$EXP/make_mixtures.py" --data_dir "$DATA_DIR" --out_dir "$MIX_DIR"
+  if [[ "$MIX" == frac* ]]; then
+    echo; echo "### Building sentence-fraction mixes ###"
+    srun python "$EXP/make_mixtures.py" --data_dir "$DATA_DIR" --out_dir "$MIX_DIR"
+  else
+    echo "ERROR: $MIX_DIR/$MIX/all_train.csv not found, and $MIX is not a fracNNN"
+    echo "mix that make_mixtures.py knows how to build. For the contaminated arm:"
+    echo "  python $EXP/make_uncontrolled_mix.py --data_dir $DATA_DIR \\"
+    echo "      --out_dir $MIX_DIR/uncontrolled"
+    exit 1
+  fi
 fi
 [[ -f "$MIX_DIR/$MIX/all_train.csv" ]] || { echo "ERROR: mix $MIX not found in $MIX_DIR"; exit 1; }
+
+# A contaminated mix carries a marker file. Say so in the log rather than
+# letting the arm look like every other one three months from now.
+if [[ -f "$MIX_DIR/$MIX/CONTAMINATED" ]]; then
+  echo
+  echo "!!!! CONTAMINATED MIX — $MIX_DIR/$MIX !!!!"
+  sed 's/^/  /' "$MIX_DIR/$MIX/CONTAMINATED"
+  echo "!!!! correlation results from this arm measure memorisation !!!!"
+  export WANDB_TAGS="${WANDB_TAGS:+$WANDB_TAGS,}contaminated"
+fi
 
 # ── 2. base checkpoint ────────────────────────────────────────────────────────
 EXTRA_ARGS=()
@@ -167,6 +223,11 @@ fi
 GEN_CFG="$CKPT_DIR/config.yaml"
 FROZEN_FLAG=()
 [[ "$FROZEN" == "1" ]] && FROZEN_FLAG+=(--frozen)
+# Optimisation overrides — unset for the composition sweep (fixed schedule is
+# what makes composition the only moving part), used by the uncontrolled arm.
+[[ -n "${ENCODER_LR:-}" ]]       && FROZEN_FLAG+=(--encoder_lr "$ENCODER_LR")
+[[ -n "${HEAD_LR:-}" ]]          && FROZEN_FLAG+=(--head_lr "$HEAD_LR")
+[[ -n "${NR_FROZEN_EPOCHS:-}" ]] && FROZEN_FLAG+=(--nr_frozen_epochs "$NR_FROZEN_EPOCHS")
 python "$EXP/make_config.py" \
     --base_cfg "$CFG" \
     --out "$GEN_CFG" \

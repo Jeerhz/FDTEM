@@ -6,17 +6,30 @@ The task (cf. Chen et al. 2023, "xSIM++", arXiv:2306.12907)
 ------------------------------------------------------------
 Take k consecutive sentences of one FLORES+ article and their translations.
 The query is the source block (the k source sentences, concatenated in order).
-The candidate pool contains
+The candidate set is built once and holds
 
-  * every true target block in the corpus (the classic xsim distractors), and
+  * every true target block in the corpus, and
   * for every true target block, *hard negatives* obtained by applying ONE
-    xSIM++ perturbation to ONE of its k sentences, leaving the other k−1 intact.
+    xSIM++ perturbation to ONE of its k sentences, leaving the other k-1 intact.
 
 The encoder must retrieve the block that is the concatenation of all k
 translations, in order, with no perturbation. A hard negative differs from the
 gold block by a single localised semantic edit inside one of k sentences — so
 the task gets strictly harder as k grows and the edit is diluted. That dilution
 curve is the object of interest.
+
+`evaluate_blocks` then scores FOUR nested pools on the same similarity matrix
+(free: nothing is re-encoded), which is how the "classic xsim distractors" —
+the *other* blocks' true targets — are ablated:
+
+    true_only           all true blocks                        classic xsim
+    true+perturbed      all true blocks + all negatives        classic xsim++
+    gold+all_perturbed  own gold + all negatives               distractors dropped
+    gold+own_perturbed  own gold + own negatives only          pure dilution
+
+Only the last one leaves the encoder nothing to separate but the injected edit;
+the first two also reward simply telling articles apart. Both hard-negative
+pools still grow with k, which run_duel.py is the protocol that fixes.
 
 Perturbation categories (the three of xSIM++ §2.2)
 --------------------------------------------------
@@ -28,11 +41,17 @@ Perturbation categories (the three of xSIM++ §2.2)
 
 Deviation from the paper: xSIM++ perturbs *English* with NLTK NER, spaCy and
 WordNet. Here the perturbed side is whichever side the pool is built from —
-by default the **translations** (non-English) — so the perturbations are
-implemented self-contained and multilingually (no NLTK/spaCy/WordNet). Entity
+by default the **translations** (non-English) — so this module implements the
+perturbations self-contained and multilingually (no NLTK/spaCy/WordNet). Entity
 detection is a casing heuristic and is therefore unavailable for languages
 without case (zh, ja, th); `variant_stats` reports per-category coverage so any
 gap is explicit rather than silent.
+
+`nlp_perturb.py` is the opt-in second backend (`--perturb_backend spacy`) that
+does use those tools: real NER instead of casing (so zh/ja get entity negatives
+too), `like_num`/`NumType` instead of a digit regex, and parse-anchored negation.
+It reuses this module's ANTONYMS / MODAL_BOOST / ORDINALS lexicons, because
+those are the parts WordNet cannot cover multilingually — see its docstring.
 
 All perturbations are deterministic: the RNG is seeded from
 (seed, lang, category, sentence, variant index).
@@ -509,6 +528,9 @@ def build_pool(data_by_split: Sequence[Tuple[str, FloresData, List[Block]]],
                ) -> Tuple[List[Candidate], List[int], Dict[str, int]]:
     """Returns (candidates, true_index_per_block, variant_stats).
 
+    `perturber` is anything exposing `.variants(sentence, category, n)` — either
+    `Perturber` or `nlp_perturb.SpacyPerturber`.
+
     `candidates[i].block_id` indexes the *global* block list (splits concatenated
     in the order given). `true_idx[b]` is the pool position of block b's gold
     candidate.
@@ -554,9 +576,30 @@ def _err_on_subset(sim: np.ndarray, cols: np.ndarray,
 def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
                     cands: List[Candidate], true_idx: List[int],
                     categories: Sequence[str]) -> Dict:
-    """All xsim / xsim++ numbers for one (encoder, lang, k) cell."""
+    """All xsim / xsim++ numbers for one (encoder, lang, k) cell.
+
+    Four candidate pools are scored off the *same* similarity matrix, so the
+    ablation costs nothing — no candidate is re-encoded:
+
+      true_only           every true target block, no negatives    → classic xsim
+      true+perturbed      everything                               → classic xsim++
+      gold+all_perturbed  the query's own gold + every perturbed block in the
+                          corpus; the *other* true target blocks — the classic
+                          xsim distractors — are dropped
+      gold+own_perturbed  the query's own gold + only its own single-edit hard
+                          negatives; nothing but the injected perturbation is
+                          left to separate, so this is the pure dilution number
+
+    The last two are what "the pool should be the hard negatives" means. The
+    gap `true+perturbed` − `gold+all_perturbed` is exactly what the classic
+    distractors contribute; `gold+own_perturbed` removes cross-block confusion
+    entirely. Caveat: `gold+own_perturbed` still has a pool that *grows* with k
+    (up to 3·k·variants negatives) — run_duel.py is the protocol that also pins
+    the candidate count, of which this is the D = m (all negatives) case.
+    """
     sim = q_emb @ p_emb.T                                  # (N_blocks, M_cands)
     n = sim.shape[0]
+    rows = np.arange(n)
     true_arr = np.asarray(true_idx)
     cand_block = np.asarray([c.block_id for c in cands])
     cand_kind = np.asarray([c.kind for c in cands])
@@ -565,15 +608,60 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
 
     true_cols = np.asarray(true_idx)
     all_cols = np.arange(len(cands))
+    is_pert = cand_kind == "perturbed"
+    own = cand_block[None, :] == rows[:, None]               # (N, M)
+    own_pert = own & is_pert[None, :]
+    gold_oh = np.zeros_like(own)
+    gold_oh[rows, true_arr] = True
 
     xsim_err, _ = _err_on_subset(sim, true_cols, true_arr)
     xsimpp_err, pred_all = _err_on_subset(sim, all_cols, true_arr)
 
+    # ── pools that drop the classic xsim distractors ────────────────────────
+    # The candidate set now differs per query, so mask columns row-wise instead
+    # of slicing a shared column list.
+    def _err_rowwise(colmask: np.ndarray, keep: Optional[np.ndarray] = None):
+        """(error, predictions, n_rows_scored) over the rows in `keep`."""
+        m = colmask if keep is None else colmask[keep]
+        s = sim if keep is None else sim[keep]
+        t = true_arr if keep is None else true_arr[keep]
+        if s.shape[0] == 0:
+            return None, np.zeros(0, dtype=int), 0
+        pred = np.where(m, s, -np.inf).argmax(1)
+        return float((pred != t).mean()), pred, int(s.shape[0])
+
+    hard_err, _, _ = _err_rowwise(gold_oh | is_pert[None, :])
+
+    # blocks with no negative of their own would score a free 0 — exclude them
+    has_own = own_pert.any(1)
+    own_err, pred_own, n_own = _err_rowwise(gold_oh | own_pert, has_own)
+
+    own_breakdown: Dict[str, Optional[float]] = {}
+    if n_own:
+        ok = pred_own == true_arr[has_own]
+        own_breakdown["correct"] = float(ok.mean())
+        for c in categories:
+            own_breakdown[c] = float(((~ok) & (cand_cat[pred_own] == c)).mean())
+
+    # A bigger own-pool is a harder pool: a coin-flip encoder scores m/(m+1),
+    # and m grows with k. Without this baseline the dilution curve is unreadable.
+    n_own_neg = own_pert.sum(1)
+    own_chance = (float((n_own_neg[has_own] / (n_own_neg[has_own] + 1)).mean())
+                  if has_own.any() else None)
+
+    own_by_cat: Dict[str, Optional[float]] = {}
+    own_n_by_cat: Dict[str, int] = {}
+    for c in categories:
+        m_cat = own_pert & (cand_cat == c)[None, :]
+        keep = m_cat.any(1)
+        e, _, nk = _err_rowwise(gold_oh | m_cat, keep)
+        own_by_cat[c], own_n_by_cat[c] = e, nk
+
     # error typology on the full pool
     correct = pred_all == true_arr
     pred_block = cand_block[pred_all]
-    own_perturbed = (~correct) & (pred_block == np.arange(n))
-    misaligned = (~correct) & (pred_block != np.arange(n))
+    own_perturbed = (~correct) & (pred_block == rows)
+    misaligned = (~correct) & (pred_block != rows)
     breakdown = {"correct": float(correct.mean()),
                  "misaligned": float(misaligned.mean())}
     for c in categories:
@@ -592,34 +680,45 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
             combos["+".join(combo)] = _pool_err(combo)
 
     # push-apart detection: P[cos(q, gold) > cos(q, negative)] over own negatives
-    gold_sim = sim[np.arange(n), true_arr]
+    gold_sim = sim[rows, true_arr]
     det_by_cat: Dict[str, Optional[float]] = {}
     det_by_pos: Dict[str, Optional[float]] = {}
     cov: Dict[str, int] = {}
-    own = cand_block[None, :] == np.arange(n)[:, None]       # (N, M)
-    is_pert = cand_kind == "perturbed"
     for c in categories:
-        m = own & is_pert[None, :] & (cand_cat == c)[None, :]
+        m = own_pert & (cand_cat == c)[None, :]
         cov[c] = int(m.sum())
         det_by_cat[c] = float((gold_sim[:, None] > sim)[m].mean()) if m.any() else None
     for pos in sorted({int(p) for p in cand_pos if p >= 0}):
-        m = own & is_pert[None, :] & (cand_pos == pos)[None, :]
+        m = own_pert & (cand_pos == pos)[None, :]
         det_by_pos[str(pos)] = float((gold_sim[:, None] > sim)[m].mean()) if m.any() else None
-    m_all = own & is_pert[None, :]
-    detection = float((gold_sim[:, None] > sim)[m_all].mean()) if m_all.any() else None
+    detection = (float((gold_sim[:, None] > sim)[own_pert].mean())
+                 if own_pert.any() else None)
 
     # margin between the gold block and the single best negative
     neg = sim.copy()
-    neg[np.arange(n), true_arr] = -np.inf
+    neg[rows, true_arr] = -np.inf
     margin = float((gold_sim - neg.max(1)).mean())
     # margin against the *hardest own perturbation* only (isolates dilution)
-    own_neg = np.where(own & is_pert[None, :], sim, -np.inf)
-    has_own = np.isfinite(own_neg.max(1))
+    own_neg = np.where(own_pert, sim, -np.inf)
     margin_own = (float((gold_sim[has_own] - own_neg.max(1)[has_own]).mean())
                   if has_own.any() else None)
 
     return {"n_blocks": n, "pool_size": len(cands),
             "xsim_err": xsim_err, "xsimpp_err": xsimpp_err,
+            # pools with the classic xsim distractors dropped
+            "xsimpp_err_hard_pool": hard_err,
+            "xsimpp_err_own_pool": own_err,
+            "pool_ablation": {"true_only": xsim_err,
+                              "true+perturbed": xsimpp_err,
+                              "gold+all_perturbed": hard_err,
+                              "gold+own_perturbed": own_err},
+            "own_pool_breakdown": own_breakdown,
+            "own_pool_err_by_category": own_by_cat,
+            "own_pool_n_blocks": n_own,
+            "own_pool_n_blocks_by_category": own_n_by_cat,
+            "own_pool_chance_err": own_chance,
+            "own_pool_negatives_per_block": (float(n_own_neg[has_own].mean())
+                                             if has_own.any() else 0.0),
             "error_breakdown": breakdown,
             "per_category_err": per_category, "category_combos": combos,
             "detection_rate": detection, "detection_by_category": det_by_cat,

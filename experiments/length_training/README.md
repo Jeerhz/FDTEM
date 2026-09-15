@@ -122,7 +122,130 @@ RUN=1 SUBMIT=1 experiments/length_training/slurm/deploy_concat_fix.sh  # ... + s
 
 ---
 
+## Extension, 2026-08-29 — four arms, a long budget, and two new lenses
+
+The wave-1 arms moved but did not separate: 6 epochs (~4,500 optimizer steps) is
+enough to show that composition does something and not enough to say what. The
+follow-up fixes four things at once.
+
+### 1. Four arms, named by what they are made of
+
+| arm | training text | the question it answers |
+|---|---|---|
+| `frac100` | 100 % single sentences | the control: continued training that changes nothing about length |
+| `frac000agg` | 100 % concatenated same-document windows | does *synthetic* length help? |
+| `frac000nat` | 100 % natively long documents | does *real* document text help, and differently? |
+| `frac000` | 50 / 50 concatenated + native | does the mixture beat either pure source? |
+
+`frac000nat` and `frac000agg` had never trained, and the reason was a silent
+one: a pure arm takes its whole N from ONE pool, while the default sizing rule
+`N = min(sent, 2·agg, 2·native)` only guarantees half of N from each long pool.
+`make_mixtures.py` logged `infeasible — skipped` and carried on, so a four-way
+design quietly became a two-way one.
+
+Fixed both ways round: `--total_policy pure` sizes N as `min(sent, agg, native)`,
+the largest N at which all four arms hold the same number of rows, and an
+infeasible arm is now a hard error unless `--allow_skip` is passed.
+
+Measured on the v2 pools: sent 59,139 · agg 156,112 · native 39,244, so the pure
+policy allows N = 39,244 and the 24,000 cap is what actually binds. **All four
+arms are at N = 24,000** — the same epoch size as wave 1, so the new numbers are
+comparable both to each other and to the earlier runs.
+
+### 2. Ten times the budget, chained across the wall clock
+
+`MAX_EPOCHS=60` (~45,000 steps) with `PATIENCE=10`. That does not fit in the
+partition's 2-day limit, so each arm is submitted as a chain of jobs linked by
+`--dependency=afterany`, each carrying `RESUME=auto`: the first starts from the
+published base, every later one picks up its arm's own `last.ckpt` and the W&B
+run id encoded in that path, so the chain is one run and one set of curves.
+Lightning counts `max_epochs` globally across a resume, so the chain stops
+itself at 60 epochs rather than doing 60 per link.
+
+```bash
+RUN=1          experiments/length_training/slurm/deploy_four_arms.sh   # mixes only (pools are reused)
+RUN=1 SUBMIT=1 experiments/length_training/slurm/deploy_four_arms.sh   # ... + submit the grid
+```
+
+Pools are **not** rebuilt: the v2 pools already carry the concatenation-aware
+token filter. Only the mixes are new (`mixes_pure/`), and checkpoints go to
+`retrain-wmt-v3`, leaving v1 and v2 untouched.
+
+### 3. The uncontrolled arm
+
+`make_uncontrolled_mix.py` builds one mix out of everything: both pool splits
+*and* the held-out evaluation portions. `slurm/launch_uncontrolled.sh` trains it
+unfrozen from step 0, at ten times the continue-training learning rates, with
+early stopping effectively off. It is the far end of the axis — the published
+metric saw none of this, the four arms are a controlled step away, this is as
+far as continued training goes — and it is what makes the size of the
+composition effects readable.
+
+**Its correlation numbers measure memorisation and are not results.** The mix
+directory carries a `CONTAMINATED` marker, the manifest carries
+`contaminated: true`, `train.sh` prints the marker in the job log and tags the
+W&B run. MetaDocEval is a different corpus and nothing from it enters the mix,
+so that lens stays honest for this arm — which is the reason to build it.
+
+### 4. Two new lenses on the same predictions
+
+`eval_length_profile.py` (run automatically by `slurm/eval_correlation.sh`,
+`PROFILE=0` to skip) reuses the correlation lens's prediction cache and reports
+what a correlation cannot:
+
+* **the distribution of the scores per k** — mean, spread, quantiles, histogram,
+  and `spread_ratio_vs_k1`. Kendall τ is invariant to any monotone squashing, so
+  a metric whose long-text scores collapse into a narrow band keeps its τ and
+  loses its resolution. This is the number that shows it.
+* **length in tokens, not in sentences** — every quantity again against the
+  XLM-R token count of the real input, in bins shared by every model and file.
+  `n_mt` for the DA arms (three sides encoded separately) and `n_concat` for the
+  QE arms (src+mt packed into one 512-token sequence — the budget is visible in
+  the last bin).
+
+Figures: `python report/figures/make_length_figures.py` → `report/figures/length/`.
+It also emits the **per-phenomenon** MetaDocEval grids, absolute and as a delta
+against each family's published metric: micro-averaging over a context window
+lets a phenomenon that improves cancel a phenomenon that degrades, and the
+average comes out flat.
+
+---
+
 ## Running it
+
+### The 2026-08-29 wave, in order
+
+```bash
+# 0. pools already exist (v2, concat-filtered) — nothing to rebuild.
+#    Check what is in them before spending GPU on them:
+python experiments/length_training/report_mix_composition.py
+
+# 1. mixes for the four arms, all at the same N
+RUN=1 experiments/length_training/slurm/deploy_four_arms.sh
+
+# 2. the four arms x two families, 60 epochs, chained across the wall clock
+SUBMIT=1 experiments/length_training/slurm/launch_long.sh
+
+# 3. the contaminated arm (separate: different data, different schedule)
+RUN=1 SUBMIT=1 experiments/length_training/slurm/launch_uncontrolled.sh
+
+# 4. evaluate as arms finish — correlation + score distributions + token profile
+sbatch --export=ALL,CKPT_ROOT=$HOME/scratch/checkpoints/retrain-wmt-v3,\
+VAL_DATA_DIR=$HOME/scratch/wmt_length_data_v2 \
+    experiments/length_training/slurm/eval_correlation.sh
+sbatch --export=ALL,CKPT_ROOT=$HOME/scratch/checkpoints/retrain-wmt-v3 \
+    experiments/length_training/slurm/eval_metadoceval.sh
+
+# 5. figures (runs anywhere the JSONs are; skips whatever is not there yet)
+python report/figures/make_length_figures.py
+```
+
+The alignment question — does the COMET *score* retrieve translations better
+than the cosine of the encoder it is built on — lives in experiment 2:
+`sbatch experiments/length_isolation/slurm/comet_align.sh`, with `QE_CKPT`
+pointing at a finished QE arm.
+
+### The original sweep
 
 ```bash
 # 1. pools (once)
@@ -146,12 +269,13 @@ python experiments/length_training/analyze.py --bootstrap
 
 Identical for every arm, and now meaningful because every epoch is the same size:
 
-| | |
-|---|---|
-| epoch | 24,000 rows = the whole mix |
-| optimizer steps / epoch | 750 (batch 4 × accum 8 × 1 GPU) |
-| `MAX_EPOCHS` | 6 → ≤ 144,000 examples, ≤ 4,500 steps |
-| `PATIENCE` | 3 validation checks (validation runs once per epoch) |
+| | wave 1 (2026-08) | four-arm wave (`launch_long.sh`) |
+|---|---|---|
+| epoch | 24,000 rows = the whole mix | N rows = the whole mix, `--total_policy pure` |
+| optimizer steps / epoch | 750 (batch 4 × accum 8 × 1 GPU) | N / 32, printed at submit time |
+| `MAX_EPOCHS` | 6 → ≤ 4,500 steps | 60 → ~45,000 steps |
+| `PATIENCE` | 3 validation checks | 10 validation checks |
+| wall clock | one 2-day job | a chain of 4 jobs, `RESUME=auto` |
 
 Early stopping is a guard against divergence, not the thing that sets the
 budget — that is the point of the correction. Raise `MAX_EPOCHS` or set
@@ -173,9 +297,13 @@ budget — that is the point of the correction. Raise `MAX_EPOCHS` or set
 | | |
 |---|---|
 | `prepare_data.py` | WMT22 segments, aggregated windows, WMT25 documents → one schema |
-| `make_mixtures.py` | constant-size mixes; language-coverage report; `manifest.json` |
+| `make_mixtures.py` | constant-size mixes; `--total_policy pure` for the four-arm grid; language-coverage report; `manifest.json` |
+| `make_uncontrolled_mix.py` | the contaminated everything-mix, with its marker |
 | `make_config.py` | per-arm training config: one train file, one budget |
 | `list_arms.py` | trained arms → `label=checkpoint` for the shell |
 | `train.py` | COMET training with a W&B logger |
 | `eval_correlation.py` · `eval_metadoceval.py` · `analyze.py` | the three lenses and the results table |
-| `slurm/` | `train.sh` · `launch_sweep.sh` · `eval_correlation.sh` · `eval_metadoceval.sh` |
+| `eval_length_profile.py` | score distributions per k, and everything again per input-token bin |
+| `report_mix_composition.py` | what is actually inside each pool and mix, per k |
+| `slurm/` | `train.sh` · `launch_sweep.sh` · `deploy_four_arms.sh` · `launch_long.sh` · `launch_uncontrolled.sh` · `eval_correlation.sh` · `eval_metadoceval.sh` |
+| `report/figures/make_length_figures.py` | per-phenomenon MetaDocEval, score distributions, token axis |

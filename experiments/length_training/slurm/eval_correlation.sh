@@ -15,6 +15,12 @@
 # checkpoint the label currently resolves to, so re-running after a retraining
 # rescores the changed arms instead of replaying the old ones.
 #
+# Each lens is then run a second time through eval_length_profile.py, which
+# reuses the SAME prediction cache (so it costs model-load time, not GPU) and
+# reports what the correlation cannot: the distribution of the scores per window
+# size k, and every quantity again against the XLM-R token count of the actual
+# input rather than against a sentence count. Set PROFILE=0 to skip it.
+#
 # Usage:
 #   sbatch experiments/length_training/slurm/eval_correlation.sh
 #   LENS=val sbatch experiments/length_training/slurm/eval_correlation.sh
@@ -31,6 +37,7 @@
 #   OUT_DIR      results dir                 (default results/length_training)
 #   VAL_DATA_DIR val-lens data dir           (default ~/scratch/wmt_length_data;
 #                                             use the *_v2 dir for v2 arms)
+#   PROFILE      1 = also run the length profile (default 1)
 # ──────────────────────────────────────────────────────────────────────────────
 #SBATCH --job-name=eval-corr
 #SBATCH --output=logs/%x-%j.out
@@ -81,10 +88,20 @@ run_lens () {
       --batch_size "${BATCH_SIZE:-32}" \
       --cache_dir "$OUT_DIR/pred_cache_$name" \
       --output "$OUT_DIR/correlation_$name.json"
+
+  if [[ "${PROFILE:-1}" == "1" ]]; then
+    echo; echo "### lens: $name — score distributions and token-length profile ###"
+    srun python "$EXP/eval_length_profile.py" \
+        --models $BASELINES $ARM_MODELS \
+        --data_dir "$data_dir" \
+        --batch_size "${BATCH_SIZE:-32}" \
+        --cache_dir "$OUT_DIR/pred_cache_$name" \
+        --output "$OUT_DIR/length_profile_$name.json"
+  fi
 }
 
 [[ "$LENS" == "val"     || "$LENS" == "both" ]] && run_lens val     "${VAL_DATA_DIR:-$HOME/scratch/wmt_length_data}"
 [[ "$LENS" == "heldout" || "$LENS" == "both" ]] && run_lens heldout "$HOME/scratch/wmt_eval_portion"
 
-echo; echo "Done → $OUT_DIR/correlation_*.json"
+echo; echo "Done → $OUT_DIR/correlation_*.json  $OUT_DIR/length_profile_*.json"
 echo "Table: python $EXP/analyze.py --results $OUT_DIR/correlation_heldout.json"

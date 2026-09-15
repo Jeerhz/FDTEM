@@ -13,6 +13,15 @@ Setup (see blocks.py for the details)
   * Correct = retrieving the concatenation of all k translations, in order,
               with no perturbation.
 
+Every run scores four nested pools off the same similarity matrix (`pool_ablation`
+in the JSON, plots/pool_ablation.png), so the contribution of the classic xsim
+distractors — the *other* blocks' true targets — is read off directly:
+
+    true_only           all true blocks                      classic xsim
+    true+perturbed      all true blocks + all negatives      classic xsim++
+    gold+all_perturbed  own gold + all negatives             distractors dropped
+    gold+own_perturbed  own gold + own negatives only        pure dilution
+
 Sweeping k ∈ {2,3,4,5} turns "how sensitive is the encoder to one error?" into
 "how fast does that sensitivity dilute with block length?" — reported as xsim vs
 xsim++ error, an error typology (misaligned vs which perturbation category won),
@@ -44,8 +53,9 @@ from typing import Dict, List
 import numpy as np
 
 from blocks import (
-    CATEGORIES, Perturber, block_text, build_blocks, build_pool, evaluate_blocks,
+    CATEGORIES, block_text, build_blocks, build_pool, evaluate_blocks,
 )
+from nlp_perturb import build_perturber
 from fdtem.encoders import build_embedder, cached_embed, enc_tag as _enc_tag, pick_device
 from fdtem.flores import load_flores_source
 
@@ -68,7 +78,8 @@ def _dry_run(args, loaded) -> None:
             continue
         pool_lang = lang if args.direction == "en2xx" else args.pivot
         corpus = [s for _sp, d in loaded for s in d.sentences[pool_lang]]
-        pert = Perturber.for_corpus(corpus, pool_lang, args.seed)
+        pert = build_perturber(corpus, pool_lang, args.seed, args.perturb_backend,
+                               args.wordnet_langs)
         logger.info(f"\n══ {pool_lang}  (entity bank: {len(pert.bank)} surfaces) ══")
         for k in args.k_list:
             blocks = [(sp, d, build_blocks(d, k, split=sp)) for sp, d in loaded]
@@ -93,8 +104,9 @@ def main() -> None:
                     default=["comet:Unbabel/wmt22-comet-da"])
     ap.add_argument("--langs", nargs="+", default=["de", "es", "fr", "ru"],
                     help="Non-pivot languages (the pivot is added automatically). "
-                         "Cased scripts only — entity perturbation needs letter "
-                         "case, so zh/ja/th are excluded by default.")
+                         "The heuristic backend needs letter case for the entity "
+                         "perturbation, so zh/ja/th are excluded by default; "
+                         "--perturb_backend spacy lifts that (real NER).")
     ap.add_argument("--pivot", default="en")
     ap.add_argument("--direction", choices=["en2xx", "xx2en"], default="en2xx",
                     help="en2xx: query=source block, pool=translation blocks "
@@ -105,6 +117,20 @@ def main() -> None:
                     choices=list(CATEGORIES))
     ap.add_argument("--variants_per_position", type=int, default=2,
                     help="Hard negatives per (block, sentence position, category).")
+    ap.add_argument("--perturb_backend", choices=["heuristic", "spacy", "auto"],
+                    default="spacy",
+                    help="spacy (default): real NER + morphology + parse-anchored "
+                         "negation; needs `python -m spacy download "
+                         "<lang>_core_*_sm`, and is the only backend that produces "
+                         "entity negatives for uncased scripts (zh/ja). heuristic: "
+                         "the self-contained regex/casing perturber. auto: spacy, "
+                         "falling back to heuristic. Note the two backends generate "
+                         "different negatives — do not compare runs across them.")
+    ap.add_argument("--wordnet_langs", nargs="*", default=["en"],
+                    help="Languages whose antonyms may come from WordNet, on top "
+                         "of the curated lexicon (spacy backend only). Clean for "
+                         "en; Open Multilingual WordNet has no de/ru and is "
+                         "sense-ambiguous elsewhere — see nlp_perturb.py.")
     ap.add_argument("--flores_source", choices=["plus", "raw"], default="plus")
     ap.add_argument("--splits", nargs="+", default=["dev", "devtest"],
                     help="FLORES+ splits to pool (more splits = more blocks; "
@@ -160,8 +186,10 @@ def main() -> None:
         query_lang = args.pivot if args.direction == "en2xx" else lang
         pool_lang = lang if args.direction == "en2xx" else args.pivot
         corpus = [s for _sp, d in loaded for s in d.sentences[pool_lang]]
-        pert = Perturber.for_corpus(corpus, pool_lang, args.seed)
-        if pool_lang in ("zh", "ja", "th") and "entity" in args.categories:
+        pert = build_perturber(corpus, pool_lang, args.seed, args.perturb_backend,
+                               args.wordnet_langs)
+        if (args.perturb_backend == "heuristic" and pool_lang in ("zh", "ja", "th")
+                and "entity" in args.categories):  # spacy has NER for these
             logger.warning(f"  [{pool_lang}] entity perturbation needs letter case — "
                            "no entity negatives will be generated for this language.")
         pools[lang] = {}
@@ -198,8 +226,12 @@ def main() -> None:
                 m = evaluate_blocks(q, c, P["cands"], P["true_idx"], args.categories)
                 m["variant_stats"] = P["stats"]
                 per_lang[lang][str(k)] = m
-                line = (f"  {lang} k={k}: xsim={m['xsim_err']:.4f} "
-                        f"xsim++={m['xsimpp_err']:.4f}")
+                pa = m["pool_ablation"]
+                line = (f"  {lang} k={k}: own={_fmt(pa['gold+own_perturbed'])}"
+                        f"/chance={_fmt(m['own_pool_chance_err'])} "
+                        f"hard={_fmt(pa['gold+all_perturbed'])}"
+                        f"  [classic: xsim={m['xsim_err']:.4f} "
+                        f"xsim++={m['xsimpp_err']:.4f}]")
                 if m["detection_rate"] is not None:
                     line += (f" detect={m['detection_rate']:.4f}"
                              f" margin_own={m['margin_vs_best_own_perturbation']:.4f}")
@@ -209,6 +241,15 @@ def main() -> None:
                     log = {f"{pref}/xsim_err": m["xsim_err"],
                            f"{pref}/xsimpp_err": m["xsimpp_err"],
                            f"{pref}/margin": m["margin_vs_best_negative"]}
+                    for pool_key, wb_key in (("gold+all_perturbed", "err_hard_pool"),
+                                             ("gold+own_perturbed", "err_own_pool")):
+                        if pa[pool_key] is not None:
+                            log[f"{pref}/{wb_key}"] = pa[pool_key]
+                    if m["own_pool_chance_err"] is not None:
+                        log[f"{pref}/err_own_pool_chance"] = m["own_pool_chance_err"]
+                    for cat, v in m["own_pool_err_by_category"].items():
+                        if v is not None:
+                            log[f"{pref}/err_own_{cat}"] = v
                     if m["detection_rate"] is not None:
                         log[f"{pref}/detection_rate"] = m["detection_rate"]
                     if m["margin_vs_best_own_perturbation"] is not None:
@@ -226,6 +267,15 @@ def main() -> None:
             mean_by_k[str(k)] = {
                 "xsim_err": float(np.mean([c["xsim_err"] for c in cells])),
                 "xsimpp_err": float(np.mean([c["xsimpp_err"] for c in cells])),
+                "pool_ablation": {pool: _nanmean([c["pool_ablation"][pool] for c in cells])
+                                  for pool in cells[0]["pool_ablation"]},
+                "own_pool_err_by_category": {
+                    cat: _nanmean([c["own_pool_err_by_category"][cat] for c in cells])
+                    for cat in args.categories},
+                "own_pool_n_blocks": int(sum(c["own_pool_n_blocks"] for c in cells)),
+                "own_pool_chance_err": _nanmean([c["own_pool_chance_err"] for c in cells]),
+                "own_pool_negatives_per_block": float(np.mean(
+                    [c["own_pool_negatives_per_block"] for c in cells])),
                 "margin_vs_best_negative": float(np.mean([c["margin_vs_best_negative"] for c in cells])),
                 "detection_rate": _nanmean([c["detection_rate"] for c in cells]),
                 "margin_vs_best_own_perturbation": _nanmean(
@@ -257,6 +307,10 @@ def main() -> None:
     logger.info(f"\nResults → {out_path}")
 
 
+def _fmt(v) -> str:
+    return "  n/a " if v is None else f"{v:.4f}"
+
+
 def _nanmean(vals):
     v = [x for x in vals if x is not None]
     return float(np.mean(v)) if v else None
@@ -282,21 +336,35 @@ def _plots(results: Dict, plot_dir: Path, categories) -> List[Path]:
     def ks(enc):
         return sorted(results["encoders"][enc]["_mean_by_k"], key=int)
 
-    # 1. headline — xsim vs xsim++ error against block length
+    # 1. headline — the hard-negative pools: no other block's true target is a
+    #    candidate, so only the injected edit can separate gold from distractor
     fig, ax = plt.subplots(figsize=(8, 5))
     for i, enc in enumerate(encoders):
         mk = results["encoders"][enc]["_mean_by_k"]
         x = [int(k) for k in ks(enc)]
         color = f"C{i}"
-        ax.plot(x, [mk[k]["xsim_err"] for k in ks(enc)], marker="o", ls="--",
-                color=color, alpha=0.5, label=f"{enc} — xsim")
-        ax.plot(x, [mk[k]["xsimpp_err"] for k in ks(enc)], marker="s", ls="-",
-                color=color, label=f"{enc} — xsim++")
+        y_all = [mk[k]["pool_ablation"]["gold+all_perturbed"] for k in ks(enc)]
+        y_own = [mk[k]["pool_ablation"]["gold+own_perturbed"] for k in ks(enc)]
+        if any(v is not None for v in y_all):
+            ax.plot(x, y_all, marker="^", ls="--", color=color, alpha=0.5,
+                    label=f"{enc} — gold + all negatives")
+        if any(v is not None for v in y_own):
+            ax.plot(x, y_own, marker="d", ls="-", color=color,
+                    label=f"{enc} — gold + own negatives")
+    # chance: the gold ranked at random among its own m negatives, m grows with k
+    mk0 = results["encoders"][encoders[0]]["_mean_by_k"]
+    kk = ks(encoders[0])
+    chance = [mk0[k].get("own_pool_chance_err") for k in kk]
+    if any(v is not None for v in chance):
+        ax.plot([int(k) for k in kk], chance, color="grey", ls=":", lw=1.2,
+                label="chance (gold ranked at random in its own pool)")
+    ax.set_xticks(sorted({int(k) for enc in encoders for k in ks(enc)}))
     ax.set_xlabel("block length k (sentences)")
     ax.set_ylabel("retrieval error rate")
-    ax.set_title("xsim vs xsim++ on concatenated blocks (mean over languages)")
+    ax.set_title("Hard-negative retrieval error vs block length "
+                 "(mean over languages)")
     ax.grid(alpha=0.3); ax.legend(fontsize=7)
-    p = plot_dir / "xsim_vs_xsimpp.png"
+    p = plot_dir / "hard_negative_error.png"
     fig.tight_layout(); fig.savefig(p, dpi=130); plt.close(fig); paths.append(p)
 
     # 2. dilution — can the encoder still push the perturbed block away?
@@ -315,7 +383,8 @@ def _plots(results: Dict, plot_dir: Path, categories) -> List[Path]:
     p = plot_dir / "detection_vs_length.png"
     fig.tight_layout(); fig.savefig(p, dpi=130); plt.close(fig); paths.append(p)
 
-    # 3. per-category xsim++ error
+    # 3. per-category error, own pool (gold + this block's own negatives of one
+    #    category) — the classic distractors are out of this one too
     fig, axes = plt.subplots(1, len(encoders), figsize=(4.2 * len(encoders), 4),
                              squeeze=False, sharey=True)
     for ax, enc in zip(axes[0], encoders):
@@ -323,11 +392,12 @@ def _plots(results: Dict, plot_dir: Path, categories) -> List[Path]:
         x = np.arange(len(ks(enc)))
         w = 0.8 / max(1, len(categories))
         for j, cat in enumerate(categories):
-            ax.bar(x + j * w, [mk[k]["per_category_err"][cat] for k in ks(enc)],
-                   width=w, label=cat)
+            ax.bar(x + j * w,
+                   [mk[k]["own_pool_err_by_category"].get(cat) or 0.0
+                    for k in ks(enc)], width=w, label=cat)
         ax.set_xticks(x + 0.4 - w / 2); ax.set_xticklabels(ks(enc))
         ax.set_xlabel("k"); ax.set_title(enc, fontsize=9)
-    axes[0][0].set_ylabel("xsim++ error (pool = true + one category)")
+    axes[0][0].set_ylabel("error (pool = gold + own negatives, one category)")
     axes[0][-1].legend(fontsize=8)
     p = plot_dir / "error_by_category.png"
     fig.tight_layout(); fig.savefig(p, dpi=130); plt.close(fig); paths.append(p)
@@ -349,6 +419,30 @@ def _plots(results: Dict, plot_dir: Path, categories) -> List[Path]:
     ax.grid(alpha=0.3); ax.legend(fontsize=6, ncol=2)
     p = plot_dir / "detection_by_position.png"
     fig.tight_layout(); fig.savefig(p, dpi=130); plt.close(fig); paths.append(p)
+
+    # 5. pool ablation — what do the classic xsim distractors actually buy?
+    pools = [("true_only", ":", "o", "true blocks only (xsim)"),
+             ("true+perturbed", "-", "s", "true blocks + negatives (xsim++)"),
+             ("gold+all_perturbed", "--", "^", "gold + all negatives"),
+             ("gold+own_perturbed", "-.", "d", "gold + own negatives")]
+    fig, axes = plt.subplots(1, len(encoders), figsize=(4.2 * len(encoders), 4),
+                             squeeze=False, sharey=True)
+    for ax, enc in zip(axes[0], encoders):
+        mk = results["encoders"][enc]["_mean_by_k"]
+        x = [int(k) for k in ks(enc)]
+        for pool, ls, mk_, lab in pools:
+            y = [mk[k].get("pool_ablation", {}).get(pool) for k in ks(enc)]
+            if any(v is not None for v in y):
+                xs = [xi for xi, yi in zip(x, y) if yi is not None]
+                ax.plot(xs, [v for v in y if v is not None], ls=ls, marker=mk_,
+                        label=lab)
+        ax.set_xticks(x)
+        ax.set_xlabel("block length k"); ax.set_title(enc, fontsize=9)
+        ax.grid(alpha=0.3)
+    axes[0][0].set_ylabel("retrieval error rate")
+    axes[0][-1].legend(fontsize=7)
+    p5 = plot_dir / "pool_ablation.png"
+    fig.tight_layout(); fig.savefig(p5, dpi=130); plt.close(fig); paths.append(p5)
 
     for pth in paths:
         logger.info(f"  [plot] {pth}")

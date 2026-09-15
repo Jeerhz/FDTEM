@@ -12,6 +12,27 @@ Every mix fracNNN has the same TOTAL number of rows N:
   (agg internally even over k). Two ablations pin the long-mass origin at f=0:
   frac000nat (all-native long) and frac000agg (all-aggregated long).
 
+N and the four-arm design
+-------------------------
+`--total_policy mix` (default) sets N = min(n_sent, 2·n_agg, 2·n_nat): enough
+for the fracNNN ladder, where no mix ever needs more than half its rows from a
+single long pool. The PURE arms need a whole N from one pool, so under that
+policy they are frequently infeasible — and used to be dropped with a one-line
+log, which is how a four-arm comparison can silently become a two-arm one.
+
+`--total_policy pure` sets N = min(n_sent, n_agg, n_nat), the largest N at
+which all four of
+
+    frac100      100 % single sentences
+    frac000agg   100 % concatenated windows
+    frac000nat   100 % native documents
+    frac000       50 / 50 concatenated + native
+
+hold the SAME number of rows. That is the policy to build the four-arm grid
+with: one epoch is then the same number of examples in every arm, so the
+training budget stays a controlled factor. Infeasible arms are now a hard
+error (`--allow_skip` to go back to skipping them).
+
 Per-(pool, lp) quotas are proportional to pool availability and FIXED across
 mixes; each (pool, lp, k) cell is shuffled once with the seed and every mix
 takes a prefix — mixes differ only by prefix length. manifest.json records
@@ -48,7 +69,23 @@ def main():
     ap.add_argument("--data_dir", default="~/scratch/wmt_length_data")
     ap.add_argument("--out_dir", default=None, help="default: <data_dir>/mixes")
     ap.add_argument("--total", type=int, default=None,
-                    help="rows per mix (default: max feasible, capped 24000)")
+                    help="rows per mix (default: max feasible under "
+                         "--total_policy, capped by --cap)")
+    ap.add_argument("--total_policy", choices=("mix", "pure"), default="mix",
+                    help="mix: N = min(sent, 2*agg, 2*native) — fits the fracNNN "
+                         "ladder, but the pure-pool arms are usually infeasible. "
+                         "pure: N = min(sent, agg, native) — the largest N at "
+                         "which frac100 / frac000agg / frac000nat / frac000 all "
+                         "hold the same number of rows. Use it for the four-arm grid.")
+    ap.add_argument("--cap", type=int, default=24_000,
+                    help="upper bound on N when --total is not given")
+    ap.add_argument("--arms", nargs="+", default=None,
+                    help="Build only these mixes (e.g. frac100 frac000agg "
+                         "frac000nat frac000). Default: all of them.")
+    ap.add_argument("--allow_skip", action="store_true",
+                    help="Skip an infeasible arm with a warning instead of "
+                         "refusing to build. Off by default: a silently missing "
+                         "arm turns a four-way comparison into a two-way one.")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--match_lp_coverage", action="store_true",
                     help="Keep only language pairs present in EVERY pool, so "
@@ -92,13 +129,14 @@ def main():
     pools = {o: g.sample(frac=1.0, random_state=rng).reset_index(drop=True)
              for o, g in df.groupby("origin")}
     n_sent, n_agg, n_nat = (len(pools.get(p, [])) for p in ("sent", "agg", "native"))
-    n_total = min(n_sent, 2 * n_agg, 2 * n_nat)
-    if args.total:
-        n_total = min(n_total, args.total)
-    else:
-        n_total = min(n_total, 24_000)
-    logger.info(f"pools: sent={n_sent:,} agg={n_agg:,} native={n_nat:,} "
-                f"→ N per mix = {n_total:,}")
+    feasible = {"mix": min(n_sent, 2 * n_agg, 2 * n_nat),
+                "pure": min(n_sent, n_agg, n_nat)}
+    n_total = min(feasible[args.total_policy], args.total or args.cap)
+    logger.info(f"pools: sent={n_sent:,} agg={n_agg:,} native={n_nat:,}")
+    logger.info(f"  N feasible: mix-policy {feasible['mix']:,} · "
+                f"pure-policy {feasible['pure']:,}  "
+                f"(the pure policy is what the four-arm grid needs)")
+    logger.info(f"  → policy={args.total_policy}, N per mix = {n_total:,}")
 
     def take(pool: str, n: int, offset: int = 0) -> pd.DataFrame:
         g = pools[pool]
@@ -107,6 +145,8 @@ def main():
         return g.iloc[offset:offset + n]
 
     manifest = {"seed": args.seed, "total_per_mix": n_total,
+                "total_policy": args.total_policy,
+                "n_feasible": feasible,
                 "pool_sizes": {"sent": n_sent, "agg": n_agg, "native": n_nat},
                 "lp_coverage": {p: sorted(v) for p, v in by_pool.items()},
                 "lp_coverage_shared": sorted(shared),
@@ -116,6 +156,11 @@ def main():
     specs = {f"frac{f:03d}": ("mix", f) for f in FRACS}
     specs["frac000nat"] = ("nat", 0)
     specs["frac000agg"] = ("agg", 0)
+    if args.arms:
+        unknown = [a for a in args.arms if a not in specs]
+        if unknown:
+            raise SystemExit(f"unknown arm(s) {unknown}; known: {sorted(specs)}")
+        specs = {k: v for k, v in specs.items() if k in args.arms}
 
     for name, (kind, f) in specs.items():
         n_s = round(n_total * f / 100)
@@ -127,10 +172,24 @@ def main():
             n_a, n_n = 0, n_long
         else:
             n_a, n_n = n_long, 0
-        if n_a > n_agg or n_n > n_nat:
-            logger.info(f"  ! {name}: infeasible (agg {n_a}/{n_agg}, "
-                        f"native {n_n}/{n_nat}) — skipped")
-            continue
+        if n_s > n_sent or n_a > n_agg or n_n > n_nat:
+            msg = (f"{name}: infeasible at N={n_total:,} "
+                   f"(needs sent {n_s}/{n_sent}, agg {n_a}/{n_agg}, "
+                   f"native {n_n}/{n_nat})")
+            if args.allow_skip:
+                logger.warning(f"  ! {msg} — SKIPPED")
+                manifest.setdefault("skipped", {})[name] = {
+                    "need": {"sent": n_s, "agg": n_a, "native": n_n},
+                    "have": {"sent": n_sent, "agg": n_agg, "native": n_nat}}
+                continue
+            raise SystemExit(
+                f"{msg}\n"
+                f"  The pure-pool arms need a whole N from one pool. Either\n"
+                f"    --total_policy pure   (N = {feasible['pure']:,}, all four "
+                f"arms at the same size), or\n"
+                f"    --total <= {min(n_sent, n_agg, n_nat):,}, or\n"
+                f"    --allow_skip          (build the ladder without this arm — "
+                f"then say so in the results).")
         parts = []
         if n_s:
             parts.append(take("sent", n_s))
@@ -159,9 +218,17 @@ def main():
         manifest["mixes"][name] = {"counts": counts, "checksums_md5": sums}
         logger.info(f"  {name}: {len(mix):,} rows (sent={n_s} agg={n_a} native={n_n})")
 
+    # The design guarantee, checked rather than asserted in prose: every mix
+    # built in this run holds the same number of rows, so one epoch is the same
+    # number of examples in every arm.
+    totals = {n: sum(m["counts"][p] for p in ("sent", "agg", "native"))
+              for n, m in manifest["mixes"].items()}
+    if len(set(totals.values())) > 1:
+        raise SystemExit(f"mixes have unequal totals: {totals}")
+
     with open(out_root / "manifest.json", "w") as fh:
         json.dump(manifest, fh, indent=2)
-    logger.info(f"Mixes → {out_root}")
+    logger.info(f"{len(totals)} mix(es) x {n_total:,} rows → {out_root}")
 
 
 if __name__ == "__main__":

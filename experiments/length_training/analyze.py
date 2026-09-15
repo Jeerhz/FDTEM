@@ -17,7 +17,12 @@ from pathlib import Path
 import pandas as pd
 
 MIXES = ["frac000", "frac010", "frac020", "frac040", "frac060", "frac080",
-         "frac100", "frac000nat", "frac000agg"]
+         "frac100", "frac000nat", "frac000agg", "uncontrolled"]
+# Trained on the evaluation sets on purpose. It appears in the table because a
+# row silently missing is worse than a row that says what it is — but its
+# correlation numbers measure memorisation and are not comparable to any other
+# row's. See make_uncontrolled_mix.py.
+CONTAMINATED = {"uncontrolled"}
 FAMILIES = [("da", "COMET-DA (reference-based)"), ("qe", "CometKiwi QE (reference-free)")]
 
 
@@ -60,8 +65,11 @@ def table(models: dict) -> None:
                 h = block(models[name], "heldout-", ("0",))
                 d1 = a["1"] - b_agg["1"] if a["1"] and b_agg["1"] else None
                 dh = h["0"] - b_held["0"] if h["0"] and b_held["0"] else None
+                flag = "  << CONTAMINATED: memorisation, not agreement" \
+                    if mix in CONTAMINATED else ""
                 print(f"  {mix+suffix:20}" + " ".join(fmt(a[k]) for k in ks) +
-                      f" {fmt(n['0'],8)} {fmt(h['0'],9)} | {fmt(d1,7)} {fmt(dh,7)}")
+                      f" {fmt(n['0'],8)} {fmt(h['0'],9)} | {fmt(d1,7)} {fmt(dh,7)}"
+                      + flag)
 
 
 def bootstrap(models: dict, data_dir: Path, cache_dir: Path, n_boot: int) -> None:
@@ -96,7 +104,9 @@ def bootstrap(models: dict, data_dir: Path, cache_dir: Path, n_boot: int) -> Non
                     continue
                 d, lo, hi = bootstrap_delta(u, base, n_boot)
                 star = "*" if lo > 0 or hi < 0 else " "
-                print(f"  {mix+suffix:24}{tau(u):7.3f}   {d:+.3f} [{lo:+.3f}, {hi:+.3f}] {star}")
+                flag = "  << CONTAMINATED" if mix in CONTAMINATED else ""
+                print(f"  {mix+suffix:24}{tau(u):7.3f}   {d:+.3f} "
+                      f"[{lo:+.3f}, {hi:+.3f}] {star}{flag}")
     print("\n* = 95% CI excludes zero")
 
 

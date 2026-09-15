@@ -26,7 +26,7 @@ gold against D single-error negatives, so task difficulty is identical
 across k and the only variable left is block length.
 
 Coverage vs pool size
----------------------
+--------------------- 
 D = 6 at k = 2 keeps only blocks whose BOTH sentences host all three error
 types (~9% of de blocks). Smaller duels qualify more blocks: D = 5 needs any
 5 of the 6 possible edits, D = 4 any 4. Since the negatives and embeddings do
@@ -59,6 +59,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from blocks import CATEGORIES, Perturber, block_text, build_blocks
+from nlp_perturb import build_perturber
 from fdtem.encoders import build_embedder, cached_embed, enc_tag as _enc_tag, pick_device
 from fdtem.flores import load_flores_source
 
@@ -164,7 +165,8 @@ def _dry_run(args, loaded) -> None:
         pool_lang = lang if args.direction == "en2xx" else args.pivot
         query_lang = args.pivot if args.direction == "en2xx" else lang
         corpus = [s for _sp, d in loaded for s in d.sentences[pool_lang]]
-        pert = Perturber.for_corpus(corpus, pool_lang, args.seed)
+        pert = build_perturber(corpus, pool_lang, args.seed,
+                               args.perturb_backend, args.wordnet_langs)
         jn = "" if pool_lang in ("zh", "ja", "th") else " "
         logger.info(f"\n══ {pool_lang} ══")
         for k in args.k_list:
@@ -202,6 +204,14 @@ def main() -> None:
     ap.add_argument("--batch_size", type=int, default=32)
     ap.add_argument("--device", default=None)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--perturb_backend", choices=["heuristic", "spacy", "auto"],
+                    default="spacy",
+                    help="See run_xsim.py — `spacy` swaps the casing/regex "
+                         "heuristics for real NER, morphology and a parse-anchored "
+                         "negation. Keep it the same across runs you compare.")
+    ap.add_argument("--wordnet_langs", nargs="*", default=["en"],
+                    help="Languages allowed to draw antonyms from WordNet "
+                         "(spacy backend only).")
     ap.add_argument("--cache_dir", default="results/block_duel/emb_cache")
     ap.add_argument("--output", default="results/block_duel/block_duel.json")
     ap.add_argument("--wandb_project", default=None)
@@ -248,7 +258,8 @@ def main() -> None:
         query_lang = args.pivot if args.direction == "en2xx" else lang
         pool_lang = lang if args.direction == "en2xx" else args.pivot
         corpus = [s for _sp, d in loaded for s in d.sentences[pool_lang]]
-        pert = Perturber.for_corpus(corpus, pool_lang, args.seed)
+        pert = build_perturber(corpus, pool_lang, args.seed,
+                               args.perturb_backend, args.wordnet_langs)
         jn = "" if pool_lang in ("zh", "ja", "th") else " "
         pools[lang] = {}
         for k in args.k_list:

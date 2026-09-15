@@ -36,6 +36,7 @@ import numpy as np
 import torch
 
 from blocks import CATEGORIES, Perturber
+from nlp_perturb import build_perturber
 from matched_core import (
     FillerBank, TokenCounter, build_input, pick_items,
 )
@@ -86,6 +87,13 @@ def main() -> None:
     ap.add_argument("--batch_size", type=int, default=8)
     ap.add_argument("--device", default=None)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--perturb_backend", choices=["heuristic", "spacy", "auto"],
+                    default="spacy",
+                    help="Negative generator — see run_xsim.py. `spacy` needs "
+                         "`python -m spacy download <lang>_core_*_sm`.")
+    ap.add_argument("--wordnet_langs", nargs="*", default=["en"],
+                    help="Languages allowed to draw antonyms from WordNet "
+                         "(spacy backend only).")
     ap.add_argument("--output", default="results/matched_core/layer_probe.json")
     args = ap.parse_args()
 
@@ -117,7 +125,8 @@ def main() -> None:
                              d.sentences[lang][i]))
                 sents.append(d.sentences[lang][i])
                 urls.append(d.urls[i])
-        pert = Perturber.for_corpus(sents, lang, args.seed)
+        pert = build_perturber(sents, lang, args.seed,
+                               args.perturb_backend, args.wordnet_langs)
         items = pick_items(rows, pert, tc, args.n_items, args.core_min_tok,
                            args.core_max_tok, args.seed, args.categories)
         bank = FillerBank(sents, urls, tc, lang, args.seed)

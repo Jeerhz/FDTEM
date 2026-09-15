@@ -298,16 +298,57 @@ Sweeping `k ∈ {2,3,4,5}` turns "how sensitive is the encoder to one error?" in
 
 **Deviation from the paper.** xSIM++ perturbs *English* using NLTK NER / spaCy /
 WordNet. Here the perturbed side is whichever the pool is built from — by default
-the **translations** (`--direction en2xx`) — so perturbations are implemented
-self-contained and multilingually (no NLTK/spaCy/WordNet; the cluster sandbox
-blocks the NLTK data download anyway). Entity detection is a casing + corpus-
-frequency heuristic and is therefore **unavailable for case-less scripts (zh, ja,
-th)**; `variant_stats` in the JSON reports per-category coverage so any gap is
-explicit. Use `--direction xx2en` for the paper's original English-pool setup.
+the **translations** (`--direction en2xx`) — so the default perturber is
+implemented self-contained and multilingually (no NLTK/spaCy/WordNet; the cluster
+sandbox blocks the NLTK data download anyway). Entity detection is a casing +
+corpus-frequency heuristic and is therefore **unavailable for case-less scripts
+(zh, ja, th)**; `variant_stats` in the JSON reports per-category coverage so any
+gap is explicit. Use `--direction xx2en` for the paper's original English-pool
+setup.
+
+**`--perturb_backend spacy`** (default;
+`experiments/length_isolation/nlp_perturb.py`) uses the paper's tooling where it
+actually holds up multilingually. `--perturb_backend heuristic` keeps the older
+self-contained perturber; the two produce different negatives, so runs are not
+comparable across backends.
+
+| | heuristic | spacy |
+|---|---|---|
+| entity | capitalised + never-seen-lowercased; nothing for zh/ja/th | `doc.ents`, typed (LOC↔LOC), works for zh |
+| number | digit regex + a 10-word ordinal list per language | `like_num` / `pos_ == NUM` / `NumType=Ord`, so spelled-out numerals too |
+| negation | per-language regexes; insertion only for en/de/es/ru | `Polarity=Neg` + the parse: both halves of "ne … pas", V2-correct "wurde **nicht** …", clitic-correct "**no** se anunció" |
+| antonym / modal | curated lexicons | the same curated lexicons, plus WordNet where `--wordnet_langs` allows |
+
+WordNet stays English-only by default, and deliberately: NLTK's Open Multilingual
+WordNet has **no German and no Russian**, and without WSD it returns the wrong
+sense's antonym (fr *grand* → *avare*, fr *chaud* → *rhume*) and bare lemmas that
+break agreement (*ouvert* → *fermer*). An ungrammatical negative is detectable for
+the wrong reason, which is not what this experiment measures. It needs
+`pip install spacy nltk` plus `python -m spacy download <lang>_core_*_sm`.
 
 ### Metrics (per encoder × language × k)
 
 - `xsim_err` / `xsimpp_err` — error over the true-only pool vs the full pool.
+- `pool_ablation` — the same similarity matrix scored over four nested pools, so
+  the contribution of the classic xsim distractors (the *other* blocks' true
+  targets) is read off directly:
+
+  | pool | candidates for query *b* | |
+  |---|---|---|
+  | `true_only` | every true block | classic xsim |
+  | `true+perturbed` | every true block + every negative | classic xsim++ |
+  | `gold+all_perturbed` | *b*'s gold + every negative | classic distractors dropped |
+  | `gold+own_perturbed` | *b*'s gold + *b*'s own negatives | **headline** — pure dilution |
+
+  `gold+own_perturbed` is the reported number and the one plotted in
+  `plots/hard_negative_error.png`; the classic rows stay in the JSON for
+  reference only. It (also `xsimpp_err_own_pool`, with
+  `own_pool_err_by_category` / `own_pool_breakdown` / `own_pool_n_blocks`) is the
+  hard-negatives-only task: nothing but the injected edit separates gold from
+  distractor. Blocks with no negative of their own are excluded from it rather
+  than scored as free wins. Caveat: its pool still *grows* with k (up to
+  3·k·variants), which is exactly the confound `run_duel.py` pins — the own pool
+  is the D = m (all-negatives) case of that duel.
 - `error_breakdown` — of the mistakes, how many were "misaligned" (a *different*
   block) vs fooled by each perturbation category (xSIM++ Table 4 typology).
 - `per_category_err`, `category_combos` — error with the pool restricted to one

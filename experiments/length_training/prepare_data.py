@@ -14,8 +14,14 @@ Three pools, one COMET-ready schema (src, mt, ref, score, …):
           Only documents WITH refA are kept, so DA and QE arms can train on
           byte-identical rows. k is recorded as 0 (marker for "native doc").
 
-Scores are z-normalised per (source_set, lp) on train and sigmoid-squashed —
-monotone, so rank-based evaluation is unaffected. Splits are document-disjoint
+Both label sources are HIGHER = BETTER before anything else happens: the WMT
+avg_seg_scores column is a negative MQM penalty (0 = no error, min -31) and ESA
+is a 0-100 quality rating — the same direction as the DA scores wmt22-comet-da
+and wmt22-cometkiwi-da were trained on, so no sign flip is applied anywhere
+(load_mqm/load_wmt25 assert the convention). Scores are then z-normalised per
+(source_set, lp) on train and sigmoid-squashed — monotone INCREASING, so the
+direction survives, rank-based evaluation is unaffected, and the differing raw
+ranges collapse onto the (0, 1) scale the pretrained heads already output. Splits are document-disjoint
 (hash of doc id; 90/10 train/val). Rows longer than --max_tokens XLM-R tokens
 on any side, or with src+mt > --max_concat_tokens (the CometKiwi concatenated
 input budget), are dropped.
@@ -88,8 +94,20 @@ def load_mqm(mqm_dir: Path, lp: str, rel: str) -> pd.DataFrame:
             .agg(src=("src", "first"), mt=("mt", "first"), ref=("ref", "first"),
                  score=("score", "mean"), domain=("domain", "first")))
     df["lp"] = lp
+    # Sign convention: the avg_seg_scores `score` column is a NEGATIVE MQM
+    # penalty (0.0 = no error, down to -31), i.e. HIGHER = BETTER — the same
+    # direction as the DA scores the base metrics were trained on. Nothing
+    # downstream flips signs (normalise() is monotone increasing), so a release
+    # shipping positive penalties would silently train an anti-correlated
+    # metric. Refuse it here rather than 40 GPU-hours later.
+    if df.score.max() > 0:
+        raise SystemExit(
+            f"[{lp}] {rel}: score column has positive values "
+            f"(range {df.score.min():.2f}..{df.score.max():.2f}). Expected a "
+            f"negative MQM penalty (higher = better). Negate it before use.")
     logger.info(f"  [{lp}] {len(df):,} scored segments, "
-                f"{df.doc_id.nunique()} docs, {df.system.nunique()} systems")
+                f"{df.doc_id.nunique()} docs, {df.system.nunique()} systems, "
+                f"score {df.score.min():.2f}..{df.score.max():.2f} (higher = better)")
     return df
 
 
@@ -141,8 +159,17 @@ def load_wmt25(path: Path) -> pd.DataFrame:
                                  domain=doc_id.split("_#_")[1] if "_#_" in doc_id else "",
                                  seg_start=0, k=0, lp=lp))
     df = pd.DataFrame(rows)
+    # ESA is a 0-100 quality rating (100 = perfect), NOT an error penalty:
+    # higher = better, same direction as the MQM pool above. A dump outside
+    # that range is a different annotation scheme and must not be mixed in.
+    if not df.score.between(0, 100).all():
+        raise SystemExit(
+            f"[wmt25] score column outside the ESA 0-100 range "
+            f"({df.score.min():.2f}..{df.score.max():.2f}) — check the "
+            f"annotation scheme and its direction before training on it.")
     logger.info(f"  [wmt25] {len(df):,} scored (doc, system) rows with refA, "
-                f"{df.doc_id.nunique()} docs, {df.lp.nunique()} lps")
+                f"{df.doc_id.nunique()} docs, {df.lp.nunique()} lps, "
+                f"ESA {df.score.min():.1f}..{df.score.max():.1f} (higher = better)")
     # keep lps with enough mass to matter
     keep = df.lp.value_counts()
     keep = set(keep[keep >= 300].index)
@@ -171,13 +198,29 @@ def token_filter(df: pd.DataFrame, tok: Tok, max_tokens: int, max_concat: int,
 
 
 def normalise(train: pd.DataFrame, val: pd.DataFrame, stats: dict):
+    """Put every source on one (0, 1) scale: z-score per (source_set, lp) with
+    TRAIN statistics, then sigmoid. Both steps are monotone INCREASING, so the
+    higher-is-better direction of the raw MQM (-31..0) and ESA (0..100) scores
+    is preserved and rank correlations are unaffected. What it buys: the MSE
+    loss and the pooled validation Kendall see one comparable scale, and the
+    targets land in the range the DA-pretrained heads already output."""
+    fitted = set()
     for (ss, lp), g in train.groupby(["source_set", "lp"]):
-        mu, sd = g.score.mean(), g.score.std() or 1.0
+        mu, sd = g.score.mean(), g.score.std()
+        if not np.isfinite(sd) or sd == 0:  # single-row group → std() is NaN
+            sd = 1.0
+        fitted.add((ss, lp))
         stats.setdefault("norm", {})[f"{ss}|{lp}"] = dict(mu=float(mu), sigma=float(sd))
         for df in (train, val):
             m = (df.source_set == ss) & (df.lp == lp)
             z = (df.loc[m, "score"] - mu) / sd
             df.loc[m, "score"] = 1 / (1 + np.exp(-z))
+    # A val group with no train counterpart would keep its RAW score and mix
+    # scales inside all_val.csv, corrupting val loss and the early-stopping
+    # Kendall without any visible error.
+    unfitted = set(map(tuple, val[["source_set", "lp"]].drop_duplicates().to_numpy())) - fitted
+    if unfitted:
+        raise SystemExit(f"val groups with no train normalisation: {sorted(unfitted)}")
 
 
 def main():
