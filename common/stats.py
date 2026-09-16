@@ -1,31 +1,38 @@
 """Correlations and document-level bootstrap.
 
-Windows of the same document share errors and, when they overlap, share text —
-so resampling *examples* would badly understate uncertainty. Everything here
-resamples **documents**.
+Windows of the same document share errors and text, so resampling examples would
+understate uncertainty. Everything here resamples documents.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel
 
 
-def correlations(gold: np.ndarray, pred: np.ndarray) -> Dict[str, Optional[float]]:
+class CorrelationCell(BaseModel):
+    n: int
+    pearson: float | None
+    spearman: float | None
+    kendall: float | None
+
+
+def correlations(gold: np.ndarray, pred: np.ndarray) -> CorrelationCell:
     from scipy.stats import kendalltau, pearsonr, spearmanr
 
     if len(gold) < 3 or np.std(gold) == 0 or np.std(pred) == 0:
-        return {"n": int(len(gold)), "pearson": None, "spearman": None, "kendall": None}
-    return {"n": int(len(gold)),
-            "pearson": float(pearsonr(gold, pred)[0]),
-            "spearman": float(spearmanr(gold, pred)[0]),
-            "kendall": float(kendalltau(gold, pred)[0])}
+        return CorrelationCell(n=int(len(gold)), pearson=None, spearman=None, kendall=None)
+    return CorrelationCell(n=int(len(gold)),
+                           pearson=float(pearsonr(gold, pred)[0]),
+                           spearman=float(spearmanr(gold, pred)[0]),
+                           kendall=float(kendalltau(gold, pred)[0]))
 
 
 def doc_units(df: pd.DataFrame, gold: str = "score", pred: str = "pred",
-              doc: str = "doc_id", group: Optional[str] = None) -> List[tuple]:
-    """Split a scored frame into resamplable per-document units."""
+              doc: str = "doc_id", group: str | None = None) -> list[tuple]:
+    """Split a scored frame into resamplable (group, gold, pred) units, one per document."""
     units = []
     for keys, g in df.groupby([c for c in (group, doc) if c], sort=False):
         gid = keys[0] if group else 0
@@ -33,15 +40,14 @@ def doc_units(df: pd.DataFrame, gold: str = "score", pred: str = "pred",
     return units
 
 
-def tau(units: Sequence[tuple], index: Optional[Sequence[int]] = None) -> float:
-    """Mean Kendall tau, computed per group then averaged (groups = files/LPs)."""
+def tau(units: Sequence[tuple], index: Sequence[int] | None = None) -> float:
+    """Mean Kendall tau, computed per group then averaged (groups = files / language pairs)."""
     from scipy.stats import kendalltau
 
-    idx = range(len(units)) if index is None else index
-    per_group: Dict[object, List[List[np.ndarray]]] = {}
-    for j in idx:
+    per_group: dict[object, tuple[list, list]] = {}
+    for j in (range(len(units)) if index is None else index):
         gid, gold, pred = units[j]
-        per_group.setdefault(gid, [[], []])
+        per_group.setdefault(gid, ([], []))
         per_group[gid][0].append(gold)
         per_group[gid][1].append(pred)
     taus = []
@@ -53,7 +59,7 @@ def tau(units: Sequence[tuple], index: Optional[Sequence[int]] = None) -> float:
 
 
 def bootstrap_delta(units_a: Sequence[tuple], units_b: Sequence[tuple],
-                    n_boot: int = 1000, seed: int = 0) -> Tuple[float, float, float]:
+                    n_boot: int = 1000, seed: int = 0) -> tuple[float, float, float]:
     """Paired bootstrap of tau(a) - tau(b) over documents -> (delta, lo, hi)."""
     if len(units_a) != len(units_b):
         raise ValueError("paired bootstrap needs the same documents on both sides")

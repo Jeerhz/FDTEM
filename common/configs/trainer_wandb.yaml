@@ -1,11 +1,6 @@
-# trainer_wandb.yaml — extends trainer.yaml with W&B logger
-# Use this instead of trainer.yaml when running finetuning experiments.
-#
-# Requires:  pip install wandb
-#            wandb login
-#
-# The WANDB_PROJECT and WANDB_RUN_NAME env vars (set by finetune_bio_mqm.sh)
-# control which project / run the metrics appear under.
+# Lightning Trainer block shared by every training run (parts 2 and 3).
+# The logger is deliberately absent: jsonargparse 3.13.1 cannot build it from
+# YAML, so common/train_comet.py attaches the WandbLogger itself.
 
 class_path: pytorch_lightning.trainer.trainer.Trainer
 init_args:
