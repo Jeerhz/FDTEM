@@ -1,659 +1,92 @@
-> **This fork is the FDTEM research repository.**
-> The COMET library below is vendored and patched; the experiments live in
-> [`EXPERIMENTS.md`](EXPERIMENTS.md) and under `experiments/`.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Unbabel/COMET/master/docs/source/_static/img/COMET_lockup-dark.png">
-  <br />
-  <br />
-  <a href="https://github.com/Unbabel/COMET/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Unbabel/COMET" /></a>
-  <a href="https://github.com/Unbabel/COMET/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Unbabel/COMET" /></a>
-  <a href=""><img alt="PyPI" src="https://img.shields.io/pypi/v/unbabel-comet" /></a>
-  <a href="https://github.com/psf/black"><img alt="Code Style" src="https://img.shields.io/badge/code%20style-black-black" /></a>
-</p>
-
-**NEWS:** 
-1) We added a new method to extract free-text explanations from XCOMET outputs! [Check this section](https://github.com/Unbabel/COMET?tab=readme-ov-file#explaining-translation-errors)
-2) We now support [DocCOMET](https://statmt.org/wmt22/pdf/2022.wmt-1.6.pdf), a document-level extension of COMET which can utilize contextual information. Using context improves accuracy on discourse phenomena tasks as well as referenceless evaluation of [chat translation quality](https://arxiv.org/pdf/2403.08314).
-3) We released our new eXplainable COMET models ([XCOMET-XL](https://huggingface.co/Unbabel/XCOMET-XL) and [-XXL](https://huggingface.co/Unbabel/XCOMET-XXL)) which along with quality scores detects which errors in the translation are minor, major or critical according to MQM typology
-
-Please check all available models [here](https://github.com/Unbabel/COMET/blob/master/MODELS.md)
- 
-# Quick Installation
-
-COMET requires python 3.8 or above. Simple installation from PyPI
-
-```bash
-pip install --upgrade pip  # ensures that pip is current 
-pip install unbabel-comet
-```
-
-**Note:** To use some COMET models such as `Unbabel/wmt22-cometkiwi-da` you must acknowledge it's license on Hugging Face Hub and [log-in into hugging face hub](https://huggingface.co/docs/huggingface_hub/quick-start#:~:text=Once%20you%20have%20your%20User%20Access%20Token%2C%20run%20the%20following%20command%20in%20your%20terminal%3A).
-
-
-To develop locally install run the following commands:
-```bash
-git clone https://github.com/Unbabel/COMET
-cd COMET
-pip install poetry
-poetry install
-```
-
-For development, you can run the CLI tools directly, e.g.,
-
-```bash
-PYTHONPATH=. ./comet/cli/score.py
-```
-
-# Table of Contents
-
-1. [Scoring MT outputs](#scoring-mt-outputs)
-    1. [CLI Usage](#cli-usage)
-        1. [Basic scoring command](#basic-scoring-command)
-        2. [Reference-free evaluation](#reference-free-evaluation)
-        3. [Comparing multiple systems](#comparing-multiple-systems)
-        4. [Minimum Bayes Risk Decoding](#minimum-bayes-risk-decoding)
-2. [COMET Models](#comet-models)
-    1. [Interpreting Scores](#interpreting-scores)
-    2. [Languages Covered](#languages-covered)
-    3. [COMET for African Languages](#comet-for-african-languages)
-    4. [Scoring within Python](#scoring-within-python)
-    5. [Explaining Translation Errors](#explaining-translation-errors)
-3. [Train your own Metric](#train-your-own-metric)
-4. [Finetuning on Biomedical MQM Data](#finetuning-on-biomedical-mqm-data)
-    1. [Prerequisites](#prerequisites)
-    2. [Step 1 — Prepare the Data](#step-1--prepare-the-data)
-    3. [Step 2 — Configure the Training](#step-2--configure-the-training)
-    4. [Step 3 — Run Finetuning](#step-3--run-finetuning)
-    5. [Monitoring with Weights & Biases](#monitoring-with-weights--biases)
-    6. [Managing Checkpoints](#managing-checkpoints)
-    7. [Step 4 — Upload to Hugging Face Hub](#step-4--upload-to-hugging-face-hub)
-    8. [Step 5 — Load and Score with the Finetuned Model](#step-5--load-and-score-with-the-finetuned-model)
-5. [Unittest](#unittest)
-6. [Publications](#publications)
-
-
-# Scoring MT outputs:
-
-## CLI Usage:
-
-Test examples:
-
-```bash
-echo -e "10 到 15 分钟可以送到吗\nPode ser entregue dentro de 10 a 15 minutos?" >> src.txt
-echo -e "Can I receive my food in 10 to 15 minutes?\nCan it be delivered in 10 to 15 minutes?" >> hyp1.txt
-echo -e "Can it be delivered within 10 to 15 minutes?\nCan you send it for 10 to 15 minutes?" >> hyp2.txt
-echo -e "Can it be delivered between 10 to 15 minutes?\nCan it be delivered between 10 to 15 minutes?" >> ref.txt
-```
-
-### Basic scoring command:
-```bash
-comet-score -s src.txt -t hyp1.txt -r ref.txt
-```
-> you can set the number of gpus using `--gpus` (0 to test on CPU).
-
-For better error analysis, you can use XCOMET models such as [`Unbabel/XCOMET-XL`](https://huggingface.co/Unbabel/XCOMET-XL), you can export the identified errors using the `--to_json` flag:
-
-```bash
-comet-score -s src.txt -t hyp1.txt -r ref.txt --model Unbabel/XCOMET-XL --to_json output.json
-```
-
-Scoring multiple systems:
-```bash
-comet-score -s src.txt -t hyp1.txt hyp2.txt -r ref.txt
-```
-
-WMT test sets via [SacreBLEU](https://github.com/mjpost/sacrebleu):
-
-```bash
-comet-score -d wmt22:en-de -t PATH/TO/TRANSLATIONS
-```
-
-Scoring with context:
-```bash
-echo -e "Pies made from apples like these. </s> Oh, they do look delicious.\nOh, they do look delicious." >> src.txt
-echo -e "Des tartes faites avec des pommes comme celles-ci. </s> Elles ont l’air delicieux.\nElles ont l’air delicieux" >> hyp1.txt
-echo -e "Des tartes faites avec des pommes comme celles-ci. </s> Ils ont l’air delicieux.\nIls ont l’air delicieux." >> hyp2.txt
-```
-
-where `</s>` is the separator token of the specific tokenizer (here: `xlm-roberta-large`) that the underlying model uses. 
-
-```bash
-comet-score -s src.txt -t hyp1.txt hyp2.txt --model Unbabel/wmt20-comet-qe-da --enable-context
-```
-
-If you are only interested in a system-level score use the following command:
-
-```bash
-comet-score -s src.txt -t hyp1.txt -r ref.txt --quiet --only_system
-```
-
-### Reference-free evaluation:
-
-```bash
-comet-score -s src.txt -t hyp1.txt --model Unbabel/wmt22-cometkiwi-da
-```
-
-**Note:** To use the `Unbabel/wmt23-cometkiwi-da-xl` you first have to acknowledge its license on [Hugging Face Hub](https://huggingface.co/Unbabel/Unbabel/wmt23-cometkiwi-da-xl).
-
-### Comparing multiple systems:
-
-When comparing multiple MT systems we encourage you to run the `comet-compare` command to get **statistical significance** with Paired T-Test and bootstrap resampling [(Koehn, et al 2004)](https://aclanthology.org/W04-3250/).
-
-```bash
-comet-compare -s src.de -t hyp1.en hyp2.en hyp3.en -r ref.en
-```
-
-### Minimum Bayes Risk Decoding:
-
-The MBR command allows you to rank translations and select the best one according to COMET metrics. For more details you can read our paper on [Quality-Aware Decoding for Neural Machine Translation](https://aclanthology.org/2022.naacl-main.100.pdf).
-
-
-```bash
-comet-mbr -s [SOURCE].txt -t [MT_SAMPLES].txt --num_sample [X] -o [OUTPUT_FILE].txt
-```
-
-If working with a very large candidate list you can use `--rerank_top_k` flag to prune the topK most promissing candidates according to a reference-free metric.
-
-Example for a candidate list of 1000 samples:
-
-```bash
-comet-mbr -s [SOURCE].txt -t [MT_SAMPLES].txt -o [OUTPUT_FILE].txt --num_sample 1000 --rerank_top_k 100 --gpus 4 --qe_model Unbabel/wmt23-cometkiwi-da-xl
-```
-
-Your source and samples file should be [formatted in this way](https://unbabel.github.io/COMET/html/running.html#:~:text=Example%20with%202%20source%20and%203%20samples%3A).
-
-# COMET Models
-
-Within COMET, there are several evaluation models available. You can refer to the [MODELS](MODELS.md) page for a comprehensive list of all available models. Here is a concise list of the main reference-based and reference-free models:
-
-- **Default Model:** [`Unbabel/wmt22-comet-da`](https://huggingface.co/Unbabel/wmt22-comet-da) - This model employs a reference-based regression approach and is built upon the XLM-R architecture. It has been trained on direct assessments from WMT17 to WMT20 and provides scores ranging from 0 to 1, where 1 signifies a perfect translation.
-- **Reference-free Model:** [`Unbabel/wmt22-cometkiwi-da`](https://huggingface.co/Unbabel/wmt22-cometkiwi-da) - This reference-free model employs a regression approach and is built on top of InfoXLM. It has been trained using direct assessments from WMT17 to WMT20, as well as direct assessments from the MLQE-PE corpus. Similar to other models, it generates scores ranging from 0 to 1. For those interested, we also offer larger versions of this model: [`Unbabel/wmt23-cometkiwi-da-xl`](https://huggingface.co/Unbabel/wmt23-cometkiwi-da-xl) with 3.5 billion parameters and [`Unbabel/wmt23-cometkiwi-da-xxl`](https://huggingface.co/Unbabel/wmt23-cometkiwi-da-xxl) with 10.7 billion parameters.
-- **eXplainable COMET (XCOMET):** [`Unbabel/XCOMET-XXL`](https://huggingface.co/Unbabel/XCOMET-XXL) - Our latest model is trained to identify error spans and assign a final quality score, resulting in an explainable neural metric. We offer this version in XXL with 10.7 billion parameters, as well as the XL variant with 3.5 billion parameters ([`Unbabel/XCOMET-XL`](https://huggingface.co/Unbabel/XCOMET-XL)). These models have demonstrated the highest correlation with MQM and are our best performing evaluation models.
-
-Please be aware that different models may be subject to varying licenses. To learn more, kindly refer to the [LICENSES.models](LICENSE.models.md) and model licenses sections.
-
-If you intend to compare your results with papers published before 2022, it's likely that they used older evaluation models. In such cases, please refer to [`Unbabel/wmt20-comet-da`](https://huggingface.co/Unbabel/wmt20-comet-da) and [`Unbabel/wmt20-comet-qe-da`](https://huggingface.co/Unbabel/wmt20-comet-qe-da), which were the primary checkpoints used in previous versions (<2.0) of COMET.
-
-Also, [UniTE Metric](https://aclanthology.org/2022.acl-long.558/) developed by the NLP2CT Lab at the University of Macau and Alibaba Group can be used directly through COMET check [here for more details](https://huggingface.co/Unbabel/unite-mup).
-
-## Interpreting Scores:
-
-**New:** An excellent reference for learning how to interpret machine translation metrics is the analysis paper by Kocmi et al. (2024), available [at this link.](https://arxiv.org/pdf/2401.06760.pdf)
-
-When using COMET to evaluate machine translation, it's important to understand how to interpret the scores it produces.
-
-In general, COMET models are trained to predict quality scores for translations. These scores are typically normalized using a [z-score transformation](https://simplypsychology.org/z-score.html) to account for individual differences among annotators. While the raw score itself does not have a direct interpretation, it is useful for ranking translations and systems according to their quality.
-
-However, since 2022 we have introduced a new training approach that scales the scores between 0 and 1. This makes it easier to interpret the scores: a score close to 1 indicates a high-quality translation, while a score close to 0 indicates a translation that is no better than random chance. Also, with the introduction of XCOMET models we can now analyse which text spans are part of minor, major or critical errors according to the MQM typology.
-
-It's worth noting that when using COMET to compare the performance of two different translation systems, it's important to run the `comet-compare` command to obtain statistical significance measures. This command compares the output of two systems using a statistical hypothesis test, providing an estimate of the probability that the observed difference in scores between the systems is due to chance. This is an important step to ensure that any differences in scores between systems are statistically significant.
-
-Overall, the added interpretability of scores in the latest COMET models, combined with the ability to assess statistical significance between systems using `comet-compare`, make COMET a valuable tool for evaluating machine translation.
-
-## Languages Covered:
-
-All the above mentioned models are build on top of XLM-R (variants) which cover the following languages:
-
-Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese, Azerbaijani, Basque, Belarusian, Bengali, Bengali Romanized, Bosnian, Breton, Bulgarian, Burmese, Catalan, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Esperanto, Estonian, Filipino, Finnish, French, Galician, Georgian, German, Greek, Gujarati, Hausa, Hebrew, Hindi, Hindi Romanized, Hungarian, Icelandic, Indonesian, Irish, Italian, Japanese, Javanese, Kannada, Kazakh, Khmer, Korean, Kurdish (Kurmanji), Kyrgyz, Lao, Latin, Latvian, Lithuanian, Macedonian, Malagasy, Malay, Malayalam, Marathi, Mongolian, Nepali, Norwegian, Oriya, Oromo, Pashto, Persian, Polish, Portuguese, Punjabi, Romanian, Russian, Sanskrit, Scottish, Gaelic, Serbian, Sindhi, Sinhala, Slovak, Slovenian, Somali, Spanish, Sundanese, Swahili, Swedish, Tamil, Tamil Romanized, Telugu, Telugu Romanized, Thai, Turkish, Ukrainian, Urdu, Urdu Romanized, Uyghur, Uzbek, Vietnamese, Welsh, Western, Frisian, Xhosa, Yiddish.
-
-**Thus, results for language pairs containing uncovered languages are unreliable!**
-
-### COMET for African Languages:
-
-If you are interested in COMET metrics for african languages please visit [afriCOMET](https://github.com/masakhane-io/africomet). 
-
-## Scoring within Python:
-
-```python
-from comet import download_model, load_from_checkpoint
-
-# Choose your model from Hugging Face Hub
-model_path = download_model("Unbabel/XCOMET-XL")
-# or for example:
-# model_path = download_model("Unbabel/wmt22-comet-da")
-
-# Load the model checkpoint:
-model = load_from_checkpoint(model_path)
-
-# Data must be in the following format:
-data = [
-    {
-        "src": "10 到 15 分钟可以送到吗",
-        "mt": "Can I receive my food in 10 to 15 minutes?",
-        "ref": "Can it be delivered between 10 to 15 minutes?"
-    },
-    {
-        "src": "Pode ser entregue dentro de 10 a 15 minutos?",
-        "mt": "Can you send it for 10 to 15 minutes?",
-        "ref": "Can it be delivered between 10 to 15 minutes?"
-    }
-]
-# Call predict method:
-model_output = model.predict(data, batch_size=8, gpus=1)
-```
-
-As output, we get the following information:
-```python
-# Sentence-level scores (list)
->>> model_output.scores
-[0.9822099208831787, 0.9599897861480713]
-
-# System-level score (float)
->>> model_output.system_score
-0.971099853515625
-
-# Detected error spans (list of list of dicts)
->>> model_output.metadata.error_spans
-[
-  [{'confidence': 0.4160953164100647,
-   'end': 21,
-   'severity': 'minor',
-   'start': 13,
-   'text': 'my food'}],
-  [{'confidence': 0.40004390478134155,
-   'end': 19,
-   'severity': 'minor',
-   'start': 3,
-   'text': 'you send it for'}]
-]
-```
-
-However, note that not all COMET models return metadata with detected error spans.
-
-
-## Explaining translation errors:
-
-Check [this notebook](https://gist.github.com/mtreviso/b618b499bc6de0414a3e11157e91cf02) for a minimal example on how you can combine xCOMET with [xTower](https://huggingface.co/sardinelab/xTower13B) to generate a natural language explanation for each error span. 
-
-For the Portuguese-English example above, we would call xTower with the following **prompt**:
-> You are provided with a Source, Translation, Translation quality analysis, and Translation quality score (weak, moderate, good, excellent, best). The Translation quality analysis contains a translation with marked error spans with different levels of severity (minor or major). Given this information, generate an explanation for each error and a fully correct translation. <br><br>
-> Portuguese source: Pode ser entregue dentro de 10 a 15 minutos? <br>
-> English translation: Can you send it for 10 to 15 minutes? <br>
-> Translation quality analysis: Can `<error1 severity='minor'>`you send it for`</error1>` 10 to 15 minutes? <br>
-> Translation quality score: excellent
-
-
-And get this as output:
-> Explanation for error1: The phrase "Can you send it for 10 to 15 minutes?" is a mistranslation of the original Portuguese sentence. The correct interpretation should focus on the delivery time rather than the duration of sending. The original sentence is asking about the delivery time, not the duration of sending. <br>
-> Translation correction: Can it be delivered within 10 to 15 minutes?
-
-
-For more information, check [xTower documentation](https://huggingface.co/sardinelab/xTower13B).
-
-
-# Train your own Metric: 
-
-Instead of using pretrained models your can train your own model with the following command:
-```bash
-comet-train --cfg configs/models/{your_model_config}.yaml
-```
-
-You can then use your own metric to score:
-
-```bash
-comet-score -s src.de -t hyp1.en -r ref.en --model PATH/TO/CHECKPOINT
-```
-
-You can also upload your model to [Hugging Face Hub](https://huggingface.co/docs/hub/index). Use [`Unbabel/wmt22-comet-da`](https://huggingface.co/Unbabel/wmt22-comet-da) as example. Then you can use your model directly from the hub.
-
-# Finetuning on Biomedical MQM Data
-
-General-domain COMET models trained on WMT news data degrade substantially on biomedical text, where terminology precision matters far more than in general translation. This section explains how to finetune COMET on the [Amazon Bio-MQM dataset](https://github.com/amazon-science/bio-mqm-dataset) — ~25 k expert MQM judgements over 11 language pairs — using the scripts provided in this repository.
-
-> **Reference:** [Fine-Tuned Machine Translation Metrics Struggle in Unseen Domains (ACL 2024)](https://aclanthology.org/2024.acl-short.45.pdf)
-
-## Prerequisites
-
-**Python environment** (Python ≥ 3.8):
-
-```bash
-git clone https://github.com/Unbabel/COMET   # or your fork
-cd COMET
-pip install poetry
-poetry install
-# additional dependencies for finetuning
-pip install wandb huggingface_hub
-```
-
-**Authentication** (one-time setup per machine):
-
-```bash
-# Hugging Face — required to download gated models and upload your checkpoint
-huggingface-cli login
-
-# Weights & Biases — required for training monitoring
-wandb login
-```
-
-**Hardware:** A single GPU with ≥ 16 GB VRAM (e.g. A100 40 GB or V100 32 GB) is sufficient with the default `batch_size: 8` and `accumulate_grad_batches: 8` (effective batch size 64). Reduce `batch_size` to 4 and increase `accumulate_grad_batches` to 16 if you have less memory.
-
-## Step 1 — Prepare the Data
-
-The preparation script clones the Bio-MQM repository, converts span-level MQM annotations to per-segment scores using standard penalty weights (critical = −25, major = −5, minor = −1), z-score normalises the scores per language pair, and writes COMET-ready CSV files.
-
-```bash
-python scripts/prepare_bio_mqm_data.py \
-    --output_dir ~/scratch/bio_mqm \
-    --write_combined
-```
-
-This produces one `<lang-pair>_train.csv` and `<lang-pair>_val.csv` per language pair under `~/scratch/bio_mqm/`, plus combined `all_train.csv` / `all_val.csv` if `--write_combined` is set.
-
-**Options:**
-
-| Flag | Default | Description |
-|---|---|---|
-| `--output_dir` | `~/scratch/bio_mqm` | Directory for processed CSV files |
-| `--repo_dir` | `<output_dir>/bio-mqm-dataset` | Local path for the cloned dataset repo |
-| `--lang_pairs` | all 11 pairs | Space-separated list, e.g. `en-de de-en en-zh` |
-| `--no_ref` | off | Omit the `ref` column for QE-style (reference-free) training |
-| `--write_combined` | off | Also write merged CSVs across all language pairs |
-
-**CSV format** (COMET training input):
+# FDTEM — length and domain sensitivity of learned MT metrics
+
+COMET-style metrics are trained on single sentences and applied to paragraphs and
+documents. This repository holds the three experiments of the FDTEM internship that
+ask what that costs, each self-contained in its own package, plus a `common/`
+library they share.
+
+| part | package | question | entry points |
+|---|---|---|---|
+| 1 | [`part1_block_alignment/`](part1_block_alignment/README.md) | Concatenate FLORES+ sentences into blocks of k sentences and add one xSIM++ perturbation to one sentence: can an encoder (cosine) or a metric (COMET score) still tell the reference block from the perturbed one as k grows? | `load_flores` → `build_blocks` → `perturb` → `evaluate_encoders` / `evaluate_duel` / `evaluate_comet_score` |
+| 2 | [`part2_length_training/`](part2_length_training/README.md) | Continue COMET-DA / CometKiwi on training mixes that differ only in composition (sentences, concatenated windows, native documents): what does it buy on validation, held-out and MetaDocEval? | `load_wmt_pools` → `make_mixtures` → `train` → `eval_validation` / `eval_length_profile` / `eval_metadoceval` / `analyze` |
+| 3 | [`part3_biomed_finetune/`](part3_biomed_finetune/README.md) | Fine-tune COMET on Bio-MQM (biomedical MQM annotations) and compare it with the published model per language pair. | `load_bio_mqm` → `slurm/finetune.sh` → `evaluate` → `upload_to_huggingface` |
+
+Every script is run from the repository root as `python -m <package>.<script> --help`;
+its slurm wrapper lives in `<package>/slurm/` and only sets the environment. Results
+(JSON + plots) and figures (script + PDF/PNG) live inside the part that produced them.
+`report/` holds the internship report and the HTML pages that read all parts.
+
+## Layout
 
 ```
-src,mt,ref,score
-"The patient was administered ...", "Der Patient erhielt ...", "Dem Patienten ...", 0.87
+common/                   shared library: paths, HF/W&B auth, FLORES loader, encoder zoo,
+                          COMET loading/scoring with caches, stats, training config + trainer
+part1_block_alignment/    part 1: models.py, scripts, slurm/, data/ (ignored), results/, figures/
+part2_length_training/    part 2: models.py, arms.py, scripts, configs/, slurm/, results/, figures/
+part3_biomed_finetune/    part 3: models.py, scripts, configs/, slurm/, results/
+report/                   main.tex + partie1_longueur.tex, figure and page builders
+docs/                     cluster_runbook.md (operations), design_history.md (pre-refactor design notes)
+tests/                    the committed result JSONs round-trip through their pydantic models
 ```
 
-## Step 2 — Configure the Training
+## `common/`
 
-The training configuration is in [`configs/models/bio_mqm_finetune.yaml`](configs/models/bio_mqm_finetune.yaml). The most important parameters to review before starting:
-
-```yaml
-regression_metric:
-  init_args:
-    # Base encoder — keep in sync with wmt22-comet-da
-    pretrained_model: xlm-roberta-large
-
-    # Conservative LRs to avoid catastrophic forgetting
-    encoder_learning_rate: 5.0e-07
-    learning_rate: 1.0e-05
-
-    # Reduce to 4 if OOM; compensate with accumulate_grad_batches in trainer
-    batch_size: 8
-
-    # Point to outputs of Step 1
-    train_data:
-      - ~/scratch/bio_mqm/en-de_train.csv
-      - ~/scratch/bio_mqm/de-en_train.csv
-      # ... add / remove language pairs as needed
-    validation_data:
-      - ~/scratch/bio_mqm/en-de_val.csv
-      - ~/scratch/bio_mqm/de-en_val.csv
-```
-
-The trainer config [`configs/trainer_wandb.yaml`](configs/trainer_wandb.yaml) controls GPU count, gradient accumulation, and the W&B logger. Edit `devices:` there or pass `--gpus` to the shell script below.
-
-## Step 3 — Run Finetuning
-
-The shell script orchestrates all steps: data preparation → base checkpoint download → training with W&B logging → checkpoint summary.
-
-```bash
-# Single GPU, default run name
-bash scripts/finetune_bio_mqm.sh
-
-# Two GPUs with a custom run name
-bash scripts/finetune_bio_mqm.sh --gpus 2 --run_name bio_mqm_v1
-```
-
-**Available flags:**
-
-| Flag | Default | Description |
-|---|---|---|
-| `--gpus` | `1` | Number of GPUs |
-| `--run_name` | `comet-bio-mqm-<timestamp>` | W&B run name and log file prefix |
-| `--output_dir` | `~/scratch/bio_mqm` | Where data CSVs are stored |
-| `--checkpoint_dir` | `~/checkpoints/bio_mqm` | Where `.ckpt` files and logs are saved |
-| `--resume` | _(none)_ | Path to a `.ckpt` to resume from (see [Resuming a Run](#resuming-a-run)) |
-| `--wandb_run_id` | _(none)_ | W&B run ID to continue metrics on the same chart |
-
-You can also invoke the training script directly for full control:
-
-```bash
-BASE_CKPT=$(python -c "from comet import download_model; print(download_model('Unbabel/wmt22-comet-da'))")
-
-python scripts/train_wandb.py \
-    --cfg configs/models/bio_mqm_finetune.yaml \
-    --load_from_checkpoint "$BASE_CKPT" \
-    --seed_everything 42
-```
-
-## Monitoring with Weights & Biases
-
-Training metrics stream automatically to W&B when `wandb login` has been run. The W&B project is controlled by the `WANDB_PROJECT` environment variable (default: `comet-bio-mqm`).
-
-```bash
-export WANDB_PROJECT=my-project
-bash scripts/finetune_bio_mqm.sh --run_name experiment_1
-```
-
-**Metrics logged per step / epoch:**
-
-| Metric | Description |
+| module | contents |
 |---|---|
-| `train_loss` | MSE loss on training batch |
-| `val_kendall` | Kendall τ on each validation set (one per language pair) |
-| `lr` / `encoder_lr` | Learning rate schedule for head and encoder |
+| `paths.py` | `ROOT`, `SCRATCH` (`~/scratch`, override with `FDTEM_SCRATCH`), `CHECKPOINTS` |
+| `auth.py` | `hf_token()` (token resolution + HF cache dirs), `init_wandb()`, `wandb_logger()` with offline fallback |
+| `cluster_env.sh` | the one shell block every slurm script sources: repo root, conda/venv, HF, W&B |
+| `flores.py` | `FloresCorpus` (pydantic), `load_flores("plus"\|"raw", …)`, language codes, `joiner()` |
+| `encoders.py` | embedder zoo `comet:<id\|ckpt>`, `hf-mean:<id>`, `labse`, `e5`, with an on-disk embedding cache |
+| `comet_models.py` | `resolve_checkpoint`, `load_comet`, `uses_reference`, `score` (prediction cache keyed by rows and checkpoint fingerprint), `best_checkpoint`, `write_hparams` |
+| `stats.py` | `CorrelationCell`, `correlations`, document-level `tau` and `bootstrap_delta` |
+| `train_config.py` | a self-contained training YAML from a base config; refuses more than one train file |
+| `train_comet.py` | `train(...)`: base checkpoint, resume (`auto` continues the arm's last run), W&B logger, `hparams.yaml` |
+| `configs/` | the Lightning trainer, early-stopping and checkpoint blocks shared by parts 2 and 3 |
 
-Each validation file listed in `validation_data` produces its own `val_kendall` curve, making it straightforward to track per-language-pair generalisation in the W&B dashboard.
-
-To disable W&B entirely:
-
-```bash
-WANDB_MODE=disabled bash scripts/finetune_bio_mqm.sh
-```
-
-## Managing Checkpoints
-
-The `ModelCheckpoint` callback (configured in [`configs/model_checkpoint.yaml`](configs/model_checkpoint.yaml)) saves the top-2 checkpoints ranked by `val_kendall` with filenames like:
-
-```
-epoch=3-step=2400-val_kendall=0.812.ckpt
-```
-
-The shell script writes the best checkpoint path to `~/checkpoints/bio_mqm/best_checkpoint.txt` at the end of each completed run:
+## Install (cluster)
 
 ```bash
-BEST=$(cat ~/checkpoints/bio_mqm/best_checkpoint.txt)
-comet-score -s src.txt -t hyp1.txt -r ref.txt --model "$BEST"
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate comet-bio
+pip uninstall -y unbabel-comet          # the old editable install of the vendored copy
+pip install "unbabel-comet==2.2.7"      # COMET now comes from PyPI
+pip install -e ".[spacy]"               # this repo (editable) + the spaCy perturbation backend
+python -m spacy download de_core_news_sm   # es fr ru zh en likewise; part 1 only
+python -c "import comet, common; print(comet.__version__, common.__file__)"
+hf auth login        # then accept the terms of openlanguagedata/flores_plus once
+wandb login          # optional: jobs fall back to WANDB_MODE=offline
 ```
 
-Checkpoints for a given W&B run are saved under:
-```
-~/checkpoints/bio_mqm/comet-bio-mqm/<wandb-run-id>/checkpoints/
-```
+Slurm scripts source `common/cluster_env.sh`, which activates the env, redirects the HF
+caches to `~/scratch/hf_cache`, re-exports the HF token and switches W&B offline when
+needed. See [`docs/cluster_runbook.md`](docs/cluster_runbook.md) for the preflight checks.
 
----
+Locally (no GPU) only the pure-Python side runs: a venv with `pydantic pandas numpy
+scipy pyyaml matplotlib pytest` is enough for the models, the figure scripts, the pages
+and `pytest tests`.
 
-## Resuming a Run
+## Conventions
 
-Use this when the job was killed by a time limit, power cut, or manual `Ctrl+C`. The resume path restores the **full training state**: epoch counter, optimizer, learning rate scheduler — not just the model weights.
+- Results are written and read through the pydantic models of `<package>/models.py`
+  (`model_dump_json` / `model_validate_json`); figure scripts never re-derive JSON shapes.
+- Predictions are cached per (model label, exact input rows) and validated against the
+  checkpoint fingerprint, so re-running an evaluation only scores what changed; caches
+  are never committed.
+- Uncertainty is bootstrapped over **documents**, never over examples.
+- A rank correlation is never the whole answer: part 2 also reports the distribution
+  of the scores per length (`eval_length_profile`).
+- A training mix built from data an evaluation set also contains carries a
+  `CONTAMINATED` marker, `contaminated: true` in its manifest and a W&B tag; its
+  correlation numbers are not results (`make_mixtures --arms uncontrolled`).
+- One train file per run: COMET reads `train_data[epoch % len]` and Lightning never
+  rebuilds the loader, so `common/train_config.py` refuses multi-file lists.
 
-**Step 1 — Find the best saved checkpoint:**
+## Report
 
 ```bash
-ls ~/checkpoints/bio_mqm/comet-bio-mqm/<wandb-run-id>/checkpoints/
-# epoch=0-step=10-val_kendall=0.366.ckpt
-# epoch=1-step=20-val_kendall=0.371.ckpt   ← pick the latest/best
+python -m part1_block_alignment.figures.make_figures
+python -m part2_length_training.figures.make_figures
+python report/figures/make_report_figures.py && python report/figures/make_answer_figures.py
+python -m report.make_status_page   # also make_deck_length, make_deck_page, make_answer_page
+cd report && latexmk -pdf main.tex
 ```
-
-**Step 2 — Find the W&B run ID** (printed at the start of training, or visible in the W&B URL):
-```
-https://wandb.ai/<entity>/comet-bio-mqm/runs/<run-id>
-#                                                ^^^^^^^^
-```
-
-**Step 3 — Resume:**
-
-```bash
-bash scripts/finetune_bio_mqm.sh \
-  --resume ~/checkpoints/bio_mqm/comet-bio-mqm/<run-id>/checkpoints/epoch=1-step=20-val_kendall=0.371.ckpt \
-  --wandb_run_id <run-id> \
-  --run_name <original-run-name>
-```
-
-- `--resume` loads weights **and** restores optimizer/scheduler state; training continues from the next epoch.
-- `--wandb_run_id` appends new metrics to the existing W&B chart instead of creating a new run.
-- Omit `--wandb_run_id` if you want a fresh W&B run while still resuming from the checkpoint.
-
-> **Note:** The data preparation step (Step 1) always re-runs but is fast if the CSV files already exist.
-
----
-
-## Running Multiple Experiments
-
-### Vary hyperparameters across runs
-
-Each run gets its own `--run_name`, which becomes both the W&B run name and the log file prefix. Checkpoints are stored under separate W&B run ID subdirectories, so runs never overwrite each other.
-
-```bash
-# Baseline — default LR
-bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_baseline
-
-# Higher encoder LR
-# Edit configs/models/bio_mqm_finetune.yaml: encoder_learning_rate: 1.0e-06
-bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_enc_lr_1e6
-
-# More epochs
-# Edit configs/trainer_wandb.yaml: max_epochs: 20
-bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_20ep
-```
-
-Compare all runs side-by-side at:
-```
-https://wandb.ai/<entity>/comet-bio-mqm
-```
-Select multiple runs → **Compare** to overlay `val_kendall` curves.
-
-### Start fresh from a different base model
-
-Change `--load_from_checkpoint` to point at any COMET `.ckpt` (e.g. a previously finetuned checkpoint):
-
-```bash
-BASE_CKPT=$(python -c "from comet import download_model; print(download_model('Unbabel/wmt22-comet-da'))")
-
-python scripts/train_wandb.py \
-    --cfg configs/models/bio_mqm_finetune.yaml \
-    --load_from_checkpoint "$BASE_CKPT" \
-    --seed_everything 42
-```
-
-### Keep a job alive on SLURM / after terminal close
-
-Run inside `tmux` so the process survives SSH disconnection:
-
-```bash
-tmux new -s bio_mqm
-bash scripts/finetune_bio_mqm.sh --run_name bio_mqm_v1
-# detach with Ctrl+B then D — reattach later with: tmux attach -t bio_mqm
-```
-
-If training is already running in a plain terminal, you can detach it without stopping:
-
-```bash
-# 1. Suspend the foreground process
-Ctrl+Z
-
-# 2. Resume it in the background and detach from the terminal
-bg && disown
-```
-
-The training process survives terminal close. Check progress at any time on the W&B dashboard.
-
-## Step 4 — Upload to Hugging Face Hub
-
-Once training is complete, upload the best checkpoint to the Hugging Face Hub. The script validates the checkpoint, exports it to HF format, generates a model card, and optionally logs the model URL back to W&B.
-
-```bash
-python scripts/upload_to_huggingface.py \
-    --checkpoint  "$(cat checkpoints/bio_mqm/best_checkpoint.txt)" \
-    --repo_id     "your-username/comet-bio-mqm" \
-    --run_name    "bio_mqm_v1"
-```
-
-**Options:**
-
-| Flag | Description |
-|---|---|
-| `--checkpoint` | Path to the `.ckpt` file |
-| `--repo_id` | HF repo in `username/model-name` form (created if it doesn't exist) |
-| `--run_name` | Label added to the model card |
-| `--private` | Create a private HF repository |
-| `--wandb_run_id` | W&B run ID to attach the HF model URL to |
-| `--wandb_project` | W&B project (defaults to `$WANDB_PROJECT` or `comet-bio-mqm`) |
-
-The raw `.ckpt` file is included in the upload alongside the HF-format weights, so users can load via either `load_from_checkpoint` or `download_model`.
-
-## Step 5 — Load and Score with the Finetuned Model
-
-**From a local checkpoint:**
-
-```python
-from comet import load_from_checkpoint
-
-model = load_from_checkpoint("checkpoints/bio_mqm/epoch=4-step=3000-val_kendall=0.812.ckpt")
-
-data = [
-    {
-        "src": "The patient was administered 500 mg of amoxicillin.",
-        "mt":  "Der Patient erhielt 500 mg Amoxicillin.",
-        "ref": "Dem Patienten wurden 500 mg Amoxicillin verabreicht.",
-    }
-]
-output = model.predict(data, batch_size=8, gpus=1)
-print(output.scores)   # [0.91]
-```
-
-**From Hugging Face Hub** (after upload):
-
-```python
-from comet import download_model, load_from_checkpoint
-
-model_path = download_model("your-username/comet-bio-mqm")
-model = load_from_checkpoint(model_path)
-output = model.predict(data, batch_size=8, gpus=1)
-```
-
-**CLI scoring** with the finetuned model:
-
-```bash
-comet-score \
-    -s src.txt -t hyp.txt -r ref.txt \
-    --model your-username/comet-bio-mqm
-```
-
-# unittest:
-In order to run the toolkit tests you must run the following command:
-
-```bash
-poetry run coverage run --source=comet -m unittest discover
-poetry run coverage report -m # Expected coverage 76%
-```
-
-**Note:** Testing on CPU takes a long time
-
-# Publications
-
-If you use COMET please cite our work **and don't forget to say which model you used!**
-
-- [xCOMET: Transparent Machine Translation Evaluation through Fine-grained Error Detection](https://arxiv.org/pdf/2310.10482.pdf)
-
-- [Scaling up CometKiwi: Unbabel-IST 2023 Submission for the Quality Estimation Shared Task](https://arxiv.org/pdf/2309.11925.pdf)
-
-- [CometKiwi: IST-Unbabel 2022 Submission for the Quality Estimation Shared Task](https://aclanthology.org/2022.wmt-1.60/)
-
-- [COMET-22: Unbabel-IST 2022 Submission for the Metrics Shared Task](https://aclanthology.org/2022.wmt-1.52/)
-
-- [Searching for Cometinho: The Little Metric That Could](https://aclanthology.org/2022.eamt-1.9/)
-
-- [Are References Really Needed? Unbabel-IST 2021 Submission for the Metrics Shared Task](https://aclanthology.org/2021.wmt-1.111/)
-
-- [Uncertainty-Aware Machine Translation Evaluation](https://aclanthology.org/2021.findings-emnlp.330/) 
-
-- [COMET - Deploying a New State-of-the-art MT Evaluation Metric in Production](https://www.aclweb.org/anthology/2020.amta-user.4)
-
-- [Unbabel's Participation in the WMT20 Metrics Shared Task](https://aclanthology.org/2020.wmt-1.101/)
-
-- [COMET: A Neural Framework for MT Evaluation](https://www.aclweb.org/anthology/2020.emnlp-main.213)

@@ -1,4 +1,11 @@
-# COMET retraining & block-level xSIM++
+# Design history — COMET retraining & block-level xSIM++
+
+> **Historical document (pre-refactor, 2026-08).** Kept as the record of how the
+> designs of parts 1 and 2 were reasoned about. Every path it quotes
+> (`scripts/…`, `experiments/…`, `results/…`, `configs/models/…`) is obsolete:
+> Experiment A / A2 / A3 is now `part2_length_training/`, Experiment B is
+> `part1_block_alignment/`, and the Bio-MQM paragraph pipeline of Experiment A
+> was replaced by the WMT pools. The encoder-swap arm was never rerun.
 
 Two experiments on how COMET behaves on **longer text**. The Lp-norm aggregation
 probe (`qe_aggregation_probe/`, formerly "Exp 0") has been **dropped**.
