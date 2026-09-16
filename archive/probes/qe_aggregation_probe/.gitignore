@@ -1,7 +1,0 @@
-# regenerated, content-hash-keyed caches (perturbations + metric scores)
-**/perturb_cache/
-**/score_cache/
-__pycache__/
-*.pyc
-.venv*/
-logs/
