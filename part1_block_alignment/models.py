@@ -95,7 +95,7 @@ class CandidatePool(DataModel):
         return items
 
     @classmethod
-    def load(cls, path: Path) -> "CandidatePool":
+    def load(cls, path: Path) -> CandidatePool:
         return cls.model_validate_json(Path(path).read_text(encoding="utf-8"))
 
     def save(self, path: Path) -> None:
