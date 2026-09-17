@@ -27,7 +27,7 @@ Two fixed-size protocols, so the candidate count never grows with k:
               3 (needing two negatives), because at 5 the k=1 coverage was 20-46 %.
 
 Reads data/pools_<backend>_<lang>_k<k>.json; writes results/comet_score.json
-(RunResult[ScoreMetrics]) and results/plots/<output stem>.png.
+(ScoreRunResult) and results/plots/<output stem>.png.
 """
 from __future__ import annotations
 
@@ -35,24 +35,24 @@ import argparse
 import logging
 import random
 from collections import defaultdict
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
 from common.auth import init_wandb
 from part1_block_alignment import DATA_DIR, RESULTS_DIR
 from part1_block_alignment.evaluate_encoders import load_pools
-from part1_block_alignment.models import Candidate, ModelCells, ScoreMetrics, ScoreRunResult, mean_by_k
+from part1_block_alignment.models import Candidate, ScoreCells, ScoreMetrics, ScoreRunResult, mean_by_k
 from part1_block_alignment.perturb import pool_categories
 
 logger = logging.getLogger(__name__)
 
 
 # ── candidate sets: fixed size, deterministic ─────────────────────────────────
-def sample_negatives(neg: List[int], cands: List[Candidate], n: int,
-                     rng: random.Random) -> List[int]:
+def sample_negatives(neg: list[int], cands: list[Candidate], n: int,
+                     rng: random.Random) -> list[int]:
     """Up to `n` negatives per block, spread over the categories present.
 
     Taking the first n would over-sample whichever category `build_pool`
@@ -61,7 +61,7 @@ def sample_negatives(neg: List[int], cands: List[Candidate], n: int,
     """
     if len(neg) <= n:
         return list(neg)
-    by_cat: Dict[str, List[int]] = defaultdict(list)
+    by_cat: dict[str, list[int]] = defaultdict(list)
     for i in neg:
         by_cat[cands[i].category].append(i)
     for v in by_cat.values():
@@ -74,7 +74,7 @@ def sample_negatives(neg: List[int], cands: List[Candidate], n: int,
     return sorted(picked)
 
 
-def shortlist(gold: int, negs: Sequence[int], size: int) -> Optional[List[int]]:
+def shortlist(gold: int, negs: Sequence[int], size: int) -> list[int] | None:
     """gold + exactly (size-1) of the block's OWN single-edit negatives, or None
     when the block cannot supply them — padding it with something easier would
     make that decision cheaper than the others and quietly bias the average."""
@@ -91,8 +91,8 @@ class Scorer:
     name = "scorer"
     kind = "scorer"
 
-    def score(self, queries: List[str], candidates: List[str],
-              pairs: List[Tuple[int, int]], tag: str) -> np.ndarray:
+    def score(self, queries: list[str], candidates: list[str],
+              pairs: list[tuple[int, int]], tag: str) -> np.ndarray:
         raise NotImplementedError
 
 
@@ -134,7 +134,7 @@ class CometScorer(Scorer):
                 "reference-based checkpoints through encoder-cos:.")
         self.name = f"comet-score:{enc_tag('comet:' + ref)}"
         self.batch_size, self.gpus = batch_size, gpus
-        self._cache: Dict[Tuple[str, str], float] = {}
+        self._cache: dict[tuple[str, str], float] = {}
 
     def score(self, queries, candidates, pairs, tag):
         # The same (src, mt) pair turns up in the duel and in the shortlist, and
@@ -165,14 +165,14 @@ def _fmt(v) -> str:
     return " n/a  " if v is None else f"{v:.4f}"
 
 
-def evaluate(sc: Dict[Tuple[int, int], float], duels: List[Tuple[int, int, int]],
-             lists: List[Tuple[int, List[int]]], cands: List[Candidate],
+def evaluate(sc: dict[tuple[int, int], float], duels: list[tuple[int, int, int]],
+             lists: list[tuple[int, list[int]]], cands: list[Candidate],
              categories: Sequence[str]) -> ScoreMetrics:
     """duels: (block, gold pool idx, negative pool idx).
        lists: (block, [gold pool idx, other pool idx, ...])."""
     wins, ties = [], 0
-    by_cat: Dict[str, List[int]] = defaultdict(list)
-    by_pos: Dict[int, List[int]] = defaultdict(list)
+    by_cat: dict[str, list[int]] = defaultdict(list)
+    by_pos: dict[int, list[int]] = defaultdict(list)
     for b, g, n in duels:
         d = sc[(b, g)] - sc[(b, n)]
         w = int(d > 0)
@@ -242,7 +242,7 @@ def main() -> None:
             f"Every block would be skipped.")
 
     # ── build every (lang, k) task once; the scorers only differ in the rule ──
-    tasks: Dict[str, Dict[int, dict]] = {}
+    tasks: dict[str, dict[int, dict]] = {}
     total_pairs = 0
     for lang, by_k in load_pools(args.backend, args.langs, args.k_list).items():
         tasks[lang] = {}
@@ -302,7 +302,7 @@ def main() -> None:
     for spec in args.scorers:
         logger.info(f"\n== {spec} ==")
         scorer = build_scorer(spec, device, args.batch_size, gpus, args.emb_cache_dir)
-        by_lang: Dict[str, Dict[str, ScoreMetrics]] = {}
+        by_lang: dict[str, dict[str, ScoreMetrics]] = {}
         for lang, by_k in tasks.items():
             by_lang[lang] = {}
             for k, T in by_k.items():
@@ -332,8 +332,7 @@ def main() -> None:
                                     ("frac_negatives_beaten", m.frac_negatives_beaten))
                                    if v is not None})
 
-        cells = ModelCells[ScoreMetrics](kind=scorer.kind, spec=spec, by_lang=by_lang,
-                                         mean_by_k=mean_by_k(by_lang))
+        cells = ScoreCells(kind=scorer.kind, spec=spec, by_lang=by_lang, mean_by_k=mean_by_k(by_lang))
         for m in cells.mean_by_k.values():          # coverage is pooled, not a mean of ratios
             m.shortlist_coverage = m.n_shortlists / m.n_blocks if m.n_blocks else None
         result.models[scorer.name] = cells
@@ -346,7 +345,7 @@ def main() -> None:
     logger.info(f"\nResults -> {out_path}")
 
 
-def _plot(result: ScoreRunResult, out: Path, k_list: List[int]) -> Path:
+def _plot(result: ScoreRunResult, out: Path, k_list: list[int]) -> Path:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt

@@ -5,9 +5,7 @@ Result models mirror the committed JSON (`results/*.json`): written with
 """
 from __future__ import annotations
 
-from typing import Literal
-
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from common.stats import CorrelationCell
 
@@ -53,7 +51,7 @@ HELDOUT_COLUMNS = list(HeldoutRow.model_fields)
 
 class MixSpec(BaseModel):
     name: str
-    kind: Literal["mix", "nat", "agg", "uncontrolled"]
+    kind: str = Field(pattern="^(mix|nat|agg|uncontrolled)$")
     sentence_fraction: int
     description: str  # figure label, named by what the arm was trained on
 
@@ -122,7 +120,7 @@ DIR_PREFIX = {"da": "mix-", "qe": "kiwi-mix-"}  # checkpoint directory prefix pe
 
 class ArmLabel(BaseModel):
     """One trained arm. `label` is the results key, `dir_name` the checkpoint directory."""
-    family: Literal["da", "qe"]
+    family: str = Field(pattern="^(da|qe)$")
     mix: str
     frozen: bool = False
 

@@ -36,7 +36,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from part1_block_alignment import FIGURES_DIR, RESULTS_DIR
-from part1_block_alignment.models import DuelMetrics, DuelRunResult, ModelCells, ScoreRunResult
+from part1_block_alignment.models import DuelMetrics, DuelRunResult, ScoreCells, ScoreRunResult
 
 BLUE, ORANGE, AQUA, YELLOW, MAGENTA = "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"
 VIOLET, RED = "#4a3aa7", "#e34948"
@@ -343,7 +343,7 @@ def describe(name: str, spec: str = "") -> dict:
     }
 
 
-def series(sc: ModelCells, ks: list[str], key: str, cat: str | None = None):
+def series(sc: ScoreCells, ks: list[str], key: str, cat: str | None = None):
     xs, ys = [], []
     for i, k in enumerate(ks):
         cell = sc.mean_by_k.get(k)

@@ -13,23 +13,23 @@ cell scores FOUR nested pools off one similarity matrix (`pool_ablation`):
     gold+all_perturbed  own gold + all negatives             distractors dropped
     gold+own_perturbed  own gold + own negatives only        pure dilution
 
-Writes results/encoder_cosine.json (RunResult[PoolMetrics]) and five plots
+Writes results/encoder_cosine.json (EncoderRunResult) and five plots
 results/plots/<output stem>_*.png.
 """
 from __future__ import annotations
 
 import argparse
 import logging
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from itertools import combinations
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
 from common.auth import init_wandb
 from part1_block_alignment import DATA_DIR, RESULTS_DIR
-from part1_block_alignment.models import (Candidate, CandidatePool, EncoderRunResult, ModelCells,
+from part1_block_alignment.models import (Candidate, CandidatePool, EncoderCells, EncoderRunResult,
                                           PoolMetrics, mean_by_k)
 from part1_block_alignment.perturb import load_pool, pool_categories
 
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 # ── retrieval + metrics (absolute margin = plain cosine, per xSIM++ footnote 6) ─
 def _err_on_subset(sim: np.ndarray, cols: np.ndarray,
-                   true_idx: np.ndarray) -> Tuple[float, np.ndarray]:
+                   true_idx: np.ndarray) -> tuple[float, np.ndarray]:
     """Error rate when retrieving over `cols` (pool positions). Returns
     (error_rate, predicted pool positions)."""
     pred = cols[sim[:, cols].argmax(1)]
@@ -47,7 +47,7 @@ def _err_on_subset(sim: np.ndarray, cols: np.ndarray,
 
 
 def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
-                    cands: List[Candidate], true_idx: List[int],
+                    cands: list[Candidate], true_idx: list[int],
                     categories: Sequence[str]) -> PoolMetrics:
     """All xsim / xsim++ numbers for one (encoder, lang, k) cell.
 
@@ -93,7 +93,7 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
     # ── pools that drop the classic xsim distractors ────────────────────────
     # The candidate set now differs per query, so mask columns row-wise instead
     # of slicing a shared column list.
-    def _err_rowwise(colmask: np.ndarray, keep: Optional[np.ndarray] = None):
+    def _err_rowwise(colmask: np.ndarray, keep: np.ndarray | None = None):
         """(error, predictions, n_rows_scored) over the rows in `keep`."""
         m = colmask if keep is None else colmask[keep]
         s = sim if keep is None else sim[keep]
@@ -109,7 +109,7 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
     has_own = own_pert.any(1)
     own_err, pred_own, n_own = _err_rowwise(gold_oh | own_pert, has_own)
 
-    own_breakdown: Dict[str, Optional[float]] = {}
+    own_breakdown: dict[str, float | None] = {}
     if n_own:
         ok = pred_own == true_arr[has_own]
         own_breakdown["correct"] = float(ok.mean())
@@ -122,8 +122,8 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
     own_chance = (float((n_own_neg[has_own] / (n_own_neg[has_own] + 1)).mean())
                   if has_own.any() else None)
 
-    own_by_cat: Dict[str, Optional[float]] = {}
-    own_n_by_cat: Dict[str, int] = {}
+    own_by_cat: dict[str, float | None] = {}
+    own_n_by_cat: dict[str, int] = {}
     for c in categories:
         m_cat = own_pert & (cand_cat == c)[None, :]
         keep = m_cat.any(1)
@@ -146,16 +146,16 @@ def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
         return _err_on_subset(sim, all_cols[mask], true_arr)[0]
 
     per_category = {c: _pool_err([c]) for c in categories}
-    combos: Dict[str, float] = {}
+    combos: dict[str, float] = {}
     for r in range(2, len(categories) + 1):
         for combo in combinations(categories, r):
             combos["+".join(combo)] = _pool_err(combo)
 
     # push-apart detection: P[cos(q, gold) > cos(q, negative)] over own negatives
     gold_sim = sim[rows, true_arr]
-    det_by_cat: Dict[str, Optional[float]] = {}
-    det_by_pos: Dict[str, Optional[float]] = {}
-    cov: Dict[str, int] = {}
+    det_by_cat: dict[str, float | None] = {}
+    det_by_pos: dict[str, float | None] = {}
+    cov: dict[str, int] = {}
     for c in categories:
         m = own_pert & (cand_cat == c)[None, :]
         cov[c] = int(m.sum())
@@ -207,8 +207,8 @@ def _fmt(v) -> str:
 
 
 def load_pools(backend: str, langs: Sequence[str], k_list: Sequence[int]
-               ) -> Dict[str, Dict[int, CandidatePool]]:
-    pools: Dict[str, Dict[int, CandidatePool]] = {}
+               ) -> dict[str, dict[int, CandidatePool]]:
+    pools: dict[str, dict[int, CandidatePool]] = {}
     for lang in langs:
         pools[lang] = {}
         for k in k_list:
@@ -260,7 +260,7 @@ def main() -> None:
     for spec in args.encoders:
         logger.info(f"\n== {spec} ==")
         emb = build_embedder(spec, device)
-        by_lang: Dict[str, Dict[str, PoolMetrics]] = {}
+        by_lang: dict[str, dict[str, PoolMetrics]] = {}
         for lang, by_k in pools.items():
             by_lang[lang] = {}
             for k, pool in by_k.items():
@@ -295,7 +295,7 @@ def main() -> None:
                     log.update({f"{pref}/err_{cat}": v for cat, v in m.per_category_err.items()})
                     wandb_run.log({key: v for key, v in log.items() if v is not None})
 
-        result.models[emb.name] = ModelCells[PoolMetrics](
+        result.models[emb.name] = EncoderCells(
             spec=spec, by_lang=by_lang, mean_by_k=mean_by_k(by_lang))
         result.save(out_path)                       # incremental
         del emb
@@ -314,15 +314,15 @@ def main() -> None:
     logger.info(f"\nResults -> {out_path}")
 
 
-def _plots(result: EncoderRunResult, plot_dir: Path, prefix: str) -> List[Path]:
+def _plots(result: EncoderRunResult, plot_dir: Path, prefix: str) -> list[Path]:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     plot_dir.mkdir(parents=True, exist_ok=True)
-    paths: List[Path] = []
+    paths: list[Path] = []
     encoders = list(result.models)
 
-    def mean(enc) -> Dict[str, PoolMetrics]:
+    def mean(enc) -> dict[str, PoolMetrics]:
         return result.models[enc].mean_by_k
 
     def ks(enc):

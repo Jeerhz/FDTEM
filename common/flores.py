@@ -12,10 +12,10 @@ from __future__ import annotations
 import glob
 import logging
 import os
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal, Sequence
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from common.auth import hf_token
 
@@ -44,7 +44,7 @@ def joiner(lang: str) -> str:
 class FloresCorpus(BaseModel):
     """Row-aligned sentences for several languages; `urls[i]` is row i's article."""
 
-    source: Literal["plus", "raw"]
+    source: str = Field(pattern="^(plus|raw)$")
     split: str
     langs: list[str]
     sentences: dict[str, list[str]]

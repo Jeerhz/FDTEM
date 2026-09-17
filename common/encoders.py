@@ -13,8 +13,8 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import torch
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # ════════════════════════════════════════════════════════════════════════════
 # Device helper
 # ════════════════════════════════════════════════════════════════════════════
-def pick_device(device_arg: Optional[str] = None) -> str:
+def pick_device(device_arg: str | None = None) -> str:
     if device_arg:
         return device_arg
     if torch.cuda.is_available():
@@ -54,7 +54,7 @@ class Embedder:
         return _l2norm(raw) if normalize else raw
 
     # -- to be overridden --
-    def _embed_raw(self, texts: List[str], batch_size: int) -> np.ndarray:
+    def _embed_raw(self, texts: list[str], batch_size: int) -> np.ndarray:
         raise NotImplementedError
 
 
@@ -227,7 +227,7 @@ def build_embedder(spec: str, device: str) -> Embedder:
 # Embedding cache  (experiments share embeddings — embed once, reuse everywhere)
 # ════════════════════════════════════════════════════════════════════════════
 def cached_embed(emb: Embedder, texts: Sequence[str], cache_key: str,
-                 cache_dir: Optional[str], batch_size: int,
+                 cache_dir: str | None, batch_size: int,
                  normalize: bool = True) -> np.ndarray:
     if cache_dir is None:
         return emb.embed(texts, batch_size, normalize)

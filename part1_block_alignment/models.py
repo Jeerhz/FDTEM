@@ -5,12 +5,11 @@ files under results/ and ignore unknown keys. Keys `k` and `D` are strings.
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Generic, Literal, Sequence, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
-Category = Literal["causality", "entity", "number"]
 CATEGORIES: tuple[str, ...] = ("causality", "entity", "number")
 
 
@@ -38,7 +37,7 @@ class Block(DataModel):
 class Candidate(DataModel):
     text: str
     block_id: int                                   # index into the block list
-    kind: Literal["true", "perturbed"]
+    kind: str = Field(pattern="^(true|perturbed)$")
     category: str | None = None                     # perturbed only
     position: int | None = None                     # perturbed sentence index in the block
     variant: int | None = None                      # rank among the (position, category) variants
@@ -167,9 +166,6 @@ class ScoreMetrics(ResultModel):
     variant_stats: dict[str, int] = {}
 
 
-M = TypeVar("M", PoolMetrics, DuelMetrics, ScoreMetrics)
-
-
 # ── mean over languages ───────────────────────────────────────────────────────
 def _mean_values(values: list):
     """Counts (int) are summed, rates (float) averaged, None skipped, dicts recursed."""
@@ -190,33 +186,45 @@ def _mean_dicts(dicts: list[dict]) -> dict:
     return {k: _mean_values([d.get(k) for d in dicts]) for k in keys}
 
 
-def mean_over_langs(cells: Sequence[M]) -> M:
+def mean_over_langs(cells: Sequence[ResultModel]) -> ResultModel:
     """The mean over languages of every numeric field of the cells, nested dicts included."""
     return type(cells[0]).model_validate(_mean_dicts([c.model_dump() for c in cells]))
 
 
-def mean_by_k(by_lang: dict[str, dict[str, M]]) -> dict[str, M]:
+def mean_by_k(by_lang: dict[str, dict[str, ResultModel]]) -> dict[str, ResultModel]:
     ks = sorted({k for cells in by_lang.values() for k in cells}, key=int)
     return {k: mean_over_langs([cells[k] for cells in by_lang.values() if k in cells])
             for k in ks}
 
 
-# ── run results ───────────────────────────────────────────────────────────────
-class ModelCells(ResultModel, Generic[M]):
+# ── run results: one model's cells, then the whole file, per evaluation ──────
+class ModelCells(ResultModel):
     kind: str | None = None                         # scorer rule (comet_score.json only)
     spec: str | None = None                         # CLI spec the model was built from
-    by_lang: dict[str, dict[str, M]] = {}           # lang -> k -> cell
-    mean_by_k: dict[str, M] = {}
 
 
-class RunResult(ResultModel, Generic[M]):
+class EncoderCells(ModelCells):
+    by_lang: dict[str, dict[str, PoolMetrics]] = {}  # lang -> k -> cell
+    mean_by_k: dict[str, PoolMetrics] = {}
+
+
+class DuelCells(ModelCells):
+    by_lang: dict[str, dict[str, DuelMetrics]] = {}
+    mean_by_k: dict[str, DuelMetrics] = {}
+
+
+class ScoreCells(ModelCells):
+    by_lang: dict[str, dict[str, ScoreMetrics]] = {}
+    mean_by_k: dict[str, ScoreMetrics] = {}
+
+
+class RunResult(ResultModel):
     experiment: str
     timestamp: str
     config: dict = {}
     question: str | None = None
     protocols: dict[str, str] | None = None
     candidate_set: str | None = None
-    models: dict[str, ModelCells[M]] = {}
 
     @classmethod
     def load(cls, path: Path):
@@ -227,6 +235,13 @@ class RunResult(ResultModel, Generic[M]):
         Path(path).write_text(self.model_dump_json(indent=2), encoding="utf-8")
 
 
-EncoderRunResult = RunResult[PoolMetrics]
-DuelRunResult = RunResult[DuelMetrics]
-ScoreRunResult = RunResult[ScoreMetrics]
+class EncoderRunResult(RunResult):
+    models: dict[str, EncoderCells] = {}
+
+
+class DuelRunResult(RunResult):
+    models: dict[str, DuelCells] = {}
+
+
+class ScoreRunResult(RunResult):
+    models: dict[str, ScoreCells] = {}

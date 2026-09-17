@@ -24,9 +24,9 @@ import argparse
 import logging
 import random
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
 
 from common.flores import NO_SPACE_LANGS, FloresCorpus, joiner
 from part1_block_alignment import DATA_DIR
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── lexicons (compact, per language) ─────────────────────────────────────────
-ANTONYMS: Dict[str, List[Tuple[str, str]]] = {
+ANTONYMS: dict[str, list[tuple[str, str]]] = {
     "en": [("good", "bad"), ("high", "low"), ("large", "small"), ("big", "small"),
            ("more", "less"), ("most", "fewest"), ("increase", "decrease"),
            ("increased", "decreased"), ("rise", "fall"), ("rising", "falling"),
@@ -89,7 +89,7 @@ ANTONYMS: Dict[str, List[Tuple[str, str]]] = {
 }
 
 # Negation strengthening (Tan et al. 2021): hedged modal → assertive modal.
-MODAL_BOOST: Dict[str, List[Tuple[str, str]]] = {
+MODAL_BOOST: dict[str, list[tuple[str, str]]] = {
     "en": [("may", "will"), ("might", "will"), ("could", "will"),
            ("possibly", "certainly"), ("perhaps", "certainly"),
            ("probably", "certainly"), ("should", "must"), ("can", "must")],
@@ -106,12 +106,12 @@ MODAL_BOOST: Dict[str, List[Tuple[str, str]]] = {
 
 # Discontinuous negation: both particles are dropped, the enclosed material
 # (group 1) is kept, so the meaning flips cleanly.
-NEG_REMOVE_PAIR: Dict[str, List[str]] = {
+NEG_REMOVE_PAIR: dict[str, list[str]] = {
     "fr": [r"\bne\s+(.+?)\s+(?:pas|plus|jamais|rien|personne|guère)\b",
            r"\bn'(.+?)\s+(?:pas|plus|jamais|rien|personne|guère)\b"],
 }
 # Single-particle negation removal patterns per language.
-NEG_REMOVE: Dict[str, List[str]] = {
+NEG_REMOVE: dict[str, list[str]] = {
     "en": [r"\bdid not\b", r"\bdoes not\b", r"\bdo not\b", r"\bis not\b",
            r"\bare not\b", r"\bwas not\b", r"\bwere not\b", r"\bhas not\b",
            r"\bhave not\b", r"\bcannot\b", r"\bnot\b", r"n't\b"],
@@ -122,16 +122,16 @@ NEG_REMOVE: Dict[str, List[str]] = {
     "zh": [r"不", r"没有", r"未"],
 }
 # Insert a negation right after one of these auxiliaries.
-NEG_INSERT_AFTER: Dict[str, Tuple[List[str], str]] = {
+NEG_INSERT_AFTER: dict[str, tuple[list[str], str]] = {
     "en": (["is", "are", "was", "were", "has", "have", "had", "can", "will",
             "would", "could", "should", "does", "did", "do"], "not"),
     "es": (["es", "son", "era", "fue", "ha", "han", "puede", "pueden"], "no"),
     "ru": (["будет", "было", "может", "могут", "есть"], "не"),
 }
 # Sentence-final negation insertion (before terminal punctuation).
-NEG_INSERT_FINAL: Dict[str, str] = {"de": "nicht"}
+NEG_INSERT_FINAL: dict[str, str] = {"de": "nicht"}
 
-STOPWORDS_CAP: Dict[str, set] = {
+STOPWORDS_CAP: dict[str, set] = {
     "en": {"the", "a", "an", "this", "that", "these", "those", "it", "he", "she",
            "they", "we", "you", "i", "in", "on", "at", "of", "and", "but", "for",
            "to", "as", "if", "when", "while", "after", "before", "there", "his",
@@ -154,7 +154,7 @@ STOPWORDS_CAP: Dict[str, set] = {
            "когда", "после", "до", "потому", "хотя", "согласно", "во", "не"},
 }
 
-ORDINALS: Dict[str, List[str]] = {
+ORDINALS: dict[str, list[str]] = {
     "en": ["first", "second", "third", "fourth", "fifth", "sixth", "seventh",
            "eighth", "ninth", "tenth"],
     "de": ["erste", "zweite", "dritte", "vierte", "fünfte", "sechste", "siebte",
@@ -195,9 +195,9 @@ def _rng(seed: int, *parts) -> random.Random:
 
 
 # ── entity bank (corpus-wide, per language) ───────────────────────────────────
-def lowercase_freq(sentences: Sequence[str]) -> Dict[str, int]:
+def lowercase_freq(sentences: Sequence[str]) -> dict[str, int]:
     """How often each surface form occurs *lowercased* in the corpus."""
-    freq: Dict[str, int] = {}
+    freq: dict[str, int] = {}
     for s in sentences:
         for t in s.split(" "):
             core = t.strip(_WORD_STRIP)
@@ -206,7 +206,7 @@ def lowercase_freq(sentences: Sequence[str]) -> Dict[str, int]:
     return freq
 
 
-def _entity_token(tok: str, lang: str, lower_freq: Dict[str, int]) -> bool:
+def _entity_token(tok: str, lang: str, lower_freq: dict[str, int]) -> bool:
     """Capitalised, ≥2 characters, not a capitalisable function word, and — the
     load-bearing test — never seen lowercased in the corpus. That separates
     'Stanford' from a sentence-initial 'Des'/'The' without a tagger. German
@@ -218,10 +218,10 @@ def _entity_token(tok: str, lang: str, lower_freq: Dict[str, int]) -> bool:
             and lower_freq.get(core.lower(), 0) == 0)
 
 
-def _spans_in(tokens: List[str], lang: str, lower_freq: Dict[str, int]
-              ) -> List[Tuple[int, int]]:
+def _spans_in(tokens: list[str], lang: str, lower_freq: dict[str, int]
+              ) -> list[tuple[int, int]]:
     """Maximal runs of entity-like tokens."""
-    spans: List[Tuple[int, int]] = []
+    spans: list[tuple[int, int]] = []
     i = 0
     while i < len(tokens):
         if _entity_token(tokens[i], lang, lower_freq):
@@ -236,7 +236,7 @@ def _spans_in(tokens: List[str], lang: str, lower_freq: Dict[str, int]
 
 
 def build_entity_bank(sentences: Sequence[str], lang: str,
-                      lower_freq: Dict[str, int]) -> List[str]:
+                      lower_freq: dict[str, int]) -> list[str]:
     """Entity-like surfaces harvested from the whole corpus."""
     if lang in NO_SPACE_LANGS:
         return []
@@ -251,10 +251,10 @@ def build_entity_bank(sentences: Sequence[str], lang: str,
 
 
 # ── the three xSIM++ perturbation categories ──────────────────────────────────
-def _perturb_number(sent: str, lang: str, rng: random.Random) -> Optional[str]:
+def _perturb_number(sent: str, lang: str, rng: random.Random) -> str | None:
     digit_spans = [(m.start(), m.end(), m.group()) for m in _DIGITS_RE.finditer(sent)]
     ords = ORDINALS.get(lang, [])
-    ord_spans: List[Tuple[int, int, str]] = []
+    ord_spans: list[tuple[int, int, str]] = []
     for w in ords:
         pattern = re.escape(w) if lang in NO_SPACE_LANGS else rf"\b{re.escape(w)}\b"
         for m in re.finditer(pattern, sent, flags=re.IGNORECASE):
@@ -284,7 +284,7 @@ def _perturb_number(sent: str, lang: str, rng: random.Random) -> Optional[str]:
 
 
 def _perturb_entity(sent: str, lang: str, rng: random.Random,
-                    bank: Sequence[str], lower_freq: Dict[str, int]) -> Optional[str]:
+                    bank: Sequence[str], lower_freq: dict[str, int]) -> str | None:
     if lang in NO_SPACE_LANGS or not bank:
         return None
     toks = sent.split(" ")
@@ -306,7 +306,7 @@ def _perturb_entity(sent: str, lang: str, rng: random.Random,
     return out if out != sent else None
 
 
-def _perturb_causality(sent: str, lang: str, rng: random.Random) -> Optional[str]:
+def _perturb_causality(sent: str, lang: str, rng: random.Random) -> str | None:
     ops = ["antonym", "modal", "negate"]
     rng.shuffle(ops)
     for op in ops:
@@ -323,10 +323,10 @@ def _perturb_causality(sent: str, lang: str, rng: random.Random) -> Optional[str
     return None
 
 
-def _apply_pair_map(sent: str, lang: str, pairs: Sequence[Tuple[str, str]],
-                    rng: random.Random, one_way: bool = False) -> Optional[str]:
+def _apply_pair_map(sent: str, lang: str, pairs: Sequence[tuple[str, str]],
+                    rng: random.Random, one_way: bool = False) -> str | None:
     """Replace one occurrence of a lexicon word by its counterpart."""
-    hits: List[Tuple[int, int, str, str]] = []
+    hits: list[tuple[int, int, str, str]] = []
     for a, b in pairs:
         directions = [(a, b)] if one_way else [(a, b), (b, a)]
         for src, dst in directions:
@@ -344,7 +344,7 @@ def _clean_spaces(text: str) -> str:
     return re.sub(r"\s+([.,;:!?»])", r"\1", text)
 
 
-def _negate(sent: str, lang: str, rng: random.Random) -> Optional[str]:
+def _negate(sent: str, lang: str, rng: random.Random) -> str | None:
     # 1a. French/Spanish discontinuous negation — remove BOTH particles so the
     #     meaning actually flips (dropping only "ne" or only "pas" doesn't).
     for pair in NEG_REMOVE_PAIR.get(lang, []):
@@ -388,8 +388,8 @@ class Perturber:
 
     lang: str
     seed: int = 42
-    bank: List[str] = field(default_factory=list)
-    lower_freq: Dict[str, int] = field(default_factory=dict)
+    bank: list[str] = field(default_factory=list)
+    lower_freq: dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def for_corpus(cls, sentences: Sequence[str], lang: str, seed: int = 42) -> "Perturber":
@@ -397,10 +397,10 @@ class Perturber:
         return cls(lang=lang, seed=seed, lower_freq=lf,
                    bank=build_entity_bank(sentences, lang, lf))
 
-    def variants(self, sent: str, category: str, n: int) -> List[str]:
+    def variants(self, sent: str, category: str, n: int) -> list[str]:
         """Up to n distinct perturbations of `sent` in `category` (deduped,
         never identical to the input)."""
-        out: List[str] = []
+        out: list[str] = []
         for v in range(n * 6):            # oversample: many draws are no-ops/dupes
             if len(out) >= n:
                 break
@@ -441,7 +441,7 @@ def backend_name(perturber) -> str:
 
 
 # ── pool construction ─────────────────────────────────────────────────────────
-def build_pool(per_split: Sequence[Tuple[FloresCorpus, List[Block]]], lang: str,
+def build_pool(per_split: Sequence[tuple[FloresCorpus, list[Block]]], lang: str,
                query_lang: str, pool_lang: str, k: int, categories: Sequence[str],
                variants_per_position: int, perturber, seed: int) -> CandidatePool:
     """Gold + single-edit negatives for every block, splits concatenated in order.
@@ -449,10 +449,10 @@ def build_pool(per_split: Sequence[Tuple[FloresCorpus, List[Block]]], lang: str,
     `candidates[i].block_id` indexes the global block list; `true_index[b]` is
     the pool position of block b's gold candidate.
     """
-    queries: List[str] = []
-    cands: List[Candidate] = []
-    true_idx: List[int] = []
-    stats: Dict[str, int] = {c: 0 for c in categories}
+    queries: list[str] = []
+    cands: list[Candidate] = []
+    true_idx: list[int] = []
+    stats: dict[str, int] = {c: 0 for c in categories}
     stats["blocks"] = 0
     bid = 0
     jn = joiner(pool_lang)
@@ -494,7 +494,7 @@ def load_pool(backend: str, lang: str, k: int) -> CandidatePool:
     return CandidatePool.load(path)
 
 
-def pool_categories(pool: CandidatePool) -> List[str]:
+def pool_categories(pool: CandidatePool) -> list[str]:
     return [c for c in CATEGORIES if c in pool.variant_counts]
 
 

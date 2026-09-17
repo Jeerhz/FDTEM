@@ -23,8 +23,8 @@ Determinism is unchanged: the RNG is seeded from (seed, lang, category, sentence
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from common.flores import joiner
 from part1_block_alignment.perturb import (ANTONYMS, MODAL_BOOST, ORDINALS, _apply_pair_map,
@@ -33,7 +33,7 @@ from part1_block_alignment.perturb import (ANTONYMS, MODAL_BOOST, ORDINALS, _app
 logger = logging.getLogger(__name__)
 
 # Small models are enough: NER + POS + morph, and they are ~15 MB each.
-SPACY_MODELS: Dict[str, str] = {
+SPACY_MODELS: dict[str, str] = {
     "en": "en_core_web_sm", "de": "de_core_news_sm", "es": "es_core_news_sm",
     "fr": "fr_core_news_sm", "ru": "ru_core_news_sm", "zh": "zh_core_web_sm",
     "ja": "ja_core_news_sm", "it": "it_core_news_sm", "pt": "pt_core_news_sm",
@@ -55,7 +55,7 @@ NUMBER_LABELS = {"CARDINAL", "ORDINAL", "PERCENT", "QUANTITY", "MONEY", "DATE", 
 #   CORE    unambiguously negative on their own — safe to trigger on
 #   PAIRED  only negative when they complete a CORE particle (French "ne … plus":
 #           bare "plus" means *more*, so it is dropped only alongside its "ne")
-NEG_LEMMAS_CORE: Dict[str, Set[str]] = {
+NEG_LEMMAS_CORE: dict[str, set[str]] = {
     "en": {"not", "n't", "never"},
     "de": {"nicht", "kein", "nie", "niemals"},
     "es": {"no", "nunca", "jamás"},
@@ -63,14 +63,14 @@ NEG_LEMMAS_CORE: Dict[str, Set[str]] = {
     "ru": {"не", "нет", "никогда"},
     "zh": {"不", "没", "没有", "未", "非"},
 }
-NEG_LEMMAS_PAIRED: Dict[str, Set[str]] = {
+NEG_LEMMAS_PAIRED: dict[str, set[str]] = {
     "fr": {"pas", "plus", "jamais", "rien", "personne", "guère", "aucun", "nul"},
     "en": {"no", "any"},
 }
 # How to insert a negation once spaCy has pointed at the finite verb:
 # (particle before it, particle after it). German is V2 — "nicht" goes *after*
 # the finite verb ("wurde nicht veröffentlicht"), not before it.
-NEG_INSERT: Dict[str, Tuple[str, str]] = {
+NEG_INSERT: dict[str, tuple[str, str]] = {
     "en": ("", "not"), "de": ("", "nicht"), "es": ("no", ""),
     "fr": ("ne", "pas"), "ru": ("не", ""), "zh": ("不", ""),
 }
@@ -113,14 +113,14 @@ def _wordnet():
 # ════════════════════════════════════════════════════════════════════════════
 # Rendering: rebuild a sentence from an edited token sequence
 # ════════════════════════════════════════════════════════════════════════════
-def _render(doc, replace: Dict[int, str], drop: Set[int],
-            before: Dict[int, str] = None, after: Dict[int, str] = None) -> str:
+def _render(doc, replace: dict[int, str], drop: set[int],
+            before: dict[int, str] | None = None, after: dict[int, str] | None = None) -> str:
     """Detokenise `doc` with edits applied. `whitespace_` keeps spacing right —
     and keeps it *absent* for zh/ja, which is why this is not `" ".join`.
     `before`/`after` are spliced verbatim, separator included, so the caller
     controls elision ("n'a" vs "ne a")."""
     before, after = before or {}, after or {}
-    parts: List[str] = []
+    parts: list[str] = []
     for t in doc:
         if t.i in before:
             parts.append(before[t.i])
@@ -141,16 +141,16 @@ class SpacyPerturber:
     lang: str
     seed: int = 42
     nlp: object = None
-    docs: Dict[str, object] = field(default_factory=dict)
-    ent_bank: Dict[str, List[str]] = field(default_factory=dict)
-    card_bank: List[str] = field(default_factory=list)
-    ord_bank: List[str] = field(default_factory=list)
-    wordnet_langs: Tuple[str, ...] = ("en",)
+    docs: dict[str, object] = field(default_factory=dict)
+    ent_bank: dict[str, list[str]] = field(default_factory=dict)
+    card_bank: list[str] = field(default_factory=list)
+    ord_bank: list[str] = field(default_factory=list)
+    wordnet_langs: tuple[str, ...] = ("en",)
     max_senses: int = 2
     _wn: object = None
 
     @property
-    def _ordinals(self) -> Set[str]:
+    def _ordinals(self) -> set[str]:
         return {w.lower() for w in ORDINALS.get(self.lang, [])}
 
     @property
@@ -186,9 +186,9 @@ class SpacyPerturber:
 
     def _harvest(self) -> None:
         """Corpus-wide entity and numeral banks, from the parses."""
-        ents: Dict[str, Set[str]] = {}
-        cards: Set[str] = set()
-        ords_: Set[str] = set()
+        ents: dict[str, set[str]] = {}
+        cards: set[str] = set()
+        ords_: set[str] = set()
         for doc in self.docs.values():
             for e in doc.ents:
                 if e.label_ in ENTITY_LABELS:
@@ -211,11 +211,11 @@ class SpacyPerturber:
                 or tok.text.lower() in self._ordinals)
 
     @property
-    def bank(self) -> List[str]:
+    def bank(self) -> list[str]:
         """Flat entity list — same meaning as `perturb.Perturber.bank`."""
         return sorted({e for v in self.ent_bank.values() for e in v})
 
-    def coverage(self) -> Dict[str, int]:
+    def coverage(self) -> dict[str, int]:
         return {"sentences": len(self.docs), "entities": len(self.bank),
                 "entity_labels": len(self.ent_bank),
                 "cardinal_words": len(self.card_bank),
@@ -230,8 +230,8 @@ class SpacyPerturber:
         return d
 
     # ── the public API, identical to perturb.Perturber ───────────────────────
-    def variants(self, sent: str, category: str, n: int) -> List[str]:
-        out: List[str] = []
+    def variants(self, sent: str, category: str, n: int) -> list[str]:
+        out: list[str] = []
         for v in range(n * 6):
             if len(out) >= n:
                 break
@@ -250,7 +250,7 @@ class SpacyPerturber:
         return out
 
     # ── entity ──────────────────────────────────────────────────────────────
-    def _entity(self, doc, rng) -> Optional[str]:
+    def _entity(self, doc, rng) -> str | None:
         # French/Italian elision: "l'université Stanford" → "l'Berlin" would be
         # ungrammatical, so a span behind an apostrophe is left alone.
         spans = [e for e in doc.ents if e.label_ in ENTITY_LABELS
@@ -268,7 +268,7 @@ class SpacyPerturber:
                        set(range(span.start + 1, span.end)))
 
     # ── number ──────────────────────────────────────────────────────────────
-    def _number(self, doc, rng) -> Optional[str]:
+    def _number(self, doc, rng) -> str | None:
         digits, words = [], []
         for t in doc:
             if any(ch.isdigit() for ch in t.text):
@@ -290,7 +290,7 @@ class SpacyPerturber:
         return _render(doc, {t.i: new}, set())
 
     # ── causality ───────────────────────────────────────────────────────────
-    def _causality(self, doc, sent: str, rng) -> Optional[str]:
+    def _causality(self, doc, sent: str, rng) -> str | None:
         ops = ["antonym", "modal", "negate"]
         rng.shuffle(ops)
         for op in ops:
@@ -306,13 +306,13 @@ class SpacyPerturber:
                 return out
         return None
 
-    def _negation_tokens(self, doc) -> List[object]:
+    def _negation_tokens(self, doc) -> list[object]:
         core = NEG_LEMMAS_CORE.get(self.lang, set())
         return [t for t in doc
                 if "Neg" in t.morph.get("Polarity") or t.dep_ in ("neg", "ng")
                 or t.lemma_.lower() in core or t.text.lower() in core]
 
-    def _negate(self, doc, rng) -> Optional[str]:
+    def _negate(self, doc, rng) -> str | None:
         negs = self._negation_tokens(doc)
         if negs:
             # Drop every particle attached to one head, so French "ne … pas"
@@ -347,12 +347,12 @@ class SpacyPerturber:
                        {anchor: pre + sep} if pre else None,
                        {v.i: self._sep + post} if post else None)
 
-    def _wordnet_antonym(self, doc, rng) -> Optional[str]:
+    def _wordnet_antonym(self, doc, rng) -> str | None:
         """WordNet antonym of one token — narrow on purpose (see module docstring)."""
         if self._wn is None:
             return None
         code = OMW_CODE[self.lang]
-        cands: List[Tuple[int, str]] = []
+        cands: list[tuple[int, str]] = []
         for t in doc:
             wn_pos = _UPOS2WN.get(t.pos_)
             # only substitute where the surface *is* the lemma: swapping a lemma
@@ -371,9 +371,9 @@ class SpacyPerturber:
         return _render(doc, {i: _match_case(new, doc[i].text)}, set())
 
 
-def _antonyms(wn, lemma: str, code: str, wn_pos: Tuple[str, ...],
-              max_senses: int) -> List[str]:
-    out: List[str] = []
+def _antonyms(wn, lemma: str, code: str, wn_pos: tuple[str, ...],
+              max_senses: int) -> list[str]:
+    out: list[str] = []
     for pos in wn_pos:
         try:
             synsets = wn.synsets(lemma, pos=pos, lang=code)[:max_senses]
@@ -391,7 +391,7 @@ def _antonyms(wn, lemma: str, code: str, wn_pos: Tuple[str, ...],
     return out
 
 
-def _scramble_digits(surface: str, rng) -> Optional[str]:
+def _scramble_digits(surface: str, rng) -> str | None:
     """Replace the digit run in `surface` with a different one of equal width."""
     import re
     m = re.search(r"\d+", surface)

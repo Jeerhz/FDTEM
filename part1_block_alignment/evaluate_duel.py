@@ -15,16 +15,16 @@ from the same embeddings in one pass.
 
 Negatives = the first variant of every (position, category) of the pool
 (data/pools_<backend>_<lang>_k<k>.json). Writes results/duel.json
-(RunResult[DuelMetrics]) and results/plots/<output stem>_*.png.
+(DuelRunResult) and results/plots/<output stem>_*.png.
 """
 from __future__ import annotations
 
 import argparse
 import logging
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from math import comb
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
 
@@ -32,28 +32,28 @@ from common.auth import init_wandb
 from part1_block_alignment import DATA_DIR, RESULTS_DIR
 from part1_block_alignment.evaluate_encoders import load_pools
 from part1_block_alignment.models import (DuelItem, DuelMetrics, DuelRunResult, DuelSizeMetrics,
-                                          ModelCells, mean_by_k)
+                                          DuelCells, mean_by_k)
 from part1_block_alignment.perturb import pool_categories
 
 logger = logging.getLogger(__name__)
 
 
 def evaluate_duels(q_emb: np.ndarray, c_emb: np.ndarray,
-                   duels: List[DuelItem], spans: List[Tuple[int, int]],
-                   categories: Sequence[str], duel_sizes: List[int]) -> DuelMetrics:
+                   duels: list[DuelItem], spans: list[tuple[int, int]],
+                   categories: Sequence[str], duel_sizes: list[int]) -> DuelMetrics:
     """Duel metrics for one (encoder, lang, k) cell, at every duel size.
 
     spans[b] = (start, end) of block b's candidates in c_emb, gold first.
     A block enters the size-D duel only if it has m ≥ D negatives; its win
     probability over all D-subsets is C(w, D)/C(m, D).
     """
-    acc: Dict[int, Dict[str, list]] = {D: {"acc": [], "all": [], "m": []}
+    acc: dict[int, dict[str, list]] = {D: {"acc": [], "all": [], "m": []}
                                        for D in duel_sizes}
-    skipped: Dict[int, int] = {D: 0 for D in duel_sizes}
-    beat_num: Dict[str, int] = {c: 0 for c in categories}
-    beat_den: Dict[str, int] = {c: 0 for c in categories}
-    beat_pos_num: Dict[int, int] = {}
-    beat_pos_den: Dict[int, int] = {}
+    skipped: dict[int, int] = {D: 0 for D in duel_sizes}
+    beat_num: dict[str, int] = {c: 0 for c in categories}
+    beat_den: dict[str, int] = {c: 0 for c in categories}
+    beat_pos_num: dict[int, int] = {}
+    beat_pos_den: dict[int, int] = {}
 
     for b, (db, (s, e)) in enumerate(zip(duels, spans)):
         sims = q_emb[b] @ c_emb[s:e].T
@@ -74,7 +74,7 @@ def evaluate_duels(q_emb: np.ndarray, c_emb: np.ndarray,
             acc[D]["m"].append(m)
 
     n = len(duels)
-    by_size: Dict[str, DuelSizeMetrics] = {}
+    by_size: dict[str, DuelSizeMetrics] = {}
     for D in duel_sizes:
         a = acc[D]
         by_size[str(D)] = DuelSizeMetrics(
@@ -123,7 +123,7 @@ def main() -> None:
     from common.encoders import build_embedder, cached_embed, enc_tag, pick_device
 
     # one duel set per (lang, k): gold first, then its negatives, in one text list
-    tasks: Dict[str, Dict[int, dict]] = {}
+    tasks: dict[str, dict[int, dict]] = {}
     for lang, by_k in load_pools(args.backend, args.langs, args.k_list).items():
         tasks[lang] = {}
         for k, pool in by_k.items():
@@ -156,7 +156,7 @@ def main() -> None:
     for spec in args.encoders:
         logger.info(f"\n== {spec} ==")
         emb = build_embedder(spec, device)
-        by_lang: Dict[str, Dict[str, DuelMetrics]] = {}
+        by_lang: dict[str, dict[str, DuelMetrics]] = {}
         for lang, by_k in tasks.items():
             by_lang[lang] = {}
             for k, T in by_k.items():
@@ -178,7 +178,7 @@ def main() -> None:
                         log[f"{pref}/coverage_d{D}"] = bs.coverage
                     wandb_run.log({k2: v for k2, v in log.items() if v is not None})
 
-        result.models[emb.name] = ModelCells[DuelMetrics](
+        result.models[emb.name] = DuelCells(
             spec=spec, by_lang=by_lang, mean_by_k=mean_by_k(by_lang))
         result.save(out_path)                       # incremental
         del emb
@@ -197,15 +197,15 @@ def main() -> None:
     logger.info(f"\nResults -> {out_path}")
 
 
-def _plots(result: DuelRunResult, plot_dir: Path, prefix: str, duel_sizes) -> List[Path]:
+def _plots(result: DuelRunResult, plot_dir: Path, prefix: str, duel_sizes) -> list[Path]:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     plot_dir.mkdir(parents=True, exist_ok=True)
-    paths: List[Path] = []
+    paths: list[Path] = []
     encoders = list(result.models)
 
-    def mean(enc) -> Dict[str, DuelMetrics]:
+    def mean(enc) -> dict[str, DuelMetrics]:
         return result.models[enc].mean_by_k
 
     def ks(enc):
