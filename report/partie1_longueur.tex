@@ -3,9 +3,9 @@
 %  Compilation : pdflatex -> bibtex -> pdflatex -> pdflatex
 %  (bibliographie : references.bib, partagee avec le reste du rapport)
 %  Les figures sont produites par :
-%      python report/figures/make_isolation_figures.py
-%  à partir de results/block_duel/block_duel.json et
-%           de results/comet_align/comet_align.json
+%      python -m part1_block_alignment.figures.make_figures
+%  à partir de part1_block_alignment/results/duel.json et
+%           de part1_block_alignment/results/comet_score.json
 %  Si babel-french est installé, décommenter la ligne \usepackage[french]{babel}
 %  pour obtenir la typographie française automatique.
 % ============================================================================
@@ -28,7 +28,7 @@
 \usepackage{xcolor}
 
 \captionsetup{font=small,labelfont=bf}
-\graphicspath{{figures/}{figures/isolation/}}
+\graphicspath{{figures/}{../part1_block_alignment/figures/}}
 
 \newcommand{\cometda}{\textsc{wmt22-comet-da}}
 \newcommand{\kiwi}{\textsc{wmt22-cometkiwi-da}}
@@ -376,7 +376,7 @@ Les blocs de référence des \emph{autres} articles ne sont pas candidats.
 
 Ce choix est délibéré.
 Distinguer deux articles est une compétence différente, et une compétence facile.
-Un essai de contrôle le vérifie : sur un vivier composé uniquement de blocs corrects, l'erreur d'alignement vaut exactement $0{,}000$ dans les vingt cellules (langue, $k$) mesurées.\footnote{Essai à petite échelle : \code{multilingual-e5-small}, 80 blocs par cellule, cinq langues (de, es, fr, ru, zh). Voir \code{results/block\_xsim\_spacy/}, où les quatre viviers emboîtés sont comparés sur la même matrice de similarité.}
+Un essai de contrôle le vérifie : sur un vivier composé uniquement de blocs corrects, l'erreur d'alignement vaut exactement $0{,}000$ dans les vingt cellules (langue, $k$) mesurées.\footnote{Essai à petite échelle : \code{multilingual-e5-small}, 80 blocs par cellule, cinq langues (de, es, fr, ru, zh). Voir \code{part1\_block\_alignment/results/encoder\_cosine\_spacy\_smoke.json}, où les quatre viviers emboîtés sont comparés sur la même matrice de similarité.}
 Laisser ces candidats dans le vivier gonfle donc la sensibilité apparente à l'erreur injectée : un modèle peut sembler détecter l'édition alors qu'il reconnaît seulement le sujet.
 En les retirant, il ne reste plus que la perturbation à séparer.
 
@@ -440,7 +440,7 @@ Elle sert à deux choses : la ventilation par catégorie de perturbation, où el
 Les valeurs de $R$ rapportées au tableau~\ref{tab:principal} sont obtenues par cette formule à partir du taux de victoire par paire agrégé, ce qui suppose ce taux homogène entre blocs d'une même cellule ; le rang exact, calculé décision par décision, est rapporté au tableau~\ref{tab:comet} pour le protocole à $D=2$.
 
 \paragraph{Correspondance avec le code.}
-$A(D)$ est \code{1 - by\_duel\_size[D].duel\_err} dans \code{results/block\_duel/block\_duel.json}, et \code{shortlist\_accuracy} dans \code{results/comet\_align/comet\_align.json}.
+$A(D)$ est \code{1 - by\_duel\_size[D].duel\_err} dans \code{part1\_block\_alignment/results/duel.json}, et \code{shortlist\_accuracy} dans \code{part1\_block\_alignment/results/comet\_score.json}.
 Le taux de victoire par paire est \code{detection\_rate} dans le premier fichier et \code{duel\_accuracy} dans le second.
 Le rang exact est \code{shortlist\_mean\_rank}.
 
@@ -726,27 +726,25 @@ python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-2.0')"
 
 \paragraph{Résultats par encodeur, $D \in \{4,5,6\}$.}
 \begin{verbatim}
-python experiments/length_isolation/run_duel.py \
+python -m part1_block_alignment.load_flores --source plus --langs en de es fr ru --splits dev devtest
+python -m part1_block_alignment.build_blocks --source plus --splits dev devtest --k_list 1 2 3 4 5
+python -m part1_block_alignment.perturb --langs de es fr ru --pivot en --direction en2xx \
+  --k_list 1 2 3 4 5 --backend spacy --seed 42
+python -m part1_block_alignment.evaluate_duel \
   --encoders comet:Unbabel/wmt22-comet-da hf-mean:xlm-roberta-large labse e5 \
-  --langs de es fr ru --pivot en --direction en2xx \
-  --k_list 2 3 4 5 --splits dev devtest \
-  --duel_sizes 6 5 4 --perturb_backend spacy --seed 42 \
-  --flores_source plus \
-  --output results/block_duel/block_duel.json
+  --langs de es fr ru --k_list 2 3 4 5 --duel_sizes 6 5 4 --backend spacy
 \end{verbatim}
 Le cinquième encodeur du tableau~\ref{tab:principal} est un point de contrôle local issu de la partie~2 ; on l'ajoute avec \code{comet:<chemin>/last.ckpt}.
 L'option \code{--dry\_run} affiche la couverture par $k$ et par $D$ sans charger de modèle, ce qui permet de vérifier le tableau~\ref{tab:donnees} sur CPU.
 
 \paragraph{Score COMET contre cosinus, $D=2$.}
 \begin{verbatim}
-python experiments/length_isolation/run_comet_align.py \
+python -m part1_block_alignment.evaluate_comet_score \
   --scorers comet-score:Unbabel/wmt22-cometkiwi-da \
             encoder-cos:Unbabel/wmt22-cometkiwi-da \
             encoder-cos:Unbabel/wmt22-comet-da \
-  --langs de es fr ru --k_list 1 2 3 4 5 --splits dev devtest \
-  --negatives_per_block 6 --shortlist_size 3 \
-  --perturb_backend spacy --seed 42 \
-  --output results/comet_align/comet_align.json
+  --langs de es fr ru --k_list 1 2 3 4 5 --backend spacy \
+  --negatives_per_block 6 --shortlist_size 3 --seed 42
 \end{verbatim}
 
 \paragraph{Figures.}

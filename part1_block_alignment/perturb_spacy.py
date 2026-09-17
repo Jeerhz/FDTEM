@@ -1,39 +1,24 @@
-#!/usr/bin/env python3
-"""
-nlp_perturb.py — the xSIM++ perturbations, but driven by spaCy (+ WordNet)
-instead of the hand-written heuristics in `blocks.py`.
+"""The xSIM++ perturbations driven by spaCy (+ optional WordNet) — `--backend spacy`.
 
-Why a second backend
---------------------
-`blocks.Perturber` is self-contained: entities are found by a casing heuristic,
-numbers by a digit regex plus a 10-item ordinal list per language, negation by
-regex. That is portable but it (a) cannot see entities in uncased scripts —
-zh/ja/th get *zero* entity negatives — (b) misses spelled-out numerals
-("dreißig", "trente", "тридцать", "三十"), and (c) guesses where a negation
-particle attaches.
+The heuristic `perturb.Perturber` (a) sees no entities in uncased scripts, so
+zh/ja/th get zero entity negatives, (b) misses spelled-out numerals and
+(c) guesses where a negation particle attaches. spaCy fixes those three:
 
-spaCy fixes exactly those three, in every language it ships a model for:
+  entity     `doc.ents` — real, typed NER: a LOC is swapped for a LOC.
+  number     `like_num` / `pos_ == NUM` / `NumType=Ord` — digits and words.
+  causality  `Polarity=Neg` / `dep_ in {neg, ng}` gives the negation particles
+             and their verb, so French "ne … pas" is removed as a unit and an
+             inserted negation lands on the finite verb.
 
-  entity     `doc.ents` — real NER, and typed, so a LOC is swapped for a LOC
-             rather than for a same-token-width string. Works for zh.
-  number     `like_num` / `pos_ == NUM` / `NumType=Ord` — digits *and* spelled-out
-             cardinals and ordinals, with no per-language word list.
-  causality  `Polarity=Neg` / `dep_ ∈ {neg, ng}` gives the exact negation
-             particles and the verb they attach to, so removal takes *both*
-             halves of French "ne … pas" and insertion lands on the finite verb.
+Antonyms and modal boosting stay lexical (`perturb.ANTONYMS` / `MODAL_BOOST`);
+WordNet is a per-language opt-in because Open Multilingual WordNet has no de/ru
+and is sense-ambiguous elsewhere.
 
-What spaCy does NOT fix: antonym substitution and modal boosting are lexical, so
-the curated `ANTONYMS` / `MODAL_BOOST` tables in `blocks.py` are still used —
-see the WordNet note below.
-
-Install
--------
     pip install spacy nltk
     python -m spacy download de_core_news_sm   # es/fr/ru/zh/en likewise
     python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-2.0')"
 
-Determinism is unchanged: the RNG is still seeded from
-(seed, lang, category, sentence, variant index).
+Determinism is unchanged: the RNG is seeded from (seed, lang, category, sentence, variant).
 """
 from __future__ import annotations
 
@@ -41,8 +26,9 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
-from blocks import (ANTONYMS, MODAL_BOOST, ORDINALS, _apply_pair_map,
-                    _clean_spaces, _match_case, _rng, joiner)
+from common.flores import joiner
+from part1_block_alignment.perturb import (ANTONYMS, MODAL_BOOST, ORDINALS, _apply_pair_map,
+                                           _clean_spaces, _match_case, _rng)
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +96,7 @@ def load_pipeline(lang: str):
     name = SPACY_MODELS.get(lang)
     if name is None:
         raise RuntimeError(f"no spaCy model registered for {lang!r}; add one to "
-                           "SPACY_MODELS or use --perturb_backend heuristic")
+                           "SPACY_MODELS or use --backend heuristic")
     try:
         return spacy.load(name)
     except OSError as exc:                                     # model not installed
@@ -151,7 +137,7 @@ def _render(doc, replace: Dict[int, str], drop: Set[int],
 # ════════════════════════════════════════════════════════════════════════════
 @dataclass
 class SpacyPerturber:
-    """Drop-in replacement for `blocks.Perturber` with the same `variants()`."""
+    """Same `variants()` interface as `perturb.Perturber`."""
     lang: str
     seed: int = 42
     nlp: object = None
@@ -226,7 +212,7 @@ class SpacyPerturber:
 
     @property
     def bank(self) -> List[str]:
-        """Flat entity list — same meaning as `blocks.Perturber.bank`."""
+        """Flat entity list — same meaning as `perturb.Perturber.bank`."""
         return sorted({e for v in self.ent_bank.values() for e in v})
 
     def coverage(self) -> Dict[str, int]:
@@ -243,7 +229,7 @@ class SpacyPerturber:
             self.docs[sent] = d
         return d
 
-    # ── the public API, identical to blocks.Perturber ────────────────────────
+    # ── the public API, identical to perturb.Perturber ───────────────────────
     def variants(self, sent: str, category: str, n: int) -> List[str]:
         out: List[str] = []
         for v in range(n * 6):
@@ -419,25 +405,3 @@ def _scramble_digits(surface: str, rng) -> Optional[str]:
         if cand != old:
             return surface[:m.start()] + cand + surface[m.end():]
     return None
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Factory
-# ════════════════════════════════════════════════════════════════════════════
-def build_perturber(sentences: Sequence[str], lang: str, seed: int = 42,
-                    backend: str = "heuristic",
-                    wordnet_langs: Sequence[str] = ("en",)):
-    """`backend` ∈ {heuristic, spacy, auto}. `auto` prefers spaCy and falls back."""
-    from blocks import Perturber
-    if backend == "heuristic":
-        return Perturber.for_corpus(sentences, lang, seed)
-    try:
-        p = SpacyPerturber.for_corpus(sentences, lang, seed, wordnet_langs)
-        logger.info(f"  [{lang}] spaCy backend: {p.coverage()}")
-        return p
-    except Exception as exc:                                   # noqa: BLE001
-        if backend == "spacy":
-            raise
-        logger.warning(f"  [{lang}] spaCy backend unavailable ({exc}) — "
-                       "falling back to the heuristic perturber")
-        return Perturber.for_corpus(sentences, lang, seed)

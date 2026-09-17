@@ -1,42 +1,22 @@
-#!/usr/bin/env python3
-"""
-prepare_wmt_length_data.py — WMT training data for the length-composition sweep.
+"""WMT training pools for the length-composition sweep, in one COMET-ready schema (PoolRow).
 
-Three pools, one COMET-ready schema (src, mt, ref, score, …):
+  sent    generalMT2022 MQM segments (en-de, en-ru, zh-en): k=1, per-segment score
+  agg     the same segments in windows of k in {2,3,4,6} consecutive same-(system, doc)
+          segments; score = mean of the segment scores (train stride 1, val stride k)
+  native  WMT25 general-MT human evaluation (ESA 0-100): whole documents, mt = the
+          system's text, ref = refA (documents without refA are dropped); k=0
 
-  sent    generalMT2022 avg_seg_scores (en-de, en-ru, zh-en): single segments
-          (k=1) with per-segment MQM scores, src+ref+doc+domain self-contained.
-  agg     the same segments aggregated into windows of k ∈ {2,3,4,6}
-          CONSECUTIVE same-(system, doc) segments; score = mean of the
-          per-segment MQM scores (train stride 1, val stride k).
-  native  WMT25 general-MT human evaluation (ESA 0-100): the scored unit is a
-          whole document; mt = tgt_text[system], ref = tgt_text['refA'].
-          Only documents WITH refA are kept, so DA and QE arms can train on
-          byte-identical rows. k is recorded as 0 (marker for "native doc").
+Both label sources are higher = better (MQM is a negative penalty, ESA a 0-100
+rating) and no sign flip is applied anywhere; the loaders assert it. Scores are
+z-normalised per (source_set, lp) on train, then sigmoid-squashed (monotone, so
+ranks are unchanged). Splits are document-disjoint (hash of doc id, 90/10). Rows
+over --max_tokens XLM-R tokens on any side, or with src+mt over --max_concat_tokens
+(the CometKiwi single-sequence budget), are dropped from the shared pools.
 
-Both label sources are HIGHER = BETTER before anything else happens: the WMT
-avg_seg_scores column is a negative MQM penalty (0 = no error, min -31) and ESA
-is a 0-100 quality rating — the same direction as the DA scores wmt22-comet-da
-and wmt22-cometkiwi-da were trained on, so no sign flip is applied anywhere
-(load_mqm/load_wmt25 assert the convention). Scores are then z-normalised per
-(source_set, lp) on train and sigmoid-squashed — monotone INCREASING, so the
-direction survives, rank-based evaluation is unaffected, and the differing raw
-ranges collapse onto the (0, 1) scale the pretrained heads already output. Splits are document-disjoint
-(hash of doc id; 90/10 train/val). Rows longer than --max_tokens XLM-R tokens
-on any side, or with src+mt > --max_concat_tokens (the CometKiwi concatenated
-input budget), are dropped.
+Outputs (--output_dir): {pool}_{lp}_{train,val}.csv, {lp}_trainpool.csv,
+all_train.csv, all_val.csv, stats.json.
 
-Outputs (--output_dir):
-  {pool}_{lp}_train.csv / _val.csv     per pool × lp
-  {lp}_trainpool.csv                   full per-lp stock (mix sampling pools)
-  all_train.csv / all_val.csv          concatenations
-  stats.json                           counts + normalisation parameters
-
-Usage:
-  python experiments/length_training/prepare_data.py \
-      --mqm_dir ~/scratch/wmt_data/wmt-mqm-human-evaluation \
-      --wmt25 ~/scratch/wmt_data/wmt25/wmt25-genmt-humeval.jsonl \
-      --output_dir ~/scratch/wmt_length_data
+  python -m part2_length_training.load_wmt_pools --output_dir ~/scratch/wmt_length_data_v2
 """
 from __future__ import annotations
 
@@ -45,11 +25,13 @@ import csv
 import hashlib
 import json
 import logging
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+from common.paths import SCRATCH
+from part2_length_training.models import POOL_COLUMNS
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -85,37 +67,29 @@ def load_mqm(mqm_dir: Path, lp: str, rel: str) -> pd.DataFrame:
                 score = float(r["score"])
             except (ValueError, KeyError):
                 continue
-            rows.append(dict(system=r["sys"], src=r["source"], mt=r["hyp"],
-                             ref=r["ref"], score=score, doc_id=r["doc"],
-                             domain=r["domain"], seg_id=int(r["seg_id"])))
+            rows.append(dict(system=r["sys"], src=r["source"], mt=r["hyp"], ref=r["ref"],
+                             score=score, doc_id=r["doc"], domain=r["domain"],
+                             seg_id=int(r["seg_id"])))
     df = pd.DataFrame(rows)
     # ratings are per (system, doc, seg): average duplicates (multiple raters)
     df = (df.groupby(["system", "doc_id", "seg_id"], as_index=False)
             .agg(src=("src", "first"), mt=("mt", "first"), ref=("ref", "first"),
                  score=("score", "mean"), domain=("domain", "first")))
     df["lp"] = lp
-    # Sign convention: the avg_seg_scores `score` column is a NEGATIVE MQM
-    # penalty (0.0 = no error, down to -31), i.e. HIGHER = BETTER — the same
-    # direction as the DA scores the base metrics were trained on. Nothing
-    # downstream flips signs (normalise() is monotone increasing), so a release
-    # shipping positive penalties would silently train an anti-correlated
-    # metric. Refuse it here rather than 40 GPU-hours later.
+    # A release shipping positive penalties would silently train an anti-correlated metric.
     if df.score.max() > 0:
-        raise SystemExit(
-            f"[{lp}] {rel}: score column has positive values "
-            f"(range {df.score.min():.2f}..{df.score.max():.2f}). Expected a "
-            f"negative MQM penalty (higher = better). Negate it before use.")
-    logger.info(f"  [{lp}] {len(df):,} scored segments, "
-                f"{df.doc_id.nunique()} docs, {df.system.nunique()} systems, "
-                f"score {df.score.min():.2f}..{df.score.max():.2f} (higher = better)")
+        raise SystemExit(f"[{lp}] {rel}: score column has positive values "
+                         f"(range {df.score.min():.2f}..{df.score.max():.2f}). Expected a "
+                         f"negative MQM penalty (higher = better). Negate it before use.")
+    logger.info(f"  [{lp}] {len(df):,} scored segments, {df.doc_id.nunique()} docs, "
+                f"{df.system.nunique()} systems, score {df.score.min():.2f}..{df.score.max():.2f}")
     return df
 
 
 def windows(df: pd.DataFrame, k: int, stride: int) -> pd.DataFrame:
     out = []
     for (sys_, doc), g in df.groupby(["system", "doc_id"], sort=False):
-        g = g.sort_values("seg_id")
-        segs = g.to_dict("records")
+        segs = g.sort_values("seg_id").to_dict("records")
         i = 0
         while i + k <= len(segs):
             w = segs[i:i + k]
@@ -123,13 +97,12 @@ def windows(df: pd.DataFrame, k: int, stride: int) -> pd.DataFrame:
             if any(w[j + 1]["seg_id"] != w[j]["seg_id"] + 1 for j in range(k - 1)):
                 i += stride
                 continue
-            out.append(dict(
-                system=sys_, doc_id=doc, lp=w[0]["lp"], domain=w[0]["domain"],
-                seg_start=w[0]["seg_id"], k=k,
-                src=" ".join(s["src"] for s in w),
-                mt=" ".join(s["mt"] for s in w),
-                ref=" ".join(s["ref"] for s in w),
-                score=float(np.mean([s["score"] for s in w]))))
+            out.append(dict(system=sys_, doc_id=doc, lp=w[0]["lp"], domain=w[0]["domain"],
+                            seg_start=w[0]["seg_id"], k=k,
+                            src=" ".join(s["src"] for s in w),
+                            mt=" ".join(s["mt"] for s in w),
+                            ref=" ".join(s["ref"] for s in w),
+                            score=float(np.mean([s["score"] for s in w]))))
             i += stride
     return pd.DataFrame(out)
 
@@ -144,14 +117,12 @@ def load_wmt25(path: Path) -> pd.DataFrame:
             if not ref or not isinstance(ref, str):
                 continue
             doc_id = d["doc_id"]
-            # doc_id prefix is e.g. "cs-de_DE" or "en-sr_Cyrl_RS" → lp "cs-de"
-            lp = doc_id.split("_#_")[0].split("_")[0]
+            lp = doc_id.split("_#_")[0].split("_")[0]  # "cs-de_DE_#_..." -> "cs-de"
             for sys_, anns in (d.get("scores") or {}).items():
                 if sys_.startswith("ref"):
                     continue
                 mt = tgt.get(sys_)
-                scores = [a["score"] for a in anns
-                          if isinstance(a.get("score"), (int, float))]
+                scores = [a["score"] for a in anns if isinstance(a.get("score"), (int, float))]
                 if not mt or not isinstance(mt, str) or not scores:
                     continue
                 rows.append(dict(system=sys_, src=d["src_text"], mt=mt, ref=ref,
@@ -159,55 +130,39 @@ def load_wmt25(path: Path) -> pd.DataFrame:
                                  domain=doc_id.split("_#_")[1] if "_#_" in doc_id else "",
                                  seg_start=0, k=0, lp=lp))
     df = pd.DataFrame(rows)
-    # ESA is a 0-100 quality rating (100 = perfect), NOT an error penalty:
-    # higher = better, same direction as the MQM pool above. A dump outside
-    # that range is a different annotation scheme and must not be mixed in.
+    # ESA is a 0-100 quality rating; anything else is another annotation scheme.
     if not df.score.between(0, 100).all():
-        raise SystemExit(
-            f"[wmt25] score column outside the ESA 0-100 range "
-            f"({df.score.min():.2f}..{df.score.max():.2f}) — check the "
-            f"annotation scheme and its direction before training on it.")
+        raise SystemExit(f"[wmt25] score column outside the ESA 0-100 range "
+                         f"({df.score.min():.2f}..{df.score.max():.2f})")
     logger.info(f"  [wmt25] {len(df):,} scored (doc, system) rows with refA, "
-                f"{df.doc_id.nunique()} docs, {df.lp.nunique()} lps, "
-                f"ESA {df.score.min():.1f}..{df.score.max():.1f} (higher = better)")
-    # keep lps with enough mass to matter
+                f"{df.doc_id.nunique()} docs, {df.lp.nunique()} lps")
     keep = df.lp.value_counts()
-    keep = set(keep[keep >= 300].index)
+    keep = set(keep[keep >= 300].index)  # keep lps with enough mass to matter
     df = df[df.lp.isin(keep)].copy()
-    logger.info(f"  [wmt25] {len(df):,} rows after lp>=300 filter "
-                f"({sorted(keep)})")
+    logger.info(f"  [wmt25] {len(df):,} rows after lp>=300 filter ({sorted(keep)})")
     return df
 
 
 def token_filter(df: pd.DataFrame, tok: Tok, max_tokens: int, max_concat: int,
                  tag: str) -> pd.DataFrame:
-    # The per-side cap protects the DA arm (sides encoded separately, <=510
-    # each). CometKiwi (UnifiedMetric) encodes "<s> mt </s></s> src </s>" as ONE
-    # sequence hard-truncated at 512, so rows must also satisfy
-    # src+mt <= max_concat (508 = 512 - 4 special tokens) or the QE arm silently
-    # loses the tail of the source on exactly the long inputs under study.
+    # Per side for the DA arms (sides encoded separately); src+mt for CometKiwi, which packs
+    # "<s> mt </s></s> src </s>" into one sequence truncated at 512 (508 = 512 - 4 specials).
     def ok(row):
         n_src, n_mt = tok.n(row["src"]), tok.n(row["mt"])
-        return (n_src <= max_tokens and n_mt <= max_tokens and
-                tok.n(row["ref"]) <= max_tokens and
-                n_src + n_mt <= max_concat)
+        return (n_src <= max_tokens and n_mt <= max_tokens and tok.n(row["ref"]) <= max_tokens
+                and n_src + n_mt <= max_concat)
     keep = df.apply(ok, axis=1)
     logger.info(f"  [{tag}] token filter: {keep.sum():,}/{len(df):,} kept "
                 f"(<= {max_tokens} XLM-R tokens per side, src+mt <= {max_concat})")
     return df[keep].copy()
 
 
-def normalise(train: pd.DataFrame, val: pd.DataFrame, stats: dict):
-    """Put every source on one (0, 1) scale: z-score per (source_set, lp) with
-    TRAIN statistics, then sigmoid. Both steps are monotone INCREASING, so the
-    higher-is-better direction of the raw MQM (-31..0) and ESA (0..100) scores
-    is preserved and rank correlations are unaffected. What it buys: the MSE
-    loss and the pooled validation Kendall see one comparable scale, and the
-    targets land in the range the DA-pretrained heads already output."""
+def normalise(train: pd.DataFrame, val: pd.DataFrame, stats: dict) -> None:
+    """z-score per (source_set, lp) with train statistics, then sigmoid; both monotone increasing."""
     fitted = set()
     for (ss, lp), g in train.groupby(["source_set", "lp"]):
         mu, sd = g.score.mean(), g.score.std()
-        if not np.isfinite(sd) or sd == 0:  # single-row group → std() is NaN
+        if not np.isfinite(sd) or sd == 0:  # single-row group -> std() is NaN
             sd = 1.0
         fitted.add((ss, lp))
         stats.setdefault("norm", {})[f"{ss}|{lp}"] = dict(mu=float(mu), sigma=float(sd))
@@ -215,24 +170,20 @@ def normalise(train: pd.DataFrame, val: pd.DataFrame, stats: dict):
             m = (df.source_set == ss) & (df.lp == lp)
             z = (df.loc[m, "score"] - mu) / sd
             df.loc[m, "score"] = 1 / (1 + np.exp(-z))
-    # A val group with no train counterpart would keep its RAW score and mix
-    # scales inside all_val.csv, corrupting val loss and the early-stopping
-    # Kendall without any visible error.
+    # a val group with no train counterpart would keep its raw score inside all_val.csv
     unfitted = set(map(tuple, val[["source_set", "lp"]].drop_duplicates().to_numpy())) - fitted
     if unfitted:
         raise SystemExit(f"val groups with no train normalisation: {sorted(unfitted)}")
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--mqm_dir", default="~/scratch/wmt_data/wmt-mqm-human-evaluation")
-    ap.add_argument("--wmt25", default="~/scratch/wmt_data/wmt25/wmt25-genmt-humeval.jsonl")
-    ap.add_argument("--output_dir", default="~/scratch/wmt_length_data")
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--mqm_dir", default=str(SCRATCH / "wmt_data" / "wmt-mqm-human-evaluation"))
+    ap.add_argument("--wmt25", default=str(SCRATCH / "wmt_data" / "wmt25" / "wmt25-genmt-humeval.jsonl"))
+    ap.add_argument("--output_dir", default=str(SCRATCH / "wmt_length_data_v2"))
     ap.add_argument("--max_tokens", type=int, default=480)
     ap.add_argument("--max_concat_tokens", type=int, default=508,
-                    help="src+mt budget of the QE concatenated input "
-                         "(512 minus 4 special tokens)")
+                    help="src+mt budget of the QE concatenated input (512 minus 4 special tokens)")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
@@ -240,10 +191,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     tok = Tok()
     stats = {"args": vars(args)}
-
     frames_train, frames_val = [], []
 
-    # ── sent + agg pools from generalMT2022 ──────────────────────────────────
     for lp, rel in MQM_SETS.items():
         seg = load_mqm(Path(args.mqm_dir).expanduser(), lp, rel)
         seg["is_val"] = seg.doc_id.map(val_doc)
@@ -259,12 +208,10 @@ def main():
                     continue
                 w["source_set"] = "mqm2022"
                 w["origin"] = "agg"
-                w["is_val"] = split == "val"
                 (frames_train if split == "train" else frames_val).append(w)
         frames_train.append(sent[~sent.is_val].drop(columns="is_val"))
         frames_val.append(sent[sent.is_val].drop(columns="is_val"))
 
-    # ── native pool from WMT25 ───────────────────────────────────────────────
     nat = load_wmt25(Path(args.wmt25).expanduser())
     nat["source_set"] = "wmt25"
     nat["origin"] = "native"
@@ -272,37 +219,27 @@ def main():
     frames_train.append(nat[~nat.is_val].drop(columns="is_val"))
     frames_val.append(nat[nat.is_val].drop(columns="is_val"))
 
-    cols = ["src", "mt", "ref", "score", "lp", "k", "system", "doc_id",
-            "seg_start", "domain", "source_set", "origin"]
-    train = pd.concat(frames_train, ignore_index=True)
-    val = pd.concat(frames_val, ignore_index=True)
-    train = train.drop(columns=[c for c in train.columns if c not in cols])
-    val = val.drop(columns=[c for c in val.columns if c not in cols])
-
+    train = pd.concat(frames_train, ignore_index=True)[POOL_COLUMNS]
+    val = pd.concat(frames_val, ignore_index=True)[POOL_COLUMNS]
     train = token_filter(train, tok, args.max_tokens, args.max_concat_tokens, "train")
     val = token_filter(val, tok, args.max_tokens, args.max_concat_tokens, "val")
     normalise(train, val, stats)
 
-    # ── write ────────────────────────────────────────────────────────────────
     for df, split in ((train, "train"), (val, "val")):
         for (origin, lp), g in df.groupby(["origin", "lp"]):
-            g[cols].to_csv(out / f"{origin}_{lp}_{split}.csv", index=False)
-        df[cols].to_csv(out / f"all_{split}.csv", index=False)
+            g[POOL_COLUMNS].to_csv(out / f"{origin}_{lp}_{split}.csv", index=False)
+        df[POOL_COLUMNS].to_csv(out / f"all_{split}.csv", index=False)
     for lp, g in train.groupby("lp"):
-        g[cols].to_csv(out / f"{lp}_trainpool.csv", index=False)
+        g[POOL_COLUMNS].to_csv(out / f"{lp}_trainpool.csv", index=False)
 
     stats["counts"] = {
-        "train": {f"{o}|{lp}": int(n) for (o, lp), n in
-                  train.groupby(["origin", "lp"]).size().items()},
-        "val": {f"{o}|{lp}": int(n) for (o, lp), n in
-                val.groupby(["origin", "lp"]).size().items()},
+        "train": {f"{o}|{lp}": int(n) for (o, lp), n in train.groupby(["origin", "lp"]).size().items()},
+        "val": {f"{o}|{lp}": int(n) for (o, lp), n in val.groupby(["origin", "lp"]).size().items()},
         "train_total": len(train), "val_total": len(val),
-        "train_by_origin": {k: int(v) for k, v in
-                            train.origin.value_counts().items()},
+        "train_by_origin": {k: int(v) for k, v in train.origin.value_counts().items()},
     }
-    with open(out / "stats.json", "w") as fh:
-        json.dump(stats, fh, indent=2)
-    logger.info(f"train={len(train):,} val={len(val):,} → {out}")
+    (out / "stats.json").write_text(json.dumps(stats, indent=2))
+    logger.info(f"train={len(train):,} val={len(val):,} -> {out}")
     logger.info(f"by origin: {stats['counts']['train_by_origin']}")
 
 

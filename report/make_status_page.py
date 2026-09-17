@@ -7,26 +7,30 @@ every figure embedded as a data URI so the file is self-contained.
 Numbers quoted in the prose are read from the result JSONs at build time rather
 than typed in, so the page cannot drift from the results it illustrates.
 
-  python report/make_status_page.py
+  python -m report.make_status_page
 """
 from base64 import b64encode
-from pathlib import Path
-import json
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "report/status_length.html"
-RES = ROOT / "results/length_training"
-FIG = {"length": ROOT / "report/figures/length",
-       "align": ROOT / "report/figures/align"}
+from common.paths import ROOT
+from part1_block_alignment.models import ScoreRunResult
+from part2_length_training.models import CorrelationResults
 
-HELD = json.load(open(RES / "correlation_heldout.json"))["models"]
-ALIGN = json.load(open(ROOT / "results/comet_align/comet_align.json"))["scorers"]
+OUT = ROOT / "report/status_length.html"
+RES = ROOT / "part2_length_training/results"
+FIG = {"length": ROOT / "part2_length_training/figures",
+       "align": ROOT / "part1_block_alignment/figures"}
+
+HELD = {label: m.mean_by_k for label, m in CorrelationResults.model_validate_json(
+    (RES / "correlation_heldout.json").read_text()).models.items()}
+ALIGN = {name: {k: cell.model_dump() for k, cell in m.mean_by_k.items()}
+         for name, m in ScoreRunResult.load(ROOT / "part1_block_alignment/results/comet_score.json").models.items()}
 
 
 def tau(m, k):
-    return HELD.get(m, {}).get("_mean_by_k", {}).get(k, {}).get("kendall")
+    cell = HELD.get(m, {}).get(k)
+    return cell.kendall if cell else None
 
 
 def concat(m):
@@ -378,10 +382,9 @@ def build():
 <hr class="div">""")
 
     # ── 6. alignment ─────────────────────────────────────────────────────────
-    kiwi_s = ALIGN["comet-score:comet:wmt22-cometkiwi-da"]["_mean_by_k"]
-    da_c = ALIGN["encoder-cos:comet:wmt22-comet-da"]["_mean_by_k"]
-    arm_c = [v for k, v in ALIGN.items()
-             if k.startswith("encoder-cos") and "gksapnlz" in k][0]["_mean_by_k"]
+    kiwi_s = ALIGN["comet-score:comet:wmt22-cometkiwi-da"]
+    da_c = ALIGN["encoder-cos:comet:wmt22-comet-da"]
+    arm_c = [v for k, v in ALIGN.items() if k.startswith("encoder-cos") and "gksapnlz" in k][0]
     a(f"""<section>
   <h2>Aligner avec le score COMET, pas avec l'encodeur</h2>
   <p class="qline">FLORES+ · blocs de k phrases · une phrase perturbée</p>

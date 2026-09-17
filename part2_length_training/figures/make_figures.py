@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
-"""Figures for the length-training follow-up. Writes PDF + PNG to figures/length/.
+"""Report figures of part 2. Writes PDF + PNG into figures/.
 
-Three things the existing deck cannot show:
+    python -m part2_length_training.figures.make_figures [--lens heldout val] [--results_dir DIR] [--out_dir DIR]
+
+Three things a results table cannot show:
 
   A. MetaDocEval PER PHENOMENON. The published figure micro-averages the lexical
      categories, and averaging over a context window w mixes phenomena that move
@@ -24,12 +25,8 @@ Three things the existing deck cannot show:
      is where CometKiwi's 512-token budget becomes visible.
 
 Inputs (whichever are present; missing ones are reported and skipped):
-    results/length_training/metadoceval.json
-    results/length_training/length_profile_heldout.json   (eval_length_profile.py)
-    results/length_training/length_profile_val.json
-
-  python report/figures/make_length_figures.py
-  python report/figures/make_length_figures.py --lens val --results_dir <dir>
+results/metadoceval.json, results/token_length_by_k.json, results/correlation_<lens>.json,
+results/length_profile_<lens>.json.
 """
 from __future__ import annotations
 
@@ -44,7 +41,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-ROOT = Path(__file__).resolve().parents[2]
+from part2_length_training import FIGURES_DIR, RESULTS_DIR
+from part2_length_training.arms import BASE_LABEL, MIX_SPECS
+from part2_length_training.models import ArmLabel, CorrelationResults, LengthProfileResults, MetaDocEvalResults
 
 BLUE, ORANGE, AQUA, YELLOW, MAGENTA = "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"
 VIOLET, RED = "#4a3aa7", "#e34948"
@@ -62,14 +61,7 @@ plt.rcParams.update({
 })
 
 # Arms are named by WHAT THEY WERE TRAINED ON, never by the sweep's fraction code.
-ARM_LABEL = {
-    "base": "publié",
-    "frac100": "phrases",
-    "frac000agg": "phrases concaténées",
-    "frac000nat": "documents natifs",
-    "frac000": "mixte (concat. + natifs)",
-    "uncontrolled": "non contrôlé (contaminé)",
-}
+ARM_LABEL = {"base": BASE_LABEL, **{name: spec.description for name, spec in MIX_SPECS.items()}}
 ARM_COLOR = {"base": MUTED, "frac100": BLUE, "frac000agg": AQUA,
              "frac000nat": ORANGE, "frac000": VIOLET, "uncontrolled": RED}
 ARM_ORDER = ["base", "frac100", "frac000agg", "frac000nat", "frac000", "uncontrolled"]
@@ -98,11 +90,8 @@ MIN_BIN_N = 100
 
 def split_label(label: str) -> tuple[str, str, bool]:
     """`qe-frac000nat-frozen` -> ('qe', 'frac000nat', True)."""
-    fam, _, rest = label.partition("-")
-    frozen = rest.endswith("-frozen")
-    if frozen:
-        rest = rest[: -len("-frozen")]
-    return fam, rest, frozen
+    arm = ArmLabel.parse(label)
+    return arm.family, arm.mix, arm.frozen
 
 
 def pretty(label: str) -> str:
@@ -244,7 +233,7 @@ def token_length_figure(tl: dict, out: Out, lens: str) -> None:
 # ════════════════════════════════════════════════════════════════════════════
 # 0 — the headline: agreement with human judgement, per input regime
 # ════════════════════════════════════════════════════════════════════════════
-def regime_figure(corr: dict, out: Out, lens: str) -> None:
+def regime_figure(corr: CorrelationResults, out: Out, lens: str) -> None:
     """Kendall tau per input regime, one bar per arm — the result table as a plot.
 
     Three regimes rather than six k values: single sentences (what the published
@@ -252,14 +241,15 @@ def regime_figure(corr: dict, out: Out, lens: str) -> None:
     documents (k=0). Averaging k=2..6 is safe here because they move together;
     the per-k detail lives in the token figure.
     """
-    M = corr["models"]
+    M = corr.models
     labels = sorted(M, key=sort_key)
     if len(labels) < 2:
         out.skip(f"tau_by_regime_{lens}", "fewer than two models in the results")
         return
 
     def tau(m, k):
-        return M[m].get("_mean_by_k", {}).get(k, {}).get("kendall")
+        cell = M[m].mean_by_k.get(k)
+        return cell.kendall if cell else None
 
     def concat(m):
         vals = [tau(m, k) for k in ("2", "3", "4", "6")]
@@ -695,8 +685,8 @@ def distribution_figures(profile: dict, out: Out, lens: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--results_dir", default=str(ROOT / "results/length_training"))
-    ap.add_argument("--out_dir", default=str(Path(__file__).resolve().parent / "length"))
+    ap.add_argument("--results_dir", default=str(RESULTS_DIR))
+    ap.add_argument("--out_dir", default=str(FIGURES_DIR))
     ap.add_argument("--lens", nargs="+", default=["heldout", "val"])
     args = ap.parse_args()
 
@@ -705,9 +695,9 @@ def main() -> None:
 
     mde_path = res / "metadoceval.json"
     if mde_path.exists():
-        metadoceval_figures(json.load(open(mde_path)), out)
+        metadoceval_figures(MetaDocEvalResults.model_validate_json(mde_path.read_text()).model_dump(), out)
     else:
-        out.skip("mde_phenomena*", f"{mde_path} not found — run eval_metadoceval.sh")
+        out.skip("mde_phenomena*", f"{mde_path} not found — run eval_metadoceval")
 
     tl_path = res / "token_length_by_k.json"
     tl = json.load(open(tl_path)) if tl_path.exists() else {}
@@ -720,16 +710,15 @@ def main() -> None:
 
         c = res / f"correlation_{lens}.json"
         if c.exists():
-            regime_figure(json.load(open(c)), out, lens)
+            regime_figure(CorrelationResults.model_validate_json(c.read_text()), out, lens)
         else:
             out.skip(f"tau_by_regime_{lens}", f"{c} not found")
 
         p = res / f"length_profile_{lens}.json"
         if not p.exists():
-            out.skip(f"*_{lens}", f"{p} not found — run eval_length_profile.py "
-                                  f"(or eval_correlation.sh, which now calls it)")
+            out.skip(f"*_{lens}", f"{p} not found — run eval_length_profile")
             continue
-        distribution_figures(json.load(open(p)), out, lens)
+        distribution_figures(LengthProfileResults.model_validate_json(p.read_text()).model_dump(), out, lens)
 
     print(f"\n{len(out.written)} figure(s) → {out.path}")
     for s in out.skipped:

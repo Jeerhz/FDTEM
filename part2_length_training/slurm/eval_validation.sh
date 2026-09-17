@@ -1,44 +1,12 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────────────────────────────────
-# eval_correlation.sh — agreement with human judgement per input length, for
-# every arm of the length-composition sweep plus the two public baselines.
-#
-# Two lenses, both run by default:
-#   val      ~/scratch/wmt_length_data — the SAME validation split early stopping
-#            monitors (sent k=1, agg k=2,3,4,6, native k=0, 15 language pairs).
-#            Selection-coupled, so it is a development signal, not a headline
-#            number — but it is the one directly comparable to `val_kendall`.
-#   heldout  ~/scratch/wmt_eval_portion — WMT22/23/24/25 portions never trained
-#            on; the reportable numbers.
-#
-# Predictions are cached per (model, exact input rows) AND validated against the
-# checkpoint the label currently resolves to, so re-running after a retraining
-# rescores the changed arms instead of replaying the old ones.
-#
-# Each lens is then run a second time through eval_length_profile.py, which
-# reuses the SAME prediction cache (so it costs model-load time, not GPU) and
-# reports what the correlation cannot: the distribution of the scores per window
-# size k, and every quantity again against the XLM-R token count of the actual
-# input rather than against a sentence count. Set PROFILE=0 to skip it.
-#
-# Usage:
-#   sbatch experiments/length_training/slurm/eval_correlation.sh
-#   LENS=val sbatch experiments/length_training/slurm/eval_correlation.sh
-#   ARMS="frac000 frac100" sbatch .../eval_correlation.sh
-#   MODELS="da-frac040=/path/to.ckpt" sbatch .../eval_correlation.sh
-#
-# Tunables:
-#   LENS         val | heldout | both        (default both)
-#   MODELS       explicit label=ckpt list    (default: discover every arm)
-#   ARMS         substrings to keep          (e.g. "frac000 frac100")
-#   SELECT       best | last                 (default best, by val_kendall)
-#   NEWER_THAN   skip checkpoints older than this ISO date / file
-#   CKPT_ROOT    checkpoint root             (default ~/scratch/checkpoints/retrain-wmt)
-#   OUT_DIR      results dir                 (default results/length_training)
-#   VAL_DATA_DIR val-lens data dir           (default ~/scratch/wmt_length_data;
-#                                             use the *_v2 dir for v2 arms)
-#   PROFILE      1 = also run the length profile (default 1)
-# ──────────────────────────────────────────────────────────────────────────────
+# Correlation lens (val + heldout) and, with PROFILE=1, the length profile on the same
+# prediction cache, for every trained arm plus the two published baselines.
+#   sbatch part2_length_training/slurm/eval_validation.sh
+#   LENS=heldout ARMS="frac000 frac100" sbatch part2_length_training/slurm/eval_validation.sh
+#   MODELS="da-frac040=/path/to.ckpt" sbatch part2_length_training/slurm/eval_validation.sh
+# Tunables: LENS (both|val|heldout) MODELS (explicit label=ckpt list) ARMS SELECT (best|last) NEWER_THAN
+#           CKPT_ROOT (~/scratch/checkpoints/retrain-wmt-v3) OUT_DIR (part2_length_training/results)
+#           VAL_DATA_DIR HELDOUT_DATA_DIR PROFILE (1) BATCH_SIZE (32)
 #SBATCH --job-name=eval-corr
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
@@ -50,58 +18,38 @@
 #SBATCH --time=20:00:00
 
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
-mkdir -p logs
+source common/cluster_env.sh
 
-EXP=experiments/length_training
-source "$HOME/miniconda3/etc/profile.d/conda.sh"; conda activate "${CONDA_ENV:-comet-bio}"
-export HF_HOME="${HF_HOME:-$HOME/scratch/hf_cache}"
-[[ -z "${HF_TOKEN:-}" && -f "$HOME/.cache/huggingface/token" ]] && export HF_TOKEN="$(cat "$HOME/.cache/huggingface/token")"
-
-CKPT_ROOT="${CKPT_ROOT:-$HOME/scratch/checkpoints/retrain-wmt}"
-OUT_DIR="${OUT_DIR:-results/length_training}"
 LENS="${LENS:-both}"
+CKPT_ROOT="${CKPT_ROOT:-$FDTEM_SCRATCH/checkpoints/retrain-wmt-v3}"
+OUT_DIR="${OUT_DIR:-part2_length_training/results}"
+VAL_DATA_DIR="${VAL_DATA_DIR:-$FDTEM_SCRATCH/wmt_length_data_v2}"
+HELDOUT_DATA_DIR="${HELDOUT_DATA_DIR:-$FDTEM_SCRATCH/wmt_eval_portion}"
+BASELINES="da-base=Unbabel/wmt22-comet-da qe-base=Unbabel/wmt22-cometkiwi-da"
 
-# ── which checkpoints ─────────────────────────────────────────────────────────
 if [[ -n "${MODELS:-}" ]]; then
   ARM_MODELS="$MODELS"
 else
   DISCOVER=(--root "$CKPT_ROOT" --select "${SELECT:-best}")
-  [[ -n "${ARMS:-}" ]]       && DISCOVER+=(--arms $ARMS)
-  [[ -n "${NEWER_THAN:-}" ]] && DISCOVER+=(--newer_than "$NEWER_THAN")
-  ARM_MODELS="$(python "$EXP/list_arms.py" "${DISCOVER[@]}" | tr '\n' ' ')"
+  if [[ -n "${ARMS:-}" ]]; then DISCOVER+=(--arms $ARMS); fi
+  if [[ -n "${NEWER_THAN:-}" ]]; then DISCOVER+=(--newer_than "$NEWER_THAN"); fi
+  ARM_MODELS="$(python -m part2_length_training.list_arms "${DISCOVER[@]}" | tr '\n' ' ')"
 fi
-BASELINES="da-base=Unbabel/wmt22-comet-da qe-base=Unbabel/wmt22-cometkiwi-da"
-
-echo "═══════════════════════════════════════════════════════════"
-echo " Node   : $(hostname)  GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo none)"
-echo " Lens   : $LENS"
-echo " Arms   : $(wc -w <<<"$ARM_MODELS") checkpoints + 2 baselines"
-echo "═══════════════════════════════════════════════════════════"
+echo "node $(hostname)  lens=$LENS  $(wc -w <<<"$ARM_MODELS") checkpoints + 2 baselines"
 
 run_lens () {
-  local name="$1" data_dir="$2"
-  echo; echo "### lens: $name ($data_dir) ###"
-  srun python "$EXP/eval_correlation.py" \
-      --models $BASELINES $ARM_MODELS \
-      --data_dir "$data_dir" \
-      --batch_size "${BATCH_SIZE:-32}" \
-      --cache_dir "$OUT_DIR/pred_cache_$name" \
-      --output "$OUT_DIR/correlation_$name.json"
-
+  local lens="$1" data_dir="$2"
+  srun python -m part2_length_training.eval_validation --lens "$lens" --data_dir "$data_dir" \
+      --models $BASELINES $ARM_MODELS --batch_size "${BATCH_SIZE:-32}" \
+      --cache_dir "$OUT_DIR/cache/pred_$lens" --output "$OUT_DIR/correlation_$lens.json"
   if [[ "${PROFILE:-1}" == "1" ]]; then
-    echo; echo "### lens: $name — score distributions and token-length profile ###"
-    srun python "$EXP/eval_length_profile.py" \
-        --models $BASELINES $ARM_MODELS \
-        --data_dir "$data_dir" \
-        --batch_size "${BATCH_SIZE:-32}" \
-        --cache_dir "$OUT_DIR/pred_cache_$name" \
-        --output "$OUT_DIR/length_profile_$name.json"
+    srun python -m part2_length_training.eval_length_profile --lens "$lens" --data_dir "$data_dir" \
+        --models $BASELINES $ARM_MODELS --batch_size "${BATCH_SIZE:-32}" \
+        --cache_dir "$OUT_DIR/cache/pred_$lens" --output "$OUT_DIR/length_profile_$lens.json"
   fi
 }
 
-[[ "$LENS" == "val"     || "$LENS" == "both" ]] && run_lens val     "${VAL_DATA_DIR:-$HOME/scratch/wmt_length_data}"
-[[ "$LENS" == "heldout" || "$LENS" == "both" ]] && run_lens heldout "$HOME/scratch/wmt_eval_portion"
-
-echo; echo "Done → $OUT_DIR/correlation_*.json  $OUT_DIR/length_profile_*.json"
-echo "Table: python $EXP/analyze.py --results $OUT_DIR/correlation_heldout.json"
+if [[ "$LENS" == "val" || "$LENS" == "both" ]]; then run_lens val "$VAL_DATA_DIR"; fi
+if [[ "$LENS" == "heldout" || "$LENS" == "both" ]]; then run_lens heldout "$HELDOUT_DATA_DIR"; fi
+echo "done -> $OUT_DIR/correlation_*.json  $OUT_DIR/length_profile_*.json"
+echo "table: python -m part2_length_training.analyze --lens heldout"

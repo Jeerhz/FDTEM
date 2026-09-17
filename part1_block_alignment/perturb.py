@@ -1,127 +1,43 @@
-#!/usr/bin/env python3
-"""
-blocks.py — xSIM++ on *blocks* of concatenated sentences.
+"""xSIM++ hard negatives on blocks: one edit in one sentence, the other k-1 intact.
 
-The task (cf. Chen et al. 2023, "xSIM++", arXiv:2306.12907)
-------------------------------------------------------------
-Take k consecutive sentences of one FLORES+ article and their translations.
-The query is the source block (the k source sentences, concatenated in order).
-The candidate set is built once and holds
+    python -m part1_block_alignment.perturb --source plus --langs de es fr ru --k_list 2 3 4 5 --backend spacy
+    python -m part1_block_alignment.perturb --langs de --k_list 3 --dry_run     # coverage + examples, CPU
 
-  * every true target block in the corpus, and
-  * for every true target block, *hard negatives* obtained by applying ONE
-    xSIM++ perturbation to ONE of its k sentences, leaving the other k-1 intact.
+For every (lang, k) one CandidatePool is written to data/pools_<backend>_<lang>_k<k>.json:
+every block's gold translation plus, per (sentence position, category), up to
+`--variants_per_position` perturbed copies of the block.
 
-The encoder must retrieve the block that is the concatenation of all k
-translations, in order, with no perturbation. A hard negative differs from the
-gold block by a single localised semantic edit inside one of k sentences — so
-the task gets strictly harder as k grows and the edit is diluted. That dilution
-curve is the object of interest.
+Categories (xSIM++ §2.2, Chen et al. 2023): `causality` (antonym, negation,
+modal boosting), `entity` (swap a named-entity-like span for one from a
+corpus-wide bank), `number` (digits / ordinals). The heuristic backend here is
+self-contained and multilingual; entity detection is a casing heuristic, so it
+yields no entity negatives for zh/ja/th. `--backend spacy` (perturb_spacy.py)
+uses real NER, morphology and the parse instead and reuses the lexicons below.
+The two backends generate different negatives: never compare runs across them.
 
-`evaluate_blocks` then scores FOUR nested pools on the same similarity matrix
-(free: nothing is re-encoded), which is how the "classic xsim distractors" —
-the *other* blocks' true targets — are ablated:
-
-    true_only           all true blocks                        classic xsim
-    true+perturbed      all true blocks + all negatives        classic xsim++
-    gold+all_perturbed  own gold + all negatives               distractors dropped
-    gold+own_perturbed  own gold + own negatives only          pure dilution
-
-Only the last one leaves the encoder nothing to separate but the injected edit;
-the first two also reward simply telling articles apart. Both hard-negative
-pools still grow with k, which run_duel.py is the protocol that fixes.
-
-Perturbation categories (the three of xSIM++ §2.2)
---------------------------------------------------
-  causality  antonym substitution, negation insertion/removal, and negation
-             strengthening (modal boosting, Tan et al. 2021)
-  entity     replace a named-entity-like span with one sampled from a
-             corpus-wide bank of the same language
-  number     replace digits / ordinals with different values
-
-Deviation from the paper: xSIM++ perturbs *English* with NLTK NER, spaCy and
-WordNet. Here the perturbed side is whichever side the pool is built from —
-by default the **translations** (non-English) — so this module implements the
-perturbations self-contained and multilingually (no NLTK/spaCy/WordNet). Entity
-detection is a casing heuristic and is therefore unavailable for languages
-without case (zh, ja, th); `variant_stats` reports per-category coverage so any
-gap is explicit rather than silent.
-
-`nlp_perturb.py` is the opt-in second backend (`--perturb_backend spacy`) that
-does use those tools: real NER instead of casing (so zh/ja get entity negatives
-too), `like_num`/`NumType` instead of a digit regex, and parse-anchored negation.
-It reuses this module's ANTONYMS / MODAL_BOOST / ORDINALS lexicons, because
-those are the parts WordNet cannot cover multilingually — see its docstring.
-
-All perturbations are deterministic: the RNG is seeded from
+Every perturbation is deterministic: the RNG is seeded from
 (seed, lang, category, sentence, variant index).
 """
 from __future__ import annotations
 
+import argparse
 import logging
 import random
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-import numpy as np
-
-from fdtem.languages import NO_SPACE_LANGS
-from fdtem.flores import FloresData
+from common.flores import NO_SPACE_LANGS, FloresCorpus, joiner
+from part1_block_alignment import DATA_DIR
+from part1_block_alignment.build_blocks import block_text, load_blocks
+from part1_block_alignment.load_flores import load_corpus
+from part1_block_alignment.models import CATEGORIES, Block, Candidate, CandidatePool
 
 logger = logging.getLogger(__name__)
 
-CATEGORIES = ("causality", "entity", "number")
 
-
-# ════════════════════════════════════════════════════════════════════════════
-# Blocks
-# ════════════════════════════════════════════════════════════════════════════
-@dataclass
-class Block:
-    """k consecutive rows of one article; row indices into a FloresData."""
-    rows: List[int]
-    url: str
-    split: str = ""
-
-    @property
-    def k(self) -> int:
-        return len(self.rows)
-
-
-def joiner(lang: str) -> str:
-    return "" if lang in NO_SPACE_LANGS else " "
-
-
-def build_blocks(data: FloresData, k: int, stride: Optional[int] = None,
-                 split: str = "") -> List[Block]:
-    """Non-overlapping (stride=k) windows of k consecutive same-article rows.
-
-    Overlapping windows would put near-duplicate blocks in the pool, which is a
-    different (and confounded) retrieval problem — hence stride defaults to k.
-    """
-    stride = stride or k
-    blocks: List[Block] = []
-    i, n = 0, data.n
-    while i < n:
-        j = i
-        while j < n and j - i < k and data.urls[j] == data.urls[i]:
-            j += 1
-        if j - i == k:
-            blocks.append(Block(rows=list(range(i, j)), url=data.urls[i], split=split))
-            i += stride
-        else:
-            i = j if j > i else i + 1
-    return blocks
-
-
-def block_text(data: FloresData, block: Block, lang: str) -> str:
-    return joiner(lang).join(data.sentences[lang][r] for r in block.rows)
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Lexicons  (compact, per-language; enough for the core FLORES languages)
-# ════════════════════════════════════════════════════════════════════════════
+# ── lexicons (compact, per language) ─────────────────────────────────────────
 ANTONYMS: Dict[str, List[Tuple[str, str]]] = {
     "en": [("good", "bad"), ("high", "low"), ("large", "small"), ("big", "small"),
            ("more", "less"), ("most", "fewest"), ("increase", "decrease"),
@@ -278,9 +194,7 @@ def _rng(seed: int, *parts) -> random.Random:
     return random.Random(f"{seed}|" + "|".join(str(p) for p in parts))
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Entity bank (corpus-wide, per language)
-# ════════════════════════════════════════════════════════════════════════════
+# ── entity bank (corpus-wide, per language) ───────────────────────────────────
 def lowercase_freq(sentences: Sequence[str]) -> Dict[str, int]:
     """How often each surface form occurs *lowercased* in the corpus."""
     freq: Dict[str, int] = {}
@@ -293,15 +207,11 @@ def lowercase_freq(sentences: Sequence[str]) -> Dict[str, int]:
 
 
 def _entity_token(tok: str, lang: str, lower_freq: Dict[str, int]) -> bool:
-    """Is this token a plausible named entity?
-
-    Capitalised, ≥2 characters, not a known capitalisable function word, and —
-    the load-bearing test — *never seen lowercased in the corpus*. That last
-    condition is what separates 'Stanford' from a sentence-initial 'Des'/'The',
-    without needing a POS tagger or an NER model. Note German capitalises every
-    noun, so for `de` the bank is noun-like rather than strictly entity-like;
-    the perturbation is still a minimal, meaning-changing surface edit.
-    """
+    """Capitalised, ≥2 characters, not a capitalisable function word, and — the
+    load-bearing test — never seen lowercased in the corpus. That separates
+    'Stanford' from a sentence-initial 'Des'/'The' without a tagger. German
+    capitalises every noun, so for `de` the bank is noun-like rather than
+    strictly entity-like."""
     core = tok.strip(_WORD_STRIP)
     return (len(core) >= 2 and _is_upper_initial(core)
             and core.lower() not in STOPWORDS_CAP.get(lang, set())
@@ -340,9 +250,7 @@ def build_entity_bank(sentences: Sequence[str], lang: str,
     return sorted(bank)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# The three xSIM++ perturbation categories
-# ════════════════════════════════════════════════════════════════════════════
+# ── the three xSIM++ perturbation categories ──────────────────────────────────
 def _perturb_number(sent: str, lang: str, rng: random.Random) -> Optional[str]:
     digit_spans = [(m.start(), m.end(), m.group()) for m in _DIGITS_RE.finditer(sent)]
     ords = ORDINALS.get(lang, [])
@@ -473,11 +381,11 @@ def _negate(sent: str, lang: str, rng: random.Random) -> Optional[str]:
     return None
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Variant generation
-# ════════════════════════════════════════════════════════════════════════════
+# ── variant generation ────────────────────────────────────────────────────────
 @dataclass
 class Perturber:
+    """The heuristic backend. `variants()` is the interface both backends share."""
+
     lang: str
     seed: int = 42
     bank: List[str] = field(default_factory=list)
@@ -510,219 +418,157 @@ class Perturber:
         return out
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Pool construction
-# ════════════════════════════════════════════════════════════════════════════
-@dataclass
-class Candidate:
-    text: str
-    block_id: int            # index into the block list
-    kind: str                # "true" | "perturbed"
-    category: str = ""       # for kind == "perturbed"
-    position: int = -1       # perturbed sentence index within the block
+def build_perturber(sentences: Sequence[str], lang: str, seed: int = 42,
+                    backend: str = "heuristic", wordnet_langs: Sequence[str] = ("en",)):
+    """`backend` in {heuristic, spacy, auto}; `auto` prefers spaCy and falls back."""
+    if backend == "heuristic":
+        return Perturber.for_corpus(sentences, lang, seed)
+    from part1_block_alignment.perturb_spacy import SpacyPerturber
+    try:
+        p = SpacyPerturber.for_corpus(sentences, lang, seed, wordnet_langs)
+        logger.info(f"  [{lang}] spaCy backend: {p.coverage()}")
+        return p
+    except Exception as exc:  # noqa: BLE001
+        if backend == "spacy":
+            raise
+        logger.warning(f"  [{lang}] spaCy backend unavailable ({exc}) — "
+                       "falling back to the heuristic perturber")
+        return Perturber.for_corpus(sentences, lang, seed)
 
 
-def build_pool(data_by_split: Sequence[Tuple[str, FloresData, List[Block]]],
-               pool_lang: str, categories: Sequence[str],
-               variants_per_position: int, perturber: Perturber,
-               ) -> Tuple[List[Candidate], List[int], Dict[str, int]]:
-    """Returns (candidates, true_index_per_block, variant_stats).
+def backend_name(perturber) -> str:
+    return "heuristic" if isinstance(perturber, Perturber) else "spacy"
 
-    `perturber` is anything exposing `.variants(sentence, category, n)` — either
-    `Perturber` or `nlp_perturb.SpacyPerturber`.
 
-    `candidates[i].block_id` indexes the *global* block list (splits concatenated
-    in the order given). `true_idx[b]` is the pool position of block b's gold
-    candidate.
+# ── pool construction ─────────────────────────────────────────────────────────
+def build_pool(per_split: Sequence[Tuple[FloresCorpus, List[Block]]], lang: str,
+               query_lang: str, pool_lang: str, k: int, categories: Sequence[str],
+               variants_per_position: int, perturber, seed: int) -> CandidatePool:
+    """Gold + single-edit negatives for every block, splits concatenated in order.
+
+    `candidates[i].block_id` indexes the global block list; `true_index[b]` is
+    the pool position of block b's gold candidate.
     """
+    queries: List[str] = []
     cands: List[Candidate] = []
     true_idx: List[int] = []
     stats: Dict[str, int] = {c: 0 for c in categories}
     stats["blocks"] = 0
     bid = 0
     jn = joiner(pool_lang)
-    for _split, data, blocks in data_by_split:
-        sents = data.sentences[pool_lang]
+    for corpus, blocks in per_split:
+        sents = corpus.sentences[pool_lang]
         for blk in blocks:
+            queries.append(block_text(corpus, blk, query_lang))
             parts = [sents[r] for r in blk.rows]
             true_idx.append(len(cands))
             cands.append(Candidate(text=jn.join(parts), block_id=bid, kind="true"))
             for pos in range(blk.k):
                 for cat in categories:
-                    for v in perturber.variants(parts[pos], cat, variants_per_position):
+                    for v, text in enumerate(perturber.variants(parts[pos], cat,
+                                                                variants_per_position)):
                         newp = list(parts)
-                        newp[pos] = v
+                        newp[pos] = text
                         cands.append(Candidate(text=jn.join(newp), block_id=bid,
                                                kind="perturbed", category=cat,
-                                               position=pos))
+                                               position=pos, variant=v))
                         stats[cat] += 1
             stats["blocks"] += 1
             bid += 1
-    return cands, true_idx, stats
+    return CandidatePool(lang=lang, query_lang=query_lang, pool_lang=pool_lang, k=k,
+                         backend=backend_name(perturber), seed=seed,
+                         splits=[c.split for c, _ in per_split], queries=queries,
+                         candidates=cands, true_index=true_idx, variant_counts=stats)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Retrieval + metrics  (absolute margin = plain cosine, per xSIM++ footnote 6)
-# ════════════════════════════════════════════════════════════════════════════
-def _err_on_subset(sim: np.ndarray, cols: np.ndarray,
-                   true_idx: np.ndarray) -> Tuple[float, np.ndarray]:
-    """Error rate when retrieving over `cols` (pool positions). Returns
-    (error_rate, predicted pool positions)."""
-    pred = cols[sim[:, cols].argmax(1)]
-    err = float((pred != true_idx).mean())
-    return err, pred
+def pool_path(backend: str, lang: str, k: int) -> Path:
+    return DATA_DIR / f"pools_{backend}_{lang}_k{k}.json"
 
 
-def evaluate_blocks(q_emb: np.ndarray, p_emb: np.ndarray,
-                    cands: List[Candidate], true_idx: List[int],
-                    categories: Sequence[str]) -> Dict:
-    """All xsim / xsim++ numbers for one (encoder, lang, k) cell.
+def load_pool(backend: str, lang: str, k: int) -> CandidatePool:
+    path = pool_path(backend, lang, k)
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"{path} not found — run `python -m part1_block_alignment.perturb "
+            f"--backend {backend} --langs {lang} --k_list {k}` first")
+    return CandidatePool.load(path)
 
-    Four candidate pools are scored off the *same* similarity matrix, so the
-    ablation costs nothing — no candidate is re-encoded:
 
-      true_only           every true target block, no negatives    → classic xsim
-      true+perturbed      everything                               → classic xsim++
-      gold+all_perturbed  the query's own gold + every perturbed block in the
-                          corpus; the *other* true target blocks — the classic
-                          xsim distractors — are dropped
-      gold+own_perturbed  the query's own gold + only its own single-edit hard
-                          negatives; nothing but the injected perturbation is
-                          left to separate, so this is the pure dilution number
+def pool_categories(pool: CandidatePool) -> List[str]:
+    return [c for c in CATEGORIES if c in pool.variant_counts]
 
-    The last two are what "the pool should be the hard negatives" means. The
-    gap `true+perturbed` − `gold+all_perturbed` is exactly what the classic
-    distractors contribute; `gold+own_perturbed` removes cross-block confusion
-    entirely. Caveat: `gold+own_perturbed` still has a pool that *grows* with k
-    (up to 3·k·variants negatives) — run_duel.py is the protocol that also pins
-    the candidate count, of which this is the D = m (all negatives) case.
-    """
-    sim = q_emb @ p_emb.T                                  # (N_blocks, M_cands)
-    n = sim.shape[0]
-    rows = np.arange(n)
-    true_arr = np.asarray(true_idx)
-    cand_block = np.asarray([c.block_id for c in cands])
-    cand_kind = np.asarray([c.kind for c in cands])
-    cand_cat = np.asarray([c.category for c in cands])
-    cand_pos = np.asarray([c.position for c in cands])
 
-    true_cols = np.asarray(true_idx)
-    all_cols = np.arange(len(cands))
-    is_pert = cand_kind == "perturbed"
-    own = cand_block[None, :] == rows[:, None]               # (N, M)
-    own_pert = own & is_pert[None, :]
-    gold_oh = np.zeros_like(own)
-    gold_oh[rows, true_arr] = True
+# ── CLI ───────────────────────────────────────────────────────────────────────
+def _print_pool(pool: CandidatePool, duel_sizes=(6, 5, 4)) -> None:
+    """Coverage of one pool: variants per block per category, duel eligibility."""
+    n = pool.n_blocks
+    per_blk = {c: round(pool.variant_counts[c] / max(1, n), 2) for c in pool_categories(pool)}
+    ms = [len(d.negatives) for d in pool.duel_items()]
+    cov = "  ".join(f">={D}: {sum(1 for m in ms if m >= D)} "
+                    f"({sum(1 for m in ms if m >= D) / max(1, n):.0%})" for D in duel_sizes)
+    hist = {m: ms.count(m) for m in sorted(set(ms))}
+    logger.info(f"  k={pool.k}: {n} blocks, pool={len(pool.candidates)}, "
+                f"variants/block={per_blk}  duel {cov}  m-histogram={hist}")
 
-    xsim_err, _ = _err_on_subset(sim, true_cols, true_arr)
-    xsimpp_err, pred_all = _err_on_subset(sim, all_cols, true_arr)
 
-    # ── pools that drop the classic xsim distractors ────────────────────────
-    # The candidate set now differs per query, so mask columns row-wise instead
-    # of slicing a shared column list.
-    def _err_rowwise(colmask: np.ndarray, keep: Optional[np.ndarray] = None):
-        """(error, predictions, n_rows_scored) over the rows in `keep`."""
-        m = colmask if keep is None else colmask[keep]
-        s = sim if keep is None else sim[keep]
-        t = true_arr if keep is None else true_arr[keep]
-        if s.shape[0] == 0:
-            return None, np.zeros(0, dtype=int), 0
-        pred = np.where(m, s, -np.inf).argmax(1)
-        return float((pred != t).mean()), pred, int(s.shape[0])
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--source", choices=["plus", "raw"], default="plus")
+    ap.add_argument("--splits", nargs="+", default=["dev", "devtest"],
+                    help="Splits pooled into ONE pool per (lang, k); k=5 blocks are scarce in one split.")
+    ap.add_argument("--langs", nargs="+", default=["de", "es", "fr", "ru"],
+                    help="Non-pivot languages. The heuristic backend needs letter case "
+                         "for entities (no zh/ja/th); the spacy backend lifts that.")
+    ap.add_argument("--pivot", default="en")
+    ap.add_argument("--direction", choices=["en2xx", "xx2en"], default="en2xx",
+                    help="en2xx: query=source block, pool=translations (perturbed). "
+                         "xx2en: the original xSIM++ direction (pool=English).")
+    ap.add_argument("--k_list", nargs="+", type=int, default=[2, 3, 4, 5])
+    ap.add_argument("--categories", nargs="+", default=list(CATEGORIES), choices=list(CATEGORIES))
+    ap.add_argument("--backend", choices=["spacy", "heuristic", "auto"], default="spacy")
+    ap.add_argument("--variants_per_position", type=int, default=2,
+                    help="Hard negatives per (block, sentence position, category).")
+    ap.add_argument("--wordnet_langs", nargs="*", default=["en"],
+                    help="Languages whose antonyms may also come from WordNet (spacy only).")
+    ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--max_blocks", type=int, default=None,
+                    help="Truncate the block list per split (smoke tests).")
+    ap.add_argument("--dry_run", action="store_true",
+                    help="Print coverage and example negatives, write nothing.")
+    args = ap.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    hard_err, _, _ = _err_rowwise(gold_oh | is_pert[None, :])
+    corpora = [load_corpus(args.source, sp) for sp in args.splits]
+    for lang in args.langs:
+        if lang == args.pivot:
+            continue
+        query_lang = args.pivot if args.direction == "en2xx" else lang
+        pool_lang = lang if args.direction == "en2xx" else args.pivot
+        sentences = [s for c in corpora for s in c.sentences[pool_lang]]
+        pert = build_perturber(sentences, pool_lang, args.seed, args.backend, args.wordnet_langs)
+        if (backend_name(pert) == "heuristic" and pool_lang in NO_SPACE_LANGS
+                and "entity" in args.categories):
+            logger.warning(f"  [{pool_lang}] entity perturbation needs letter case — "
+                           "no entity negatives will be generated for this language.")
+        logger.info(f"\n== {pool_lang} ({backend_name(pert)}, entity bank: {len(pert.bank)}) ==")
+        for k in args.k_list:
+            per_split = [(c, load_blocks(args.source, c.split, k)[:args.max_blocks]) for c in corpora]
+            pool = build_pool(per_split, lang, query_lang, pool_lang, k, args.categories,
+                              args.variants_per_position, pert, args.seed)
+            _print_pool(pool)
+            if pool.n_blocks < 2:
+                logger.warning(f"  [{lang}] k={k}: {pool.n_blocks} blocks — not written")
+            elif not args.dry_run:
+                pool.save(pool_path(pool.backend, lang, k))
+                logger.info(f"  -> {pool_path(pool.backend, lang, k)}")
+        if args.dry_run:
+            sample = next(s for s in sentences if len(s) > 40)
+            logger.info(f"  example: {sample}")
+            for c in args.categories:
+                for v in pert.variants(sample, c, 2):
+                    logger.info(f"    [{c}] {v}")
 
-    # blocks with no negative of their own would score a free 0 — exclude them
-    has_own = own_pert.any(1)
-    own_err, pred_own, n_own = _err_rowwise(gold_oh | own_pert, has_own)
 
-    own_breakdown: Dict[str, Optional[float]] = {}
-    if n_own:
-        ok = pred_own == true_arr[has_own]
-        own_breakdown["correct"] = float(ok.mean())
-        for c in categories:
-            own_breakdown[c] = float(((~ok) & (cand_cat[pred_own] == c)).mean())
-
-    # A bigger own-pool is a harder pool: a coin-flip encoder scores m/(m+1),
-    # and m grows with k. Without this baseline the dilution curve is unreadable.
-    n_own_neg = own_pert.sum(1)
-    own_chance = (float((n_own_neg[has_own] / (n_own_neg[has_own] + 1)).mean())
-                  if has_own.any() else None)
-
-    own_by_cat: Dict[str, Optional[float]] = {}
-    own_n_by_cat: Dict[str, int] = {}
-    for c in categories:
-        m_cat = own_pert & (cand_cat == c)[None, :]
-        keep = m_cat.any(1)
-        e, _, nk = _err_rowwise(gold_oh | m_cat, keep)
-        own_by_cat[c], own_n_by_cat[c] = e, nk
-
-    # error typology on the full pool
-    correct = pred_all == true_arr
-    pred_block = cand_block[pred_all]
-    own_perturbed = (~correct) & (pred_block == rows)
-    misaligned = (~correct) & (pred_block != rows)
-    breakdown = {"correct": float(correct.mean()),
-                 "misaligned": float(misaligned.mean())}
-    for c in categories:
-        breakdown[c] = float((own_perturbed & (cand_cat[pred_all] == c)).mean())
-
-    # per-category pools (paper Table 4 rows) and every category combination
-    def _pool_err(cats: Sequence[str]) -> float:
-        mask = (cand_kind == "true") | np.isin(cand_cat, list(cats))
-        return _err_on_subset(sim, all_cols[mask], true_arr)[0]
-
-    per_category = {c: _pool_err([c]) for c in categories}
-    combos: Dict[str, float] = {}
-    from itertools import combinations
-    for r in range(2, len(categories) + 1):
-        for combo in combinations(categories, r):
-            combos["+".join(combo)] = _pool_err(combo)
-
-    # push-apart detection: P[cos(q, gold) > cos(q, negative)] over own negatives
-    gold_sim = sim[rows, true_arr]
-    det_by_cat: Dict[str, Optional[float]] = {}
-    det_by_pos: Dict[str, Optional[float]] = {}
-    cov: Dict[str, int] = {}
-    for c in categories:
-        m = own_pert & (cand_cat == c)[None, :]
-        cov[c] = int(m.sum())
-        det_by_cat[c] = float((gold_sim[:, None] > sim)[m].mean()) if m.any() else None
-    for pos in sorted({int(p) for p in cand_pos if p >= 0}):
-        m = own_pert & (cand_pos == pos)[None, :]
-        det_by_pos[str(pos)] = float((gold_sim[:, None] > sim)[m].mean()) if m.any() else None
-    detection = (float((gold_sim[:, None] > sim)[own_pert].mean())
-                 if own_pert.any() else None)
-
-    # margin between the gold block and the single best negative
-    neg = sim.copy()
-    neg[rows, true_arr] = -np.inf
-    margin = float((gold_sim - neg.max(1)).mean())
-    # margin against the *hardest own perturbation* only (isolates dilution)
-    own_neg = np.where(own_pert, sim, -np.inf)
-    margin_own = (float((gold_sim[has_own] - own_neg.max(1)[has_own]).mean())
-                  if has_own.any() else None)
-
-    return {"n_blocks": n, "pool_size": len(cands),
-            "xsim_err": xsim_err, "xsimpp_err": xsimpp_err,
-            # pools with the classic xsim distractors dropped
-            "xsimpp_err_hard_pool": hard_err,
-            "xsimpp_err_own_pool": own_err,
-            "pool_ablation": {"true_only": xsim_err,
-                              "true+perturbed": xsimpp_err,
-                              "gold+all_perturbed": hard_err,
-                              "gold+own_perturbed": own_err},
-            "own_pool_breakdown": own_breakdown,
-            "own_pool_err_by_category": own_by_cat,
-            "own_pool_n_blocks": n_own,
-            "own_pool_n_blocks_by_category": own_n_by_cat,
-            "own_pool_chance_err": own_chance,
-            "own_pool_negatives_per_block": (float(n_own_neg[has_own].mean())
-                                             if has_own.any() else 0.0),
-            "error_breakdown": breakdown,
-            "per_category_err": per_category, "category_combos": combos,
-            "detection_rate": detection, "detection_by_category": det_by_cat,
-            "detection_by_position": det_by_pos,
-            "n_negatives_by_category": cov,
-            "margin_vs_best_negative": margin,
-            "margin_vs_best_own_perturbation": margin_own}
+if __name__ == "__main__":
+    main()

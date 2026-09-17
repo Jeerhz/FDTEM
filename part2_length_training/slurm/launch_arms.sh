@@ -1,147 +1,101 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────────────────────────────────
-# launch_long.sh — the four-arm grid, trained far past the wave-1 budget.
+# Login-node launcher: build the missing mixes, check that every arm has the same number
+# of rows, then submit each (model, arm, frozen) as a chain of CHAIN jobs linked by
+# --dependency=afterany, every link carrying RESUME=auto (one W&B run per arm; Lightning
+# counts max_epochs globally, so the chain stops itself at the preset's budget).
 #
-# The four arms differ ONLY in what kind of text they are made of, at the same
-# number of rows (see make_mixtures.py --total_policy pure):
+#   part2_length_training/slurm/launch_arms.sh                 # dry run
+#   RUN=1 part2_length_training/slurm/launch_arms.sh           # build missing mixes
+#   RUN=1 SUBMIT=1 part2_length_training/slurm/launch_arms.sh  # ... and submit
+#   SUBMIT=1 MODELS=da ARMS=uncontrolled PRESET=uncontrolled part2_length_training/slurm/launch_arms.sh
+#   PRESET=wave1 ARMS="frac000 frac010 frac020 frac040 frac060 frac080 frac100" FROZEN_LEVELS="0 1" \
+#       CHAIN=1 MIX_DIR=$HOME/scratch/wmt_length_data_v2/mixes SUBMIT=1 part2_length_training/slurm/launch_arms.sh
 #
-#   frac100      100 % single sentences                    "phrases"
-#   frac000agg   100 % concatenated same-document windows  "phrases concaténées"
-#   frac000nat   100 % natively long documents             "documents natifs"
-#   frac000       50 / 50 concatenated + native            "mixte"
-#
-# Wave 1 gave every arm 6 epochs (~4,500 optimizer steps), which was enough to
-# show the arms move but not enough to separate them. This launcher gives them
-# MAX_EPOCHS=60 (~45,000 steps) with PATIENCE=10, i.e. ten times the budget.
-#
-# ── Why the jobs are chained ──────────────────────────────────────────────────
-# 60 epochs does not fit in the partition's 2-day wall clock. Each arm is
-# therefore submitted as a CHAIN of jobs linked by --dependency=afterany, every
-# one of them carrying RESUME=auto: the first finds no checkpoint and starts
-# from the published base, each later one picks up its arm's own last.ckpt and
-# the W&B run id encoded in that path, so the whole chain is one run and one set
-# of curves. Lightning counts max_epochs GLOBALLY across a resume, so every link
-# carrying MAX_EPOCHS=60 converges on 60 epochs total — the chain stops itself.
-# Links that start after the arm has already finished exit in minutes.
-#
-# --dependency=afterany (not afterok) is deliberate: a job killed by the wall
-# clock exits non-zero, and that is exactly the case the next link exists for.
-#
-# ── Usage (login node) ────────────────────────────────────────────────────────
-#   experiments/length_training/slurm/launch_long.sh                 # dry run
-#   SUBMIT=1 experiments/length_training/slurm/launch_long.sh        # send it
-#   SUBMIT=1 MODELS=da ARMS=frac000nat .../launch_long.sh            # one cell
-#
-# Tunables: MODELS ("da qe") · ARMS · FROZEN_LEVELS ("0") · MAX_EPOCHS (60) ·
-#           PATIENCE (10) · CHAIN (4 links/arm) · DATA_DIR · MIX_DIR ·
-#           CKPT_ROOT · SEED · plus anything train.sh reads.
-#
-# Build the mixes first with slurm/deploy_four_arms.sh — this script refuses to
-# submit if the four arms do not all exist at the same size.
-# ──────────────────────────────────────────────────────────────────────────────
+# Tunables: MODELS ("da qe") ARMS ("frac100 frac000agg frac000nat frac000") FROZEN_LEVELS ("0")
+#           PRESET (default) CHAIN (4) DATA_DIR MIX_DIR ($DATA_DIR/mixes_pure) CKPT_ROOT (retrain-wmt-v3)
+#           TOTAL_POLICY (pure) EVAL_DIRS (uncontrolled arm: ~/scratch/wmt_eval_portion)
+#           SMALL_GPUS (excluded for unfrozen arms) RUN SUBMIT
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$(git rev-parse --show-toplevel)}"
-
-EXP=experiments/length_training
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+source common/cluster_env.sh
 
 MODELS="${MODELS:-da qe}"
 ARMS="${ARMS:-frac100 frac000agg frac000nat frac000}"
 FROZEN_LEVELS="${FROZEN_LEVELS:-0}"
+PRESET="${PRESET:-default}"
 CHAIN="${CHAIN:-4}"
-
-export MAX_EPOCHS="${MAX_EPOCHS:-60}"
-export PATIENCE="${PATIENCE:-10}"
-export DATA_DIR="${DATA_DIR:-$HOME/scratch/wmt_length_data_v2}"
-export MIX_DIR="${MIX_DIR:-$DATA_DIR/mixes_pure}"
-export CKPT_ROOT="${CKPT_ROOT:-retrain-wmt-v3}"
+DATA_DIR="${DATA_DIR:-$FDTEM_SCRATCH/wmt_length_data_v2}"
+MIX_DIR="${MIX_DIR:-$DATA_DIR/mixes_pure}"
+CKPT_ROOT="${CKPT_ROOT:-retrain-wmt-v3}"
+TOTAL_POLICY="${TOTAL_POLICY:-pure}"
+EVAL_DIRS="${EVAL_DIRS:-$FDTEM_SCRATCH/wmt_eval_portion}"
 SMALL_GPUS="${SMALL_GPUS:-gpu001,gpu004,gpu011,gpu014}"
+SRUN_CPU=(srun --partition=cpu_devel --cpus-per-task=4 --mem=24G --time=01:00:00)
 
-# ── design guard ──────────────────────────────────────────────────────────────
-# The budget is only a controlled factor if an epoch is the same number of
-# examples in every arm. Check it against the manifest rather than trusting that
-# the mixes were built with the right policy.
-python - "$MIX_DIR" $ARMS <<'PY'
-import json, sys
-from pathlib import Path
-mix_dir, arms = Path(sys.argv[1]), sys.argv[2:]
-man_path = mix_dir / "manifest.json"
-if not man_path.exists():
-    raise SystemExit(f"no manifest at {man_path} — build the mixes first:\n"
-                     f"  experiments/length_training/slurm/deploy_four_arms.sh")
-man = json.load(open(man_path))
-missing = [a for a in arms if a not in man["mixes"]]
-if missing:
-    raise SystemExit(
-        f"mixes {missing} are absent from {man_path}.\n"
-        f"  present: {sorted(man['mixes'])}\n"
-        f"  A pure-pool arm needs a whole N from one pool; rebuild with\n"
-        f"  make_mixtures.py --total_policy pure --arms {' '.join(arms)}")
-totals = {a: sum(man["mixes"][a]["counts"][p] for p in ("sent", "agg", "native"))
-          for a in arms}
-if len(set(totals.values())) != 1:
-    raise SystemExit(f"arms have unequal row counts, so an epoch means different "
-                     f"things in each: {totals}")
-n = next(iter(totals.values()))
-print(f"mixes OK: {len(arms)} arms x {n:,} rows "
-      f"(policy={man.get('total_policy', 'mix')}, seed={man['seed']})")
-for a in arms:
-    c = man["mixes"][a]["counts"]
-    print(f"  {a:12} sent={c['sent']:>6,}  agg={c['agg']:>6,}  native={c['native']:>6,}")
-PY
+[[ -f "$DATA_DIR/all_train.csv" ]] || { echo "no pools in $DATA_DIR: python -m part2_length_training.load_wmt_pools --output_dir $DATA_DIR"; exit 1; }
 
-STEPS_PER_EPOCH=$(python - "$MIX_DIR" "$(echo $ARMS | cut -d' ' -f1)" <<'PY'
-import csv, sys
-csv.field_size_limit(10 ** 9)
-p = f"{sys.argv[1]}/{sys.argv[2]}/all_train.csv"
-n = sum(1 for _ in csv.reader(open(p, newline="", encoding="utf-8"))) - 1
-print(max(1, n // 32))   # batch 4 x accum 8
-PY
-)
+# 1. mixes: build whatever is missing (all_train.csv is ~350 MB, so on a compute node)
+CONTROLLED=""; MISSING_CONTROLLED=""; MISSING_UNCONTROLLED=0
+for arm in $ARMS; do
+  if [[ "$arm" == "uncontrolled" ]]; then
+    [[ -f "$MIX_DIR/uncontrolled/all_train.csv" ]] || MISSING_UNCONTROLLED=1
+  else
+    CONTROLLED="$CONTROLLED $arm"
+    [[ -f "$MIX_DIR/$arm/all_train.csv" ]] || MISSING_CONTROLLED="$MISSING_CONTROLLED $arm"
+  fi
+done
+if [[ -n "$MISSING_CONTROLLED" || "$MISSING_UNCONTROLLED" == "1" ]]; then
+  if [[ "${RUN:-0}" != "1" ]]; then
+    echo "mixes missing under $MIX_DIR (controlled:${MISSING_CONTROLLED:- none}, uncontrolled: $MISSING_UNCONTROLLED) - set RUN=1 to build them"
+    [[ "${SUBMIT:-0}" == "1" ]] && exit 1
+  else
+    if [[ -n "$CONTROLLED" ]]; then
+      "${SRUN_CPU[@]}" python -m part2_length_training.make_mixtures --data_dir "$DATA_DIR" --out_dir "$MIX_DIR" \
+          --total_policy "$TOTAL_POLICY" --arms $CONTROLLED
+    fi
+    if [[ "$MISSING_UNCONTROLLED" == "1" ]]; then
+      "${SRUN_CPU[@]}" python -m part2_length_training.make_mixtures --data_dir "$DATA_DIR" --out_dir "$MIX_DIR" \
+          --arms uncontrolled --eval_dirs $EVAL_DIRS
+    fi
+    "${SRUN_CPU[@]}" python -m part2_length_training.inspect_mixtures --data_dirs "$DATA_DIR" \
+        --mix_subdirs "$(basename "$MIX_DIR")" || true
+  fi
+fi
 
+# 2. design guard: every arm the same N, and the budget that implies
+if [[ -z "$MISSING_CONTROLLED" && "$MISSING_UNCONTROLLED" == "0" ]]; then
+  python -m part2_length_training.make_mixtures --data_dir "$DATA_DIR" --out_dir "$MIX_DIR" \
+      --verify --arms $ARMS --preset "$PRESET"
+fi
+
+# 3. submit the chains
 echo
-echo "═══════════════════════════════════════════════════════════"
-echo " Four-arm grid, long budget"
-echo "   arms      : $ARMS"
-echo "   models    : $MODELS   frozen levels: $FROZEN_LEVELS"
-echo "   budget    : MAX_EPOCHS=$MAX_EPOCHS  PATIENCE=$PATIENCE"
-echo "               ~$STEPS_PER_EPOCH optimizer steps/epoch"
-echo "               → ~$((MAX_EPOCHS * STEPS_PER_EPOCH)) steps/arm"
-echo "   chain     : $CHAIN linked jobs per arm (2-day wall clock each)"
-echo "   data      : $MIX_DIR"
-echo "   ckpts     : ~/scratch/checkpoints/$CKPT_ROOT"
-echo "═══════════════════════════════════════════════════════════"
-
+echo "models=$MODELS  arms=$ARMS  frozen=$FROZEN_LEVELS  preset=$PRESET  chain=$CHAIN  ckpts=$FDTEM_SCRATCH/checkpoints/$CKPT_ROOT"
 n=0
 for model in $MODELS; do
   for arm in $ARMS; do
     for frozen in $FROZEN_LEVELS; do
       dep=""
       for link in $(seq 1 "$CHAIN"); do
-        args=(--export="ALL,MODEL=$model,MIX=$arm,FROZEN=$frozen,RESUME=auto,\
-MAX_EPOCHS=$MAX_EPOCHS,PATIENCE=$PATIENCE,DATA_DIR=$DATA_DIR,MIX_DIR=$MIX_DIR,\
-CKPT_ROOT=$CKPT_ROOT")
+        args=(--export="ALL,MODEL=$model,MIX=$arm,FROZEN=$frozen,PRESET=$PRESET,RESUME=auto,DATA_DIR=$DATA_DIR,MIX_DIR=$MIX_DIR,CKPT_ROOT=$CKPT_ROOT")
         [[ "$frozen" == "0" ]] && args+=(--exclude="$SMALL_GPUS")
         [[ -n "$dep" ]] && args+=(--dependency="afterany:$dep")
         n=$((n + 1))
         if [[ "${SUBMIT:-0}" == "1" ]]; then
-          jid=$(sbatch --parsable "${args[@]}" "$EXP/slurm/train.sh")
+          jid=$(sbatch --parsable "${args[@]}" part2_length_training/slurm/train.sh)
           echo "submitted $jid  model=$model arm=$arm frozen=$frozen link=$link/$CHAIN${dep:+ after $dep}"
           dep="$jid"
         else
-          echo "would submit: model=$model arm=$arm frozen=$frozen link=$link/$CHAIN${dep:+ after \$prev}"
+          echo "would submit: model=$model arm=$arm frozen=$frozen link=$link/$CHAIN${dep:+ after previous link}"
           dep="PREV"
         fi
       done
     done
   done
 done
-
 echo
 if [[ "${SUBMIT:-0}" == "1" ]]; then
-  echo "$n job(s) submitted across $((n / CHAIN)) arm(s)."
-  echo "Watch:   squeue -u $USER"
-  echo "Then:    sbatch --export=ALL,CKPT_ROOT=$HOME/scratch/checkpoints/$CKPT_ROOT,\
-VAL_DATA_DIR=$DATA_DIR,SELECT=best $EXP/slurm/eval_correlation.sh"
+  echo "$n job(s) submitted. Then: CKPT_ROOT=$FDTEM_SCRATCH/checkpoints/$CKPT_ROOT sbatch part2_length_training/slurm/eval_validation.sh"
 else
-  echo "$n job(s) — dry run, set SUBMIT=1 to send them."
+  echo "$n job(s) - dry run, set SUBMIT=1 to send them."
 fi

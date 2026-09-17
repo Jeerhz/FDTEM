@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
 """Build report/deck_length.html — slide deck for the length-composition wave.
 
-Figures come from report/figures/{length,align}/ and are embedded as data URIs,
-so the file is self-contained and can be opened or shared as-is.
+Figures come from part2_length_training/figures/ and part1_block_alignment/figures/
+(align_*) and are embedded as data URIs, so the file is self-contained.
 
 Style (CSS + keyboard navigation) is imported from make_deck_page.py rather than
 copied, so the two decks cannot drift apart.
 
-  python report/make_deck_length.py
+  python -m report.make_deck_length
 """
 from base64 import b64encode
-from pathlib import Path
 
-from make_deck_page import HEAD, SCRIPT
+from common.paths import ROOT
+from report.make_deck_page import HEAD, SCRIPT
 
-ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "report/deck_length.html"
-DIRS = {"length": ROOT / "report/figures/length",
-        "align": ROOT / "report/figures/align"}
+DIRS = {"length": ROOT / "part2_length_training/figures",
+        "align": ROOT / "part1_block_alignment/figures"}
 
 
 def img(where, name, alt):
     path = DIRS[where] / f"{name}.png"
     if not path.exists():
-        raise SystemExit(f"missing figure {path} — run report/figures/"
-                         f"make_{'align' if where == 'align' else 'length'}_figures.py")
+        raise SystemExit(f"missing figure {path} — run python -m "
+                         f"part{'1_block_alignment' if where == 'align' else '2_length_training'}"
+                         ".figures.make_figures")
     data = b64encode(path.read_bytes()).decode()
     return f'<img src="data:image/png;base64,{data}" alt="{alt}">'
 

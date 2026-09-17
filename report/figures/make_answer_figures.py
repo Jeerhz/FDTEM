@@ -2,12 +2,11 @@
 """Figures answering the three evaluation questions, from the results JSONs.
 
 Q1  agreement with human judgement per input regime (single sentences,
-    concatenated windows, natively long documents)   → results/length_training/
-Q2  MetaDocEval contrastive accuracy per model       → results/{metadoceval,length_training}/
-Q3  encoders on the FLORES+ concatenated-block frame → results/{block_xsim,matched_core}/
+    concatenated windows, natively long documents)   → part2_length_training/results/
+Q2  MetaDocEval contrastive accuracy per model       → part2_length_training/results/
+Q3  encoders on the FLORES+ concatenated-block frame → part1_block_alignment/results/
 
-Writes PDF + PNG into report/figures/answers/.
-Palette: the validated categorical slots (light mode).
+    python report/figures/make_answer_figures.py     -> report/figures/answers/*.pdf (+ .png)
 """
 from pathlib import Path
 import json
@@ -20,7 +19,12 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.colors import LinearSegmentedColormap
 
-ROOT = Path(__file__).resolve().parents[2]
+from common.paths import ROOT
+from part1_block_alignment.models import DuelRunResult, EncoderRunResult
+from part2_length_training.models import CorrelationResults, MetaDocEvalResults
+
+P1 = ROOT / "part1_block_alignment" / "results"
+P2 = ROOT / "part2_length_training" / "results"
 OUT = Path(__file__).resolve().parent / "answers"
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +64,8 @@ def note(fig, text, y=-0.04, width=130):
 # ════════════════════════════════════════════════════════════════════════════
 # Q1 — agreement with human judgement, per input regime (held-out sets)
 # ════════════════════════════════════════════════════════════════════════════
-held = json.load(open(ROOT / "results/length_training/correlation_heldout.json"))["models"]
+HELD = CorrelationResults.model_validate_json((P2 / "correlation_heldout.json").read_text()).models
+held = {label: m.mean_by_k for label, m in HELD.items()}
 KS = ["1", "2", "3", "4", "6"]
 CONCAT = ["2", "3", "4", "6"]
 
@@ -75,12 +80,13 @@ PRETTY = {
     "qe-frac000-frozen": "Kiwi · texte long, gelé", "qe-frac100": "Kiwi · phrases",
     "qe-frac100-frozen": "Kiwi · phrases, gelé",
 }
-ORDER = ["da-base", "da-frac000", "da-frac000-frozen", "da-frac100", "da-frac100-frozen",
-         "qe-base", "qe-frac000", "qe-frac000-frozen", "qe-frac100", "qe-frac100-frozen"]
+ORDER = [m for m in ["da-base", "da-frac000", "da-frac000-frozen", "da-frac100", "da-frac100-frozen",
+                     "qe-base", "qe-frac000", "qe-frac000-frozen", "qe-frac100", "qe-frac100-frozen"]
+         if m in held]   # frozen arms only exist in the wave-1 file
 
 
 def tau(model, k):
-    return held[model]["_mean_by_k"][k]["kendall"]
+    return held[model][k].kendall
 
 
 def tau_concat(model):
@@ -140,11 +146,13 @@ fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.1), sharey=False)
 for ax, fam, title in ((axes[0], "da", "COMET-DA  (avec référence)"),
                        (axes[1], "qe", "CometKiwi  (sans référence)")):
     xs = np.arange(len(KS))
-    b = held[f"{fam}-base"]["_mean_by_k"]
-    ax.plot(xs, [b[k]["kendall"] for k in KS], "-o", color=MUTED, lw=2.4, ms=5, zorder=4)
+    b = held[f"{fam}-base"]
+    ax.plot(xs, [b[k].kendall for k in KS], "-o", color=MUTED, lw=2.4, ms=5, zorder=4)
     for suffix, c, ls in ARMS:
-        m = held[f"{fam}-{suffix}"]["_mean_by_k"]
-        ax.plot(xs, [m[k]["kendall"] for k in KS], ls, color=c, lw=2, zorder=5,
+        if f"{fam}-{suffix}" not in held:
+            continue
+        m = held[f"{fam}-{suffix}"]
+        ax.plot(xs, [m[k].kendall for k in KS], ls, color=c, lw=2, zorder=5,
                 marker="o", ms=4.5, markeredgecolor=SURFACE, markeredgewidth=0.8)
     ax.set_xticks(xs)
     ax.set_xticklabels([f"k={k}" for k in KS], fontsize=8)
@@ -171,7 +179,7 @@ DOCSETS = ["heldout-wmt23-en-de", "heldout-wmt24-en-de", "heldout-wmt24-en-es",
            "heldout-wmt24-ja-zh", "wmt25-cs-de", "wmt25-en-sr", "wmt25-en-uk", "wmt25-en-zh"]
 SETLAB = ["wmt23\nen-de", "wmt24\nen-de", "wmt24\nen-es", "wmt24\nja-zh",
           "wmt25\ncs-de", "wmt25\nen-sr", "wmt25\nen-uk", "wmt25\nen-zh"]
-M = np.array([[held[m][s]["0"]["kendall"] for s in DOCSETS] for m in ORDER])
+M = np.array([[HELD[m].by_file[s]["0"].kendall for s in DOCSETS] for m in ORDER])
 means = M.mean(axis=1, keepdims=True)
 fig, ax = plt.subplots(figsize=(8.0, 3.6))
 full = np.hstack([M, np.full((len(ORDER), 1), np.nan), means])
@@ -204,7 +212,7 @@ save(fig, "q1_docsets")
 # ════════════════════════════════════════════════════════════════════════════
 # Q2 — MetaDocEval (Dahan, Bawden & Yvon, EAMT 2026)
 # ════════════════════════════════════════════════════════════════════════════
-mde = json.load(open(ROOT / "results/length_training/metadoceval.json"))
+mde = MetaDocEvalResults.model_validate_json((P2 / "metadoceval.json").read_text()).model_dump()
 MM = mde["models"]
 COUNTS = mde["counts_per_perturbation"]
 W = ["1", "3", "6", "9"]
@@ -303,6 +311,8 @@ for ax, fam, title in ((axes[0], "da", "COMET-DA (avec référence)"),
     ax.annotate("publié", (3, base[-1]), textcoords="offset points", xytext=(6, 0),
                 fontsize=7.5, color=INK2, va="center")
     for suffix, c, ls in ARMS:
+        if f"{fam}-{suffix}" not in MM:
+            continue
         ys = [np.mean([acc(f"{fam}-{suffix}", c2, w) for c2 in LEXICAL]) for w in W]
         ax.plot(range(4), ys, ls, color=c, lw=2, marker="o", ms=4,
                 markeredgecolor=SURFACE, markeredgewidth=0.8, zorder=5)
@@ -337,11 +347,10 @@ save(fig, "q2_context")
 # `xsimpp_err` (pool = all true blocks + all their perturbed copies) is NOT
 # plotted here: that pool grows with k, which is the confound the duel removes.
 # ════════════════════════════════════════════════════════════════════════════
-duel = json.load(open(ROOT / "results/block_duel/block_duel.json"))["encoders"]
+duel = DuelRunResult.load(P1 / "duel.json").models
 enc = {}
-for f in ["results/block_xsim/block_xsim_wave1_frac000.json",
-          "results/block_xsim/block_xsim_frac100.json"]:
-    enc.update(json.load(open(ROOT / f))["encoders"])
+for f in ["encoder_cosine_arm_frac000.json", "encoder_cosine_arm_frac100.json"]:
+    enc.update(EncoderRunResult.load(P1 / f).models)
 BK = ["2", "3", "4", "5"]
 D = "5"                                   # negatives per duel — a free parameter
 CHANCE_D = int(D) / (int(D) + 1)          # gold ranked at random among D+1 candidates
@@ -358,15 +367,15 @@ COMETS = [("comet:wmt22-comet-da", MUTED, "-", "COMET publié"),
 
 
 def duel_err(key, k, d=D):
-    return duel[key]["_mean_by_k"][k]["by_duel_size"][d]["duel_err"]
+    return duel[key].mean_by_k[k].by_duel_size[d].duel_err
 
 
 def coverage(k, d=D):
-    return float(np.mean([duel["labse"][L][k]["by_duel_size"][d]["coverage"] for L in LANGS]))
+    return float(np.mean([duel["labse"].by_lang[L][k].by_duel_size[d].coverage for L in LANGS]))
 
 
 def n_used(k, d=D):
-    return int(sum(duel["labse"][L][k]["by_duel_size"][d]["n_used"] for L in LANGS))
+    return int(sum(duel["labse"].by_lang[L][k].by_duel_size[d].n_used for L in LANGS))
 
 
 # ── Fig 7: the duel — the same number of candidates at every k ──────────────
@@ -418,7 +427,7 @@ save(fig, "q3_duel")
 fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.2), sharey=True)
 ax = axes[0]
 for key, c, lab in PUBLIC:
-    ys = [enc[key]["_mean_by_k"][k]["detection_rate"] for k in BK]
+    ys = [enc[key].mean_by_k[k].detection_rate for k in BK]
     ax.plot(range(4), ys, "-o", color=c, lw=2, ms=5,
             markeredgecolor=SURFACE, markeredgewidth=0.8)
     ax.annotate(lab, (3, ys[-1]), textcoords="offset points", xytext=(6, 0),
@@ -426,7 +435,7 @@ for key, c, lab in PUBLIC:
 ax.set_title("Encodeurs publics", fontsize=9.5)
 ax = axes[1]
 for key, c, ls, lab in COMETS:
-    ys = [enc[key]["_mean_by_k"][k]["detection_rate"] for k in BK]
+    ys = [enc[key].mean_by_k[k].detection_rate for k in BK]
     ax.plot(range(4), ys, ls, color=c, lw=2, marker="o", ms=4.5,
             markeredgecolor=SURFACE, markeredgewidth=0.8)
     ax.annotate(lab, (3, ys[-1]), textcoords="offset points",
@@ -454,7 +463,7 @@ note(fig,
 save(fig, "q3_detection")
 
 # ── Fig 9: matched core — length isolated ───────────────────────────────────
-mc = json.load(open(ROOT / "results/matched_core/matched_core.json"))["encoders"]
+mc = json.load(open(P1 / "matched_core.json"))["encoders"]   # probe dropped; plain dict
 LS = ["60", "120", "240", "480"]
 MC_ENC = [("e5:multilingual-e5-base", AQUA, "E5"), ("labse", ORANGE, "LaBSE"),
           ("comet:wmt22-comet-da", BLUE, "COMET"), ("xlmr:xlm-roberta-large", VIOLET, "XLM-R")]

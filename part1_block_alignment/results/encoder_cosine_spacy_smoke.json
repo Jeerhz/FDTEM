@@ -46,1529 +46,1533 @@
     "run_name": null,
     "dry_run": false
   },
-  "encoders": {
+  "models": {
     "e5:multilingual-e5-small": {
-      "de": {
-        "2": {
-          "n_blocks": 80,
-          "pool_size": 747,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.4125,
-          "xsimpp_err_hard_pool": 0.4125,
-          "xsimpp_err_own_pool": 0.4125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.4125,
-            "gold+all_perturbed": 0.4125,
-            "gold+own_perturbed": 0.4125
+      "kind": null,
+      "spec": null,
+      "by_lang": {
+        "de": {
+          "2": {
+            "n_blocks": 80,
+            "pool_size": 747,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.4125,
+            "xsimpp_err_hard_pool": 0.4125,
+            "xsimpp_err_own_pool": 0.4125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.4125,
+              "gold+all_perturbed": 0.4125,
+              "gold+own_perturbed": 0.4125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.5875,
+              "causality": 0.4,
+              "entity": 0.0,
+              "number": 0.0125
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.4,
+              "entity": 0.0,
+              "number": 0.02564102564102564
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 80,
+              "number": 39
+            },
+            "own_pool_chance_err": 0.8876414904539904,
+            "own_pool_negatives_per_block": 8.3375,
+            "error_breakdown": {
+              "correct": 0.5875,
+              "misaligned": 0.0,
+              "causality": 0.4,
+              "entity": 0.0,
+              "number": 0.0125
+            },
+            "per_category_err": {
+              "causality": 0.4,
+              "entity": 0.0,
+              "number": 0.0125
+            },
+            "category_combos": {
+              "causality+entity": 0.4,
+              "causality+number": 0.4125,
+              "entity+number": 0.0125,
+              "causality+entity+number": 0.4125
+            },
+            "detection_rate": 0.9355322338830585,
+            "detection_by_category": {
+              "causality": 0.8515901060070671,
+              "entity": 1.0,
+              "number": 0.9907407407407407
+            },
+            "detection_by_position": {
+              "0": 0.9475218658892128,
+              "1": 0.9228395061728395
+            },
+            "n_negatives_by_category": {
+              "causality": 283,
+              "entity": 276,
+              "number": 108
+            },
+            "margin_vs_best_negative": 0.0004744224133901298,
+            "margin_vs_best_own_perturbation": 0.0004744224133901298,
+            "variant_stats": {
+              "causality": 283,
+              "entity": 276,
+              "number": 108,
+              "blocks": 80
+            }
           },
-          "own_pool_breakdown": {
-            "correct": 0.5875,
-            "causality": 0.4,
-            "entity": 0.0,
-            "number": 0.0125
+          "3": {
+            "n_blocks": 80,
+            "pool_size": 1063,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.6,
+            "xsimpp_err_hard_pool": 0.6,
+            "xsimpp_err_own_pool": 0.6,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.6,
+              "gold+all_perturbed": 0.6,
+              "gold+own_perturbed": 0.6
+            },
+            "own_pool_breakdown": {
+              "correct": 0.4,
+              "causality": 0.4875,
+              "entity": 0.05,
+              "number": 0.0625
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.55,
+              "entity": 0.0625,
+              "number": 0.12244897959183673
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 80,
+              "number": 49
+            },
+            "own_pool_chance_err": 0.9208404803078757,
+            "own_pool_negatives_per_block": 12.2875,
+            "error_breakdown": {
+              "correct": 0.4,
+              "misaligned": 0.0,
+              "causality": 0.4875,
+              "entity": 0.05,
+              "number": 0.0625
+            },
+            "per_category_err": {
+              "causality": 0.55,
+              "entity": 0.0625,
+              "number": 0.075
+            },
+            "category_combos": {
+              "causality+entity": 0.5875,
+              "causality+number": 0.5625,
+              "entity+number": 0.1375,
+              "causality+entity+number": 0.6
+            },
+            "detection_rate": 0.9043743641912513,
+            "detection_by_category": {
+              "causality": 0.8037825059101655,
+              "entity": 0.9869791666666666,
+              "number": 0.9659090909090909
+            },
+            "detection_by_position": {
+              "0": 0.9259259259259259,
+              "1": 0.8980891719745223,
+              "2": 0.8867924528301887
+            },
+            "n_negatives_by_category": {
+              "causality": 423,
+              "entity": 384,
+              "number": 176
+            },
+            "margin_vs_best_negative": -0.0003094300627708435,
+            "margin_vs_best_own_perturbation": -0.0003094300627708435,
+            "variant_stats": {
+              "causality": 423,
+              "entity": 384,
+              "number": 176,
+              "blocks": 80
+            }
           },
-          "own_pool_err_by_category": {
-            "causality": 0.4,
-            "entity": 0.0,
-            "number": 0.02564102564102564
+          "4": {
+            "n_blocks": 80,
+            "pool_size": 1361,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.7875,
+            "xsimpp_err_hard_pool": 0.7875,
+            "xsimpp_err_own_pool": 0.7875,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.7875,
+              "gold+all_perturbed": 0.7875,
+              "gold+own_perturbed": 0.7875
+            },
+            "own_pool_breakdown": {
+              "correct": 0.2125,
+              "causality": 0.625,
+              "entity": 0.1125,
+              "number": 0.05
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.7375,
+              "entity": 0.1875,
+              "number": 0.06779661016949153
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 80,
+              "number": 59
+            },
+            "own_pool_chance_err": 0.9388256813836469,
+            "own_pool_negatives_per_block": 16.0125,
+            "error_breakdown": {
+              "correct": 0.2125,
+              "misaligned": 0.0,
+              "causality": 0.625,
+              "entity": 0.1125,
+              "number": 0.05
+            },
+            "per_category_err": {
+              "causality": 0.7375,
+              "entity": 0.1875,
+              "number": 0.05
+            },
+            "category_combos": {
+              "causality+entity": 0.7625,
+              "causality+number": 0.7625,
+              "entity+number": 0.2375,
+              "causality+entity+number": 0.7875
+            },
+            "detection_rate": 0.8641686182669789,
+            "detection_by_category": {
+              "causality": 0.7134935304990758,
+              "entity": 0.9705882352941176,
+              "number": 0.9826086956521739
+            },
+            "detection_by_position": {
+              "0": 0.9215116279069767,
+              "1": 0.858085808580858,
+              "2": 0.8548895899053628,
+              "3": 0.8170347003154574
+            },
+            "n_negatives_by_category": {
+              "causality": 541,
+              "entity": 510,
+              "number": 230
+            },
+            "margin_vs_best_negative": -0.0007442220812663436,
+            "margin_vs_best_own_perturbation": -0.0007442220812663436,
+            "variant_stats": {
+              "causality": 541,
+              "entity": 510,
+              "number": 230,
+              "blocks": 80
+            }
           },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 80,
-            "number": 39
-          },
-          "own_pool_chance_err": 0.8876414904539904,
-          "own_pool_negatives_per_block": 8.3375,
-          "error_breakdown": {
-            "correct": 0.5875,
-            "misaligned": 0.0,
-            "causality": 0.4,
-            "entity": 0.0,
-            "number": 0.0125
-          },
-          "per_category_err": {
-            "causality": 0.4,
-            "entity": 0.0,
-            "number": 0.0125
-          },
-          "category_combos": {
-            "causality+entity": 0.4,
-            "causality+number": 0.4125,
-            "entity+number": 0.0125,
-            "causality+entity+number": 0.4125
-          },
-          "detection_rate": 0.9355322338830585,
-          "detection_by_category": {
-            "causality": 0.8515901060070671,
-            "entity": 1.0,
-            "number": 0.9907407407407407
-          },
-          "detection_by_position": {
-            "0": 0.9475218658892128,
-            "1": 0.9228395061728395
-          },
-          "n_negatives_by_category": {
-            "causality": 283,
-            "entity": 276,
-            "number": 108
-          },
-          "margin_vs_best_negative": 0.0004744224133901298,
-          "margin_vs_best_own_perturbation": 0.0004744224133901298,
-          "variant_stats": {
-            "causality": 283,
-            "entity": 276,
-            "number": 108,
-            "blocks": 80
+          "5": {
+            "n_blocks": 80,
+            "pool_size": 1427,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.875,
+            "xsimpp_err_hard_pool": 0.875,
+            "xsimpp_err_own_pool": 0.875,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.875,
+              "gold+all_perturbed": 0.875,
+              "gold+own_perturbed": 0.875
+            },
+            "own_pool_breakdown": {
+              "correct": 0.125,
+              "causality": 0.625,
+              "entity": 0.1875,
+              "number": 0.0625
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.85,
+              "entity": 0.28205128205128205,
+              "number": 0.2
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 78,
+              "number": 40
+            },
+            "own_pool_chance_err": 0.9403413742833248,
+            "own_pool_negatives_per_block": 16.8375,
+            "error_breakdown": {
+              "correct": 0.125,
+              "misaligned": 0.0,
+              "causality": 0.625,
+              "entity": 0.1875,
+              "number": 0.0625
+            },
+            "per_category_err": {
+              "causality": 0.85,
+              "entity": 0.275,
+              "number": 0.1
+            },
+            "category_combos": {
+              "causality+entity": 0.8625,
+              "causality+number": 0.8625,
+              "entity+number": 0.3625,
+              "causality+entity+number": 0.875
+            },
+            "detection_rate": 0.7951002227171492,
+            "detection_by_category": {
+              "causality": 0.6453576864535768,
+              "entity": 0.9417293233082706,
+              "number": 0.9240506329113924
+            },
+            "detection_by_position": {
+              "0": 0.8226950354609929,
+              "1": 0.8,
+              "2": 0.8157894736842105,
+              "3": 0.7509025270758123,
+              "4": 0.7859922178988327
+            },
+            "n_negatives_by_category": {
+              "causality": 657,
+              "entity": 532,
+              "number": 158
+            },
+            "margin_vs_best_negative": -0.001348865800537169,
+            "margin_vs_best_own_perturbation": -0.001348865800537169,
+            "variant_stats": {
+              "causality": 657,
+              "entity": 532,
+              "number": 158,
+              "blocks": 80
+            }
           }
         },
-        "3": {
-          "n_blocks": 80,
-          "pool_size": 1063,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.6,
-          "xsimpp_err_hard_pool": 0.6,
-          "xsimpp_err_own_pool": 0.6,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.6,
-            "gold+all_perturbed": 0.6,
-            "gold+own_perturbed": 0.6
+        "es": {
+          "2": {
+            "n_blocks": 80,
+            "pool_size": 764,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.425,
+            "xsimpp_err_hard_pool": 0.425,
+            "xsimpp_err_own_pool": 0.425,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.425,
+              "gold+all_perturbed": 0.425,
+              "gold+own_perturbed": 0.425
+            },
+            "own_pool_breakdown": {
+              "correct": 0.575,
+              "causality": 0.325,
+              "entity": 0.05,
+              "number": 0.05
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.3375,
+              "entity": 0.05333333333333334,
+              "number": 0.12244897959183673
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 75,
+              "number": 49
+            },
+            "own_pool_chance_err": 0.8877189477189477,
+            "own_pool_negatives_per_block": 8.55,
+            "error_breakdown": {
+              "correct": 0.575,
+              "misaligned": 0.0,
+              "causality": 0.325,
+              "entity": 0.05,
+              "number": 0.05
+            },
+            "per_category_err": {
+              "causality": 0.3375,
+              "entity": 0.05,
+              "number": 0.075
+            },
+            "category_combos": {
+              "causality+entity": 0.375,
+              "causality+number": 0.3875,
+              "entity+number": 0.125,
+              "causality+entity+number": 0.425
+            },
+            "detection_rate": 0.9254385964912281,
+            "detection_by_category": {
+              "causality": 0.855072463768116,
+              "entity": 0.9848484848484849,
+              "number": 0.9513888888888888
+            },
+            "detection_by_position": {
+              "0": 0.9333333333333333,
+              "1": 0.9166666666666666
+            },
+            "n_negatives_by_category": {
+              "causality": 276,
+              "entity": 264,
+              "number": 144
+            },
+            "margin_vs_best_negative": -9.350329492008314e-05,
+            "margin_vs_best_own_perturbation": -9.350329492008314e-05,
+            "variant_stats": {
+              "causality": 276,
+              "entity": 264,
+              "number": 144,
+              "blocks": 80
+            }
           },
-          "own_pool_breakdown": {
-            "correct": 0.4,
-            "causality": 0.4875,
-            "entity": 0.05,
-            "number": 0.0625
+          "3": {
+            "n_blocks": 80,
+            "pool_size": 1080,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.7125,
+            "xsimpp_err_hard_pool": 0.7125,
+            "xsimpp_err_own_pool": 0.7125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.7125,
+              "gold+all_perturbed": 0.7125,
+              "gold+own_perturbed": 0.7125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.2875,
+              "causality": 0.525,
+              "entity": 0.1,
+              "number": 0.0875
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.5625,
+              "entity": 0.13157894736842105,
+              "number": 0.2033898305084746
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 76,
+              "number": 59
+            },
+            "own_pool_chance_err": 0.92191555128523,
+            "own_pool_negatives_per_block": 12.5,
+            "error_breakdown": {
+              "correct": 0.2875,
+              "misaligned": 0.0,
+              "causality": 0.525,
+              "entity": 0.1,
+              "number": 0.0875
+            },
+            "per_category_err": {
+              "causality": 0.5625,
+              "entity": 0.125,
+              "number": 0.15
+            },
+            "category_combos": {
+              "causality+entity": 0.6375,
+              "causality+number": 0.6625,
+              "entity+number": 0.25,
+              "causality+entity+number": 0.7125
+            },
+            "detection_rate": 0.887,
+            "detection_by_category": {
+              "causality": 0.7818627450980392,
+              "entity": 0.9723756906077348,
+              "number": 0.9391304347826087
+            },
+            "detection_by_position": {
+              "0": 0.9390581717451524,
+              "1": 0.8469055374592834,
+              "2": 0.8674698795180723
+            },
+            "n_negatives_by_category": {
+              "causality": 408,
+              "entity": 362,
+              "number": 230
+            },
+            "margin_vs_best_negative": -0.0013339899014681578,
+            "margin_vs_best_own_perturbation": -0.0013339899014681578,
+            "variant_stats": {
+              "causality": 408,
+              "entity": 362,
+              "number": 230,
+              "blocks": 80
+            }
           },
-          "own_pool_err_by_category": {
-            "causality": 0.55,
-            "entity": 0.0625,
-            "number": 0.12244897959183673
+          "4": {
+            "n_blocks": 80,
+            "pool_size": 1410,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.8375,
+            "xsimpp_err_hard_pool": 0.8375,
+            "xsimpp_err_own_pool": 0.8375,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.8375,
+              "gold+all_perturbed": 0.8375,
+              "gold+own_perturbed": 0.8375
+            },
+            "own_pool_breakdown": {
+              "correct": 0.1625,
+              "causality": 0.6625,
+              "entity": 0.1125,
+              "number": 0.0625
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.7625,
+              "entity": 0.12658227848101267,
+              "number": 0.2608695652173913
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 79,
+              "number": 69
+            },
+            "own_pool_chance_err": 0.940827874414196,
+            "own_pool_negatives_per_block": 16.625,
+            "error_breakdown": {
+              "correct": 0.1625,
+              "misaligned": 0.0,
+              "causality": 0.6625,
+              "entity": 0.1125,
+              "number": 0.0625
+            },
+            "per_category_err": {
+              "causality": 0.7625,
+              "entity": 0.125,
+              "number": 0.225
+            },
+            "category_combos": {
+              "causality+entity": 0.7875,
+              "causality+number": 0.8125,
+              "entity+number": 0.325,
+              "causality+entity+number": 0.8375
+            },
+            "detection_rate": 0.856390977443609,
+            "detection_by_category": {
+              "causality": 0.7124542124542125,
+              "entity": 0.976890756302521,
+              "number": 0.9253246753246753
+            },
+            "detection_by_position": {
+              "0": 0.9211956521739131,
+              "1": 0.8242811501597445,
+              "2": 0.8215384615384616,
+              "3": 0.8487654320987654
+            },
+            "n_negatives_by_category": {
+              "causality": 546,
+              "entity": 476,
+              "number": 308
+            },
+            "margin_vs_best_negative": -0.0013710722560063004,
+            "margin_vs_best_own_perturbation": -0.0013710722560063004,
+            "variant_stats": {
+              "causality": 546,
+              "entity": 476,
+              "number": 308,
+              "blocks": 80
+            }
           },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 80,
-            "number": 49
-          },
-          "own_pool_chance_err": 0.9208404803078757,
-          "own_pool_negatives_per_block": 12.2875,
-          "error_breakdown": {
-            "correct": 0.4,
-            "misaligned": 0.0,
-            "causality": 0.4875,
-            "entity": 0.05,
-            "number": 0.0625
-          },
-          "per_category_err": {
-            "causality": 0.55,
-            "entity": 0.0625,
-            "number": 0.075
-          },
-          "category_combos": {
-            "causality+entity": 0.5875,
-            "causality+number": 0.5625,
-            "entity+number": 0.1375,
-            "causality+entity+number": 0.6
-          },
-          "detection_rate": 0.9043743641912513,
-          "detection_by_category": {
-            "causality": 0.8037825059101655,
-            "entity": 0.9869791666666666,
-            "number": 0.9659090909090909
-          },
-          "detection_by_position": {
-            "0": 0.9259259259259259,
-            "1": 0.8980891719745223,
-            "2": 0.8867924528301887
-          },
-          "n_negatives_by_category": {
-            "causality": 423,
-            "entity": 384,
-            "number": 176
-          },
-          "margin_vs_best_negative": -0.0003094300627708435,
-          "margin_vs_best_own_perturbation": -0.0003094300627708435,
-          "variant_stats": {
-            "causality": 423,
-            "entity": 384,
-            "number": 176,
-            "blocks": 80
+          "5": {
+            "n_blocks": 80,
+            "pool_size": 1393,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.8125,
+            "xsimpp_err_hard_pool": 0.8125,
+            "xsimpp_err_own_pool": 0.8125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.8125,
+              "gold+all_perturbed": 0.8125,
+              "gold+own_perturbed": 0.8125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.1875,
+              "causality": 0.7,
+              "entity": 0.075,
+              "number": 0.0375
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.775,
+              "entity": 0.21428571428571427,
+              "number": 0.16666666666666666
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 70,
+              "number": 54
+            },
+            "own_pool_chance_err": 0.9378002627215423,
+            "own_pool_negatives_per_block": 16.4125,
+            "error_breakdown": {
+              "correct": 0.1875,
+              "misaligned": 0.0,
+              "causality": 0.7,
+              "entity": 0.075,
+              "number": 0.0375
+            },
+            "per_category_err": {
+              "causality": 0.775,
+              "entity": 0.1875,
+              "number": 0.1125
+            },
+            "category_combos": {
+              "causality+entity": 0.8,
+              "causality+number": 0.7875,
+              "entity+number": 0.2625,
+              "causality+entity+number": 0.8125
+            },
+            "detection_rate": 0.8172124904798173,
+            "detection_by_category": {
+              "causality": 0.7022222222222222,
+              "entity": 0.9527363184079602,
+              "number": 0.9152542372881356
+            },
+            "detection_by_position": {
+              "0": 0.8844765342960289,
+              "1": 0.7992125984251969,
+              "2": 0.7924528301886793,
+              "3": 0.7910447761194029,
+              "4": 0.8152610441767069
+            },
+            "n_negatives_by_category": {
+              "causality": 675,
+              "entity": 402,
+              "number": 236
+            },
+            "margin_vs_best_negative": -0.0012639887863770127,
+            "margin_vs_best_own_perturbation": -0.0012639887863770127,
+            "variant_stats": {
+              "causality": 675,
+              "entity": 402,
+              "number": 236,
+              "blocks": 80
+            }
           }
         },
-        "4": {
-          "n_blocks": 80,
-          "pool_size": 1361,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.7875,
-          "xsimpp_err_hard_pool": 0.7875,
-          "xsimpp_err_own_pool": 0.7875,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.7875,
-            "gold+all_perturbed": 0.7875,
-            "gold+own_perturbed": 0.7875
+        "fr": {
+          "2": {
+            "n_blocks": 80,
+            "pool_size": 752,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.4875,
+            "xsimpp_err_hard_pool": 0.4875,
+            "xsimpp_err_own_pool": 0.4875,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.4875,
+              "gold+all_perturbed": 0.4875,
+              "gold+own_perturbed": 0.4875
+            },
+            "own_pool_breakdown": {
+              "correct": 0.5125,
+              "causality": 0.3625,
+              "entity": 0.0375,
+              "number": 0.0875
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.4,
+              "entity": 0.039473684210526314,
+              "number": 0.1568627450980392
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 76,
+              "number": 51
+            },
+            "own_pool_chance_err": 0.8856685328560328,
+            "own_pool_negatives_per_block": 8.4,
+            "error_breakdown": {
+              "correct": 0.5125,
+              "misaligned": 0.0,
+              "causality": 0.3625,
+              "entity": 0.0375,
+              "number": 0.0875
+            },
+            "per_category_err": {
+              "causality": 0.4,
+              "entity": 0.0375,
+              "number": 0.1
+            },
+            "category_combos": {
+              "causality+entity": 0.425,
+              "causality+number": 0.4625,
+              "entity+number": 0.1375,
+              "causality+entity+number": 0.4875
+            },
+            "detection_rate": 0.9122023809523809,
+            "detection_by_category": {
+              "causality": 0.8321428571428572,
+              "entity": 0.9878048780487805,
+              "number": 0.9383561643835616
+            },
+            "detection_by_position": {
+              "0": 0.9211267605633803,
+              "1": 0.9022082018927445
+            },
+            "n_negatives_by_category": {
+              "causality": 280,
+              "entity": 246,
+              "number": 146
+            },
+            "margin_vs_best_negative": 0.00019019097089767456,
+            "margin_vs_best_own_perturbation": 0.00019019097089767456,
+            "variant_stats": {
+              "causality": 280,
+              "entity": 246,
+              "number": 146,
+              "blocks": 80
+            }
           },
-          "own_pool_breakdown": {
-            "correct": 0.2125,
-            "causality": 0.625,
-            "entity": 0.1125,
-            "number": 0.05
+          "3": {
+            "n_blocks": 80,
+            "pool_size": 1057,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.7125,
+            "xsimpp_err_hard_pool": 0.7125,
+            "xsimpp_err_own_pool": 0.7125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.7125,
+              "gold+all_perturbed": 0.7125,
+              "gold+own_perturbed": 0.7125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.2875,
+              "causality": 0.5625,
+              "entity": 0.0375,
+              "number": 0.1125
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.625,
+              "entity": 0.05333333333333334,
+              "number": 0.21666666666666667
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 75,
+              "number": 60
+            },
+            "own_pool_chance_err": 0.9188461893391267,
+            "own_pool_negatives_per_block": 12.2125,
+            "error_breakdown": {
+              "correct": 0.2875,
+              "misaligned": 0.0,
+              "causality": 0.5625,
+              "entity": 0.0375,
+              "number": 0.1125
+            },
+            "per_category_err": {
+              "causality": 0.625,
+              "entity": 0.05,
+              "number": 0.1625
+            },
+            "category_combos": {
+              "causality+entity": 0.6375,
+              "causality+number": 0.7,
+              "entity+number": 0.2125,
+              "causality+entity+number": 0.7125
+            },
+            "detection_rate": 0.9007164790174002,
+            "detection_by_category": {
+              "causality": 0.8166259168704156,
+              "entity": 0.9883720930232558,
+              "number": 0.9196428571428571
+            },
+            "detection_by_position": {
+              "0": 0.9204545454545454,
+              "1": 0.8926174496644296,
+              "2": 0.8868501529051988
+            },
+            "n_negatives_by_category": {
+              "causality": 409,
+              "entity": 344,
+              "number": 224
+            },
+            "margin_vs_best_negative": -0.00035144464345648885,
+            "margin_vs_best_own_perturbation": -0.00035144464345648885,
+            "variant_stats": {
+              "causality": 409,
+              "entity": 344,
+              "number": 224,
+              "blocks": 80
+            }
           },
-          "own_pool_err_by_category": {
-            "causality": 0.7375,
-            "entity": 0.1875,
-            "number": 0.06779661016949153
+          "4": {
+            "n_blocks": 80,
+            "pool_size": 1365,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.8125,
+            "xsimpp_err_hard_pool": 0.8125,
+            "xsimpp_err_own_pool": 0.8125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.8125,
+              "gold+all_perturbed": 0.8125,
+              "gold+own_perturbed": 0.8125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.1875,
+              "causality": 0.625,
+              "entity": 0.0875,
+              "number": 0.1
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.725,
+              "entity": 0.14285714285714285,
+              "number": 0.2571428571428571
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 77,
+              "number": 70
+            },
+            "own_pool_chance_err": 0.937919949844393,
+            "own_pool_negatives_per_block": 16.0625,
+            "error_breakdown": {
+              "correct": 0.1875,
+              "misaligned": 0.0,
+              "causality": 0.625,
+              "entity": 0.0875,
+              "number": 0.1
+            },
+            "per_category_err": {
+              "causality": 0.725,
+              "entity": 0.1375,
+              "number": 0.225
+            },
+            "category_combos": {
+              "causality+entity": 0.7625,
+              "causality+number": 0.8,
+              "entity+number": 0.325,
+              "causality+entity+number": 0.8125
+            },
+            "detection_rate": 0.863035019455253,
+            "detection_by_category": {
+              "causality": 0.7430167597765364,
+              "entity": 0.9708520179372198,
+              "number": 0.9172185430463576
+            },
+            "detection_by_position": {
+              "0": 0.9020172910662824,
+              "1": 0.8548387096774194,
+              "2": 0.8490566037735849,
+              "3": 0.8419354838709677
+            },
+            "n_negatives_by_category": {
+              "causality": 537,
+              "entity": 446,
+              "number": 302
+            },
+            "margin_vs_best_negative": -0.0008326098322868347,
+            "margin_vs_best_own_perturbation": -0.0008326098322868347,
+            "variant_stats": {
+              "causality": 537,
+              "entity": 446,
+              "number": 302,
+              "blocks": 80
+            }
           },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 80,
-            "number": 59
-          },
-          "own_pool_chance_err": 0.9388256813836469,
-          "own_pool_negatives_per_block": 16.0125,
-          "error_breakdown": {
-            "correct": 0.2125,
-            "misaligned": 0.0,
-            "causality": 0.625,
-            "entity": 0.1125,
-            "number": 0.05
-          },
-          "per_category_err": {
-            "causality": 0.7375,
-            "entity": 0.1875,
-            "number": 0.05
-          },
-          "category_combos": {
-            "causality+entity": 0.7625,
-            "causality+number": 0.7625,
-            "entity+number": 0.2375,
-            "causality+entity+number": 0.7875
-          },
-          "detection_rate": 0.8641686182669789,
-          "detection_by_category": {
-            "causality": 0.7134935304990758,
-            "entity": 0.9705882352941176,
-            "number": 0.9826086956521739
-          },
-          "detection_by_position": {
-            "0": 0.9215116279069767,
-            "1": 0.858085808580858,
-            "2": 0.8548895899053628,
-            "3": 0.8170347003154574
-          },
-          "n_negatives_by_category": {
-            "causality": 541,
-            "entity": 510,
-            "number": 230
-          },
-          "margin_vs_best_negative": -0.0007442220812663436,
-          "margin_vs_best_own_perturbation": -0.0007442220812663436,
-          "variant_stats": {
-            "causality": 541,
-            "entity": 510,
-            "number": 230,
-            "blocks": 80
+          "5": {
+            "n_blocks": 80,
+            "pool_size": 1384,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.9,
+            "xsimpp_err_hard_pool": 0.9,
+            "xsimpp_err_own_pool": 0.9,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.9,
+              "gold+all_perturbed": 0.9,
+              "gold+own_perturbed": 0.9
+            },
+            "own_pool_breakdown": {
+              "correct": 0.1,
+              "causality": 0.725,
+              "entity": 0.0875,
+              "number": 0.0875
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.8375,
+              "entity": 0.2028985507246377,
+              "number": 0.3508771929824561
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 69,
+              "number": 57
+            },
+            "own_pool_chance_err": 0.9360038854192834,
+            "own_pool_negatives_per_block": 16.3,
+            "error_breakdown": {
+              "correct": 0.1,
+              "misaligned": 0.0,
+              "causality": 0.725,
+              "entity": 0.0875,
+              "number": 0.0875
+            },
+            "per_category_err": {
+              "causality": 0.8375,
+              "entity": 0.175,
+              "number": 0.25
+            },
+            "category_combos": {
+              "causality+entity": 0.8625,
+              "causality+number": 0.875,
+              "entity+number": 0.3625,
+              "causality+entity+number": 0.9
+            },
+            "detection_rate": 0.7906441717791411,
+            "detection_by_category": {
+              "causality": 0.6656626506024096,
+              "entity": 0.9529702970297029,
+              "number": 0.864406779661017
+            },
+            "detection_by_position": {
+              "0": 0.8248175182481752,
+              "1": 0.7883817427385892,
+              "2": 0.7908745247148289,
+              "3": 0.8015564202334631,
+              "4": 0.7472118959107806
+            },
+            "n_negatives_by_category": {
+              "causality": 664,
+              "entity": 404,
+              "number": 236
+            },
+            "margin_vs_best_negative": -0.0013219981919974089,
+            "margin_vs_best_own_perturbation": -0.0013219981919974089,
+            "variant_stats": {
+              "causality": 664,
+              "entity": 404,
+              "number": 236,
+              "blocks": 80
+            }
           }
         },
-        "5": {
-          "n_blocks": 80,
-          "pool_size": 1427,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.875,
-          "xsimpp_err_hard_pool": 0.875,
-          "xsimpp_err_own_pool": 0.875,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.875,
-            "gold+all_perturbed": 0.875,
-            "gold+own_perturbed": 0.875
+        "ru": {
+          "2": {
+            "n_blocks": 80,
+            "pool_size": 710,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.4875,
+            "xsimpp_err_hard_pool": 0.4875,
+            "xsimpp_err_own_pool": 0.4875,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.4875,
+              "gold+all_perturbed": 0.4875,
+              "gold+own_perturbed": 0.4875
+            },
+            "own_pool_breakdown": {
+              "correct": 0.5125,
+              "causality": 0.325,
+              "entity": 0.0625,
+              "number": 0.1
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.3375,
+              "entity": 0.07042253521126761,
+              "number": 0.2
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 71,
+              "number": 45
+            },
+            "own_pool_chance_err": 0.8770749389499389,
+            "own_pool_negatives_per_block": 7.875,
+            "error_breakdown": {
+              "correct": 0.5125,
+              "misaligned": 0.0,
+              "causality": 0.325,
+              "entity": 0.0625,
+              "number": 0.1
+            },
+            "per_category_err": {
+              "causality": 0.3375,
+              "entity": 0.0625,
+              "number": 0.1125
+            },
+            "category_combos": {
+              "causality+entity": 0.4,
+              "causality+number": 0.425,
+              "entity+number": 0.175,
+              "causality+entity+number": 0.4875
+            },
+            "detection_rate": 0.9206349206349206,
+            "detection_by_category": {
+              "causality": 0.87109375,
+              "entity": 0.9795081967213115,
+              "number": 0.9076923076923077
+            },
+            "detection_by_position": {
+              "0": 0.9365079365079365,
+              "1": 0.9047619047619048
+            },
+            "n_negatives_by_category": {
+              "causality": 256,
+              "entity": 244,
+              "number": 130
+            },
+            "margin_vs_best_negative": 0.0002505280135665089,
+            "margin_vs_best_own_perturbation": 0.0002505280135665089,
+            "variant_stats": {
+              "causality": 256,
+              "entity": 244,
+              "number": 130,
+              "blocks": 80
+            }
           },
-          "own_pool_breakdown": {
-            "correct": 0.125,
-            "causality": 0.625,
-            "entity": 0.1875,
-            "number": 0.0625
+          "3": {
+            "n_blocks": 80,
+            "pool_size": 989,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.6,
+            "xsimpp_err_hard_pool": 0.6,
+            "xsimpp_err_own_pool": 0.6,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.6,
+              "gold+all_perturbed": 0.6,
+              "gold+own_perturbed": 0.6
+            },
+            "own_pool_breakdown": {
+              "correct": 0.4,
+              "causality": 0.4625,
+              "entity": 0.0625,
+              "number": 0.075
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.525,
+              "entity": 0.10144927536231885,
+              "number": 0.17543859649122806
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 69,
+              "number": 57
+            },
+            "own_pool_chance_err": 0.9111462215545034,
+            "own_pool_negatives_per_block": 11.3625,
+            "error_breakdown": {
+              "correct": 0.4,
+              "misaligned": 0.0,
+              "causality": 0.4625,
+              "entity": 0.0625,
+              "number": 0.075
+            },
+            "per_category_err": {
+              "causality": 0.525,
+              "entity": 0.0875,
+              "number": 0.125
+            },
+            "category_combos": {
+              "causality+entity": 0.55,
+              "causality+number": 0.575,
+              "entity+number": 0.2125,
+              "causality+entity+number": 0.6
+            },
+            "detection_rate": 0.8998899889988999,
+            "detection_by_category": {
+              "causality": 0.8249336870026526,
+              "entity": 0.9754601226993865,
+              "number": 0.9174757281553398
+            },
+            "detection_by_position": {
+              "0": 0.8958990536277602,
+              "1": 0.8949152542372881,
+              "2": 0.9090909090909091
+            },
+            "n_negatives_by_category": {
+              "causality": 377,
+              "entity": 326,
+              "number": 206
+            },
+            "margin_vs_best_negative": -0.00032396690221503377,
+            "margin_vs_best_own_perturbation": -0.00032396690221503377,
+            "variant_stats": {
+              "causality": 377,
+              "entity": 326,
+              "number": 206,
+              "blocks": 80
+            }
           },
-          "own_pool_err_by_category": {
-            "causality": 0.85,
-            "entity": 0.28205128205128205,
-            "number": 0.2
+          "4": {
+            "n_blocks": 80,
+            "pool_size": 1273,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.7375,
+            "xsimpp_err_hard_pool": 0.7375,
+            "xsimpp_err_own_pool": 0.7375,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.7375,
+              "gold+all_perturbed": 0.7375,
+              "gold+own_perturbed": 0.7375
+            },
+            "own_pool_breakdown": {
+              "correct": 0.2625,
+              "causality": 0.6,
+              "entity": 0.0625,
+              "number": 0.075
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.675,
+              "entity": 0.21333333333333335,
+              "number": 0.16666666666666666
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 75,
+              "number": 66
+            },
+            "own_pool_chance_err": 0.9328897937796974,
+            "own_pool_negatives_per_block": 14.9125,
+            "error_breakdown": {
+              "correct": 0.2625,
+              "misaligned": 0.0,
+              "causality": 0.6,
+              "entity": 0.0625,
+              "number": 0.075
+            },
+            "per_category_err": {
+              "causality": 0.675,
+              "entity": 0.2,
+              "number": 0.1375
+            },
+            "category_combos": {
+              "causality+entity": 0.7,
+              "causality+number": 0.7125,
+              "entity+number": 0.2875,
+              "causality+entity+number": 0.7375
+            },
+            "detection_rate": 0.865046102263202,
+            "detection_by_category": {
+              "causality": 0.7524752475247525,
+              "entity": 0.9565217391304348,
+              "number": 0.9343065693430657
+            },
+            "detection_by_position": {
+              "0": 0.9057750759878419,
+              "1": 0.8680555555555556,
+              "2": 0.8435374149659864,
+              "3": 0.8368794326241135
+            },
+            "n_negatives_by_category": {
+              "causality": 505,
+              "entity": 414,
+              "number": 274
+            },
+            "margin_vs_best_negative": -0.0012028947239741683,
+            "margin_vs_best_own_perturbation": -0.0012028947239741683,
+            "variant_stats": {
+              "causality": 505,
+              "entity": 414,
+              "number": 274,
+              "blocks": 80
+            }
           },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 78,
-            "number": 40
+          "5": {
+            "n_blocks": 80,
+            "pool_size": 1231,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.9125,
+            "xsimpp_err_hard_pool": 0.9125,
+            "xsimpp_err_own_pool": 0.9125,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.9125,
+              "gold+all_perturbed": 0.9125,
+              "gold+own_perturbed": 0.9125
+            },
+            "own_pool_breakdown": {
+              "correct": 0.0875,
+              "causality": 0.675,
+              "entity": 0.125,
+              "number": 0.1125
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.8375,
+              "entity": 0.2641509433962264,
+              "number": 0.32142857142857145
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 53,
+              "number": 56
+            },
+            "own_pool_chance_err": 0.9254985963671267,
+            "own_pool_negatives_per_block": 14.3875,
+            "error_breakdown": {
+              "correct": 0.0875,
+              "misaligned": 0.0,
+              "causality": 0.675,
+              "entity": 0.125,
+              "number": 0.1125
+            },
+            "per_category_err": {
+              "causality": 0.8375,
+              "entity": 0.175,
+              "number": 0.225
+            },
+            "category_combos": {
+              "causality+entity": 0.875,
+              "causality+number": 0.8875,
+              "entity+number": 0.3625,
+              "causality+entity+number": 0.9125
+            },
+            "detection_rate": 0.8097306689834927,
+            "detection_by_category": {
+              "causality": 0.7170731707317073,
+              "entity": 0.9331210191082803,
+              "number": 0.8918918918918919
+            },
+            "detection_by_position": {
+              "0": 0.8695652173913043,
+              "1": 0.8009259259259259,
+              "2": 0.7777777777777778,
+              "3": 0.8026315789473685,
+              "4": 0.7909090909090909
+            },
+            "n_negatives_by_category": {
+              "causality": 615,
+              "entity": 314,
+              "number": 222
+            },
+            "margin_vs_best_negative": -0.0010257072281092405,
+            "margin_vs_best_own_perturbation": -0.0010257072281092405,
+            "variant_stats": {
+              "causality": 615,
+              "entity": 314,
+              "number": 222,
+              "blocks": 80
+            }
+          }
+        },
+        "zh": {
+          "2": {
+            "n_blocks": 80,
+            "pool_size": 772,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.5625,
+            "xsimpp_err_hard_pool": 0.5625,
+            "xsimpp_err_own_pool": 0.5625,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.5625,
+              "gold+all_perturbed": 0.5625,
+              "gold+own_perturbed": 0.5625
+            },
+            "own_pool_breakdown": {
+              "correct": 0.4375,
+              "causality": 0.25,
+              "entity": 0.2375,
+              "number": 0.075
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.325,
+              "entity": 0.29577464788732394,
+              "number": 0.15517241379310345
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 71,
+              "number": 58
+            },
+            "own_pool_chance_err": 0.8904549617049617,
+            "own_pool_negatives_per_block": 8.65,
+            "error_breakdown": {
+              "correct": 0.4375,
+              "misaligned": 0.0,
+              "causality": 0.25,
+              "entity": 0.2375,
+              "number": 0.075
+            },
+            "per_category_err": {
+              "causality": 0.325,
+              "entity": 0.2625,
+              "number": 0.1125
+            },
+            "category_combos": {
+              "causality+entity": 0.5,
+              "causality+number": 0.4,
+              "entity+number": 0.3375,
+              "causality+entity+number": 0.5625
+            },
+            "detection_rate": 0.8916184971098265,
+            "detection_by_category": {
+              "causality": 0.8605442176870748,
+              "entity": 0.8983050847457628,
+              "number": 0.9382716049382716
+            },
+            "detection_by_position": {
+              "0": 0.8915989159891599,
+              "1": 0.891640866873065
+            },
+            "n_negatives_by_category": {
+              "causality": 294,
+              "entity": 236,
+              "number": 162
+            },
+            "margin_vs_best_negative": -0.0005187898641452193,
+            "margin_vs_best_own_perturbation": -0.0005187898641452193,
+            "variant_stats": {
+              "causality": 294,
+              "entity": 236,
+              "number": 162,
+              "blocks": 80
+            }
           },
-          "own_pool_chance_err": 0.9403413742833248,
-          "own_pool_negatives_per_block": 16.8375,
-          "error_breakdown": {
-            "correct": 0.125,
-            "misaligned": 0.0,
-            "causality": 0.625,
-            "entity": 0.1875,
-            "number": 0.0625
+          "3": {
+            "n_blocks": 80,
+            "pool_size": 1078,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.6625,
+            "xsimpp_err_hard_pool": 0.6625,
+            "xsimpp_err_own_pool": 0.6625,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.6625,
+              "gold+all_perturbed": 0.6625,
+              "gold+own_perturbed": 0.6625
+            },
+            "own_pool_breakdown": {
+              "correct": 0.3375,
+              "causality": 0.3625,
+              "entity": 0.225,
+              "number": 0.075
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.4875,
+              "entity": 0.3055555555555556,
+              "number": 0.16176470588235295
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 72,
+              "number": 68
+            },
+            "own_pool_chance_err": 0.9221258187439496,
+            "own_pool_negatives_per_block": 12.475,
+            "error_breakdown": {
+              "correct": 0.3375,
+              "misaligned": 0.0,
+              "causality": 0.3625,
+              "entity": 0.225,
+              "number": 0.075
+            },
+            "per_category_err": {
+              "causality": 0.4875,
+              "entity": 0.275,
+              "number": 0.1375
+            },
+            "category_combos": {
+              "causality+entity": 0.625,
+              "causality+number": 0.55,
+              "entity+number": 0.3875,
+              "causality+entity+number": 0.6625
+            },
+            "detection_rate": 0.8977955911823647,
+            "detection_by_category": {
+              "causality": 0.8623853211009175,
+              "entity": 0.9072847682119205,
+              "number": 0.9461538461538461
+            },
+            "detection_by_position": {
+              "0": 0.912568306010929,
+              "1": 0.88,
+              "2": 0.8975903614457831
+            },
+            "n_negatives_by_category": {
+              "causality": 436,
+              "entity": 302,
+              "number": 260
+            },
+            "margin_vs_best_negative": -0.0004836931766476482,
+            "margin_vs_best_own_perturbation": -0.0004836931766476482,
+            "variant_stats": {
+              "causality": 436,
+              "entity": 302,
+              "number": 260,
+              "blocks": 80
+            }
           },
-          "per_category_err": {
-            "causality": 0.85,
-            "entity": 0.275,
-            "number": 0.1
+          "4": {
+            "n_blocks": 80,
+            "pool_size": 1408,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.825,
+            "xsimpp_err_hard_pool": 0.825,
+            "xsimpp_err_own_pool": 0.825,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.825,
+              "gold+all_perturbed": 0.825,
+              "gold+own_perturbed": 0.825
+            },
+            "own_pool_breakdown": {
+              "correct": 0.175,
+              "causality": 0.3625,
+              "entity": 0.3625,
+              "number": 0.1
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.5875,
+              "entity": 0.45454545454545453,
+              "number": 0.2465753424657534
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 77,
+              "number": 73
+            },
+            "own_pool_chance_err": 0.9404812909015948,
+            "own_pool_negatives_per_block": 16.6,
+            "error_breakdown": {
+              "correct": 0.175,
+              "misaligned": 0.0,
+              "causality": 0.3625,
+              "entity": 0.3625,
+              "number": 0.1
+            },
+            "per_category_err": {
+              "causality": 0.5875,
+              "entity": 0.4375,
+              "number": 0.225
+            },
+            "category_combos": {
+              "causality+entity": 0.8,
+              "causality+number": 0.6625,
+              "entity+number": 0.5375,
+              "causality+entity+number": 0.825
+            },
+            "detection_rate": 0.8569277108433735,
+            "detection_by_category": {
+              "causality": 0.8224137931034483,
+              "entity": 0.8564593301435407,
+              "number": 0.9181818181818182
+            },
+            "detection_by_position": {
+              "0": 0.8921832884097035,
+              "1": 0.8622950819672132,
+              "2": 0.8228228228228228,
+              "3": 0.8463949843260188
+            },
+            "n_negatives_by_category": {
+              "causality": 580,
+              "entity": 418,
+              "number": 330
+            },
+            "margin_vs_best_negative": -0.0011289656395092607,
+            "margin_vs_best_own_perturbation": -0.0011289656395092607,
+            "variant_stats": {
+              "causality": 580,
+              "entity": 418,
+              "number": 330,
+              "blocks": 80
+            }
           },
-          "category_combos": {
-            "causality+entity": 0.8625,
-            "causality+number": 0.8625,
-            "entity+number": 0.3625,
-            "causality+entity+number": 0.875
-          },
-          "detection_rate": 0.7951002227171492,
-          "detection_by_category": {
-            "causality": 0.6453576864535768,
-            "entity": 0.9417293233082706,
-            "number": 0.9240506329113924
-          },
-          "detection_by_position": {
-            "0": 0.8226950354609929,
-            "1": 0.8,
-            "2": 0.8157894736842105,
-            "3": 0.7509025270758123,
-            "4": 0.7859922178988327
-          },
-          "n_negatives_by_category": {
-            "causality": 657,
-            "entity": 532,
-            "number": 158
-          },
-          "margin_vs_best_negative": -0.001348865800537169,
-          "margin_vs_best_own_perturbation": -0.001348865800537169,
-          "variant_stats": {
-            "causality": 657,
-            "entity": 532,
-            "number": 158,
-            "blocks": 80
+          "5": {
+            "n_blocks": 80,
+            "pool_size": 1447,
+            "xsim_err": 0.0,
+            "xsimpp_err": 0.875,
+            "xsimpp_err_hard_pool": 0.875,
+            "xsimpp_err_own_pool": 0.875,
+            "pool_ablation": {
+              "true_only": 0.0,
+              "true+perturbed": 0.875,
+              "gold+all_perturbed": 0.875,
+              "gold+own_perturbed": 0.875
+            },
+            "own_pool_breakdown": {
+              "correct": 0.125,
+              "causality": 0.425,
+              "entity": 0.325,
+              "number": 0.125
+            },
+            "own_pool_err_by_category": {
+              "causality": 0.6625,
+              "entity": 0.55,
+              "number": 0.4098360655737705
+            },
+            "own_pool_n_blocks": 80,
+            "own_pool_n_blocks_by_category": {
+              "causality": 80,
+              "entity": 60,
+              "number": 61
+            },
+            "own_pool_chance_err": 0.9389069883070974,
+            "own_pool_negatives_per_block": 17.0875,
+            "error_breakdown": {
+              "correct": 0.125,
+              "misaligned": 0.0,
+              "causality": 0.425,
+              "entity": 0.325,
+              "number": 0.125
+            },
+            "per_category_err": {
+              "causality": 0.6625,
+              "entity": 0.4125,
+              "number": 0.3125
+            },
+            "category_combos": {
+              "causality+entity": 0.8375,
+              "causality+number": 0.775,
+              "entity+number": 0.55,
+              "causality+entity+number": 0.875
+            },
+            "detection_rate": 0.8354059985369422,
+            "detection_by_category": {
+              "causality": 0.8226466575716235,
+              "entity": 0.8383233532934131,
+              "number": 0.8633333333333333
+            },
+            "detection_by_position": {
+              "0": 0.8705501618122977,
+              "1": 0.8237547892720306,
+              "2": 0.8278388278388278,
+              "3": 0.821969696969697,
+              "4": 0.8269230769230769
+            },
+            "n_negatives_by_category": {
+              "causality": 733,
+              "entity": 334,
+              "number": 300
+            },
+            "margin_vs_best_negative": -0.0012556023430079222,
+            "margin_vs_best_own_perturbation": -0.0012556023430079222,
+            "variant_stats": {
+              "causality": 733,
+              "entity": 334,
+              "number": 300,
+              "blocks": 80
+            }
           }
         }
       },
-      "es": {
-        "2": {
-          "n_blocks": 80,
-          "pool_size": 764,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.425,
-          "xsimpp_err_hard_pool": 0.425,
-          "xsimpp_err_own_pool": 0.425,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.425,
-            "gold+all_perturbed": 0.425,
-            "gold+own_perturbed": 0.425
-          },
-          "own_pool_breakdown": {
-            "correct": 0.575,
-            "causality": 0.325,
-            "entity": 0.05,
-            "number": 0.05
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.3375,
-            "entity": 0.05333333333333334,
-            "number": 0.12244897959183673
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 75,
-            "number": 49
-          },
-          "own_pool_chance_err": 0.8877189477189477,
-          "own_pool_negatives_per_block": 8.55,
-          "error_breakdown": {
-            "correct": 0.575,
-            "misaligned": 0.0,
-            "causality": 0.325,
-            "entity": 0.05,
-            "number": 0.05
-          },
-          "per_category_err": {
-            "causality": 0.3375,
-            "entity": 0.05,
-            "number": 0.075
-          },
-          "category_combos": {
-            "causality+entity": 0.375,
-            "causality+number": 0.3875,
-            "entity+number": 0.125,
-            "causality+entity+number": 0.425
-          },
-          "detection_rate": 0.9254385964912281,
-          "detection_by_category": {
-            "causality": 0.855072463768116,
-            "entity": 0.9848484848484849,
-            "number": 0.9513888888888888
-          },
-          "detection_by_position": {
-            "0": 0.9333333333333333,
-            "1": 0.9166666666666666
-          },
-          "n_negatives_by_category": {
-            "causality": 276,
-            "entity": 264,
-            "number": 144
-          },
-          "margin_vs_best_negative": -9.350329492008314e-05,
-          "margin_vs_best_own_perturbation": -9.350329492008314e-05,
-          "variant_stats": {
-            "causality": 276,
-            "entity": 264,
-            "number": 144,
-            "blocks": 80
-          }
-        },
-        "3": {
-          "n_blocks": 80,
-          "pool_size": 1080,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.7125,
-          "xsimpp_err_hard_pool": 0.7125,
-          "xsimpp_err_own_pool": 0.7125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.7125,
-            "gold+all_perturbed": 0.7125,
-            "gold+own_perturbed": 0.7125
-          },
-          "own_pool_breakdown": {
-            "correct": 0.2875,
-            "causality": 0.525,
-            "entity": 0.1,
-            "number": 0.0875
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.5625,
-            "entity": 0.13157894736842105,
-            "number": 0.2033898305084746
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 76,
-            "number": 59
-          },
-          "own_pool_chance_err": 0.92191555128523,
-          "own_pool_negatives_per_block": 12.5,
-          "error_breakdown": {
-            "correct": 0.2875,
-            "misaligned": 0.0,
-            "causality": 0.525,
-            "entity": 0.1,
-            "number": 0.0875
-          },
-          "per_category_err": {
-            "causality": 0.5625,
-            "entity": 0.125,
-            "number": 0.15
-          },
-          "category_combos": {
-            "causality+entity": 0.6375,
-            "causality+number": 0.6625,
-            "entity+number": 0.25,
-            "causality+entity+number": 0.7125
-          },
-          "detection_rate": 0.887,
-          "detection_by_category": {
-            "causality": 0.7818627450980392,
-            "entity": 0.9723756906077348,
-            "number": 0.9391304347826087
-          },
-          "detection_by_position": {
-            "0": 0.9390581717451524,
-            "1": 0.8469055374592834,
-            "2": 0.8674698795180723
-          },
-          "n_negatives_by_category": {
-            "causality": 408,
-            "entity": 362,
-            "number": 230
-          },
-          "margin_vs_best_negative": -0.0013339899014681578,
-          "margin_vs_best_own_perturbation": -0.0013339899014681578,
-          "variant_stats": {
-            "causality": 408,
-            "entity": 362,
-            "number": 230,
-            "blocks": 80
-          }
-        },
-        "4": {
-          "n_blocks": 80,
-          "pool_size": 1410,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.8375,
-          "xsimpp_err_hard_pool": 0.8375,
-          "xsimpp_err_own_pool": 0.8375,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.8375,
-            "gold+all_perturbed": 0.8375,
-            "gold+own_perturbed": 0.8375
-          },
-          "own_pool_breakdown": {
-            "correct": 0.1625,
-            "causality": 0.6625,
-            "entity": 0.1125,
-            "number": 0.0625
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.7625,
-            "entity": 0.12658227848101267,
-            "number": 0.2608695652173913
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 79,
-            "number": 69
-          },
-          "own_pool_chance_err": 0.940827874414196,
-          "own_pool_negatives_per_block": 16.625,
-          "error_breakdown": {
-            "correct": 0.1625,
-            "misaligned": 0.0,
-            "causality": 0.6625,
-            "entity": 0.1125,
-            "number": 0.0625
-          },
-          "per_category_err": {
-            "causality": 0.7625,
-            "entity": 0.125,
-            "number": 0.225
-          },
-          "category_combos": {
-            "causality+entity": 0.7875,
-            "causality+number": 0.8125,
-            "entity+number": 0.325,
-            "causality+entity+number": 0.8375
-          },
-          "detection_rate": 0.856390977443609,
-          "detection_by_category": {
-            "causality": 0.7124542124542125,
-            "entity": 0.976890756302521,
-            "number": 0.9253246753246753
-          },
-          "detection_by_position": {
-            "0": 0.9211956521739131,
-            "1": 0.8242811501597445,
-            "2": 0.8215384615384616,
-            "3": 0.8487654320987654
-          },
-          "n_negatives_by_category": {
-            "causality": 546,
-            "entity": 476,
-            "number": 308
-          },
-          "margin_vs_best_negative": -0.0013710722560063004,
-          "margin_vs_best_own_perturbation": -0.0013710722560063004,
-          "variant_stats": {
-            "causality": 546,
-            "entity": 476,
-            "number": 308,
-            "blocks": 80
-          }
-        },
-        "5": {
-          "n_blocks": 80,
-          "pool_size": 1393,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.8125,
-          "xsimpp_err_hard_pool": 0.8125,
-          "xsimpp_err_own_pool": 0.8125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.8125,
-            "gold+all_perturbed": 0.8125,
-            "gold+own_perturbed": 0.8125
-          },
-          "own_pool_breakdown": {
-            "correct": 0.1875,
-            "causality": 0.7,
-            "entity": 0.075,
-            "number": 0.0375
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.775,
-            "entity": 0.21428571428571427,
-            "number": 0.16666666666666666
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 70,
-            "number": 54
-          },
-          "own_pool_chance_err": 0.9378002627215423,
-          "own_pool_negatives_per_block": 16.4125,
-          "error_breakdown": {
-            "correct": 0.1875,
-            "misaligned": 0.0,
-            "causality": 0.7,
-            "entity": 0.075,
-            "number": 0.0375
-          },
-          "per_category_err": {
-            "causality": 0.775,
-            "entity": 0.1875,
-            "number": 0.1125
-          },
-          "category_combos": {
-            "causality+entity": 0.8,
-            "causality+number": 0.7875,
-            "entity+number": 0.2625,
-            "causality+entity+number": 0.8125
-          },
-          "detection_rate": 0.8172124904798173,
-          "detection_by_category": {
-            "causality": 0.7022222222222222,
-            "entity": 0.9527363184079602,
-            "number": 0.9152542372881356
-          },
-          "detection_by_position": {
-            "0": 0.8844765342960289,
-            "1": 0.7992125984251969,
-            "2": 0.7924528301886793,
-            "3": 0.7910447761194029,
-            "4": 0.8152610441767069
-          },
-          "n_negatives_by_category": {
-            "causality": 675,
-            "entity": 402,
-            "number": 236
-          },
-          "margin_vs_best_negative": -0.0012639887863770127,
-          "margin_vs_best_own_perturbation": -0.0012639887863770127,
-          "variant_stats": {
-            "causality": 675,
-            "entity": 402,
-            "number": 236,
-            "blocks": 80
-          }
-        }
-      },
-      "fr": {
-        "2": {
-          "n_blocks": 80,
-          "pool_size": 752,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.4875,
-          "xsimpp_err_hard_pool": 0.4875,
-          "xsimpp_err_own_pool": 0.4875,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.4875,
-            "gold+all_perturbed": 0.4875,
-            "gold+own_perturbed": 0.4875
-          },
-          "own_pool_breakdown": {
-            "correct": 0.5125,
-            "causality": 0.3625,
-            "entity": 0.0375,
-            "number": 0.0875
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.4,
-            "entity": 0.039473684210526314,
-            "number": 0.1568627450980392
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 76,
-            "number": 51
-          },
-          "own_pool_chance_err": 0.8856685328560328,
-          "own_pool_negatives_per_block": 8.4,
-          "error_breakdown": {
-            "correct": 0.5125,
-            "misaligned": 0.0,
-            "causality": 0.3625,
-            "entity": 0.0375,
-            "number": 0.0875
-          },
-          "per_category_err": {
-            "causality": 0.4,
-            "entity": 0.0375,
-            "number": 0.1
-          },
-          "category_combos": {
-            "causality+entity": 0.425,
-            "causality+number": 0.4625,
-            "entity+number": 0.1375,
-            "causality+entity+number": 0.4875
-          },
-          "detection_rate": 0.9122023809523809,
-          "detection_by_category": {
-            "causality": 0.8321428571428572,
-            "entity": 0.9878048780487805,
-            "number": 0.9383561643835616
-          },
-          "detection_by_position": {
-            "0": 0.9211267605633803,
-            "1": 0.9022082018927445
-          },
-          "n_negatives_by_category": {
-            "causality": 280,
-            "entity": 246,
-            "number": 146
-          },
-          "margin_vs_best_negative": 0.00019019097089767456,
-          "margin_vs_best_own_perturbation": 0.00019019097089767456,
-          "variant_stats": {
-            "causality": 280,
-            "entity": 246,
-            "number": 146,
-            "blocks": 80
-          }
-        },
-        "3": {
-          "n_blocks": 80,
-          "pool_size": 1057,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.7125,
-          "xsimpp_err_hard_pool": 0.7125,
-          "xsimpp_err_own_pool": 0.7125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.7125,
-            "gold+all_perturbed": 0.7125,
-            "gold+own_perturbed": 0.7125
-          },
-          "own_pool_breakdown": {
-            "correct": 0.2875,
-            "causality": 0.5625,
-            "entity": 0.0375,
-            "number": 0.1125
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.625,
-            "entity": 0.05333333333333334,
-            "number": 0.21666666666666667
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 75,
-            "number": 60
-          },
-          "own_pool_chance_err": 0.9188461893391267,
-          "own_pool_negatives_per_block": 12.2125,
-          "error_breakdown": {
-            "correct": 0.2875,
-            "misaligned": 0.0,
-            "causality": 0.5625,
-            "entity": 0.0375,
-            "number": 0.1125
-          },
-          "per_category_err": {
-            "causality": 0.625,
-            "entity": 0.05,
-            "number": 0.1625
-          },
-          "category_combos": {
-            "causality+entity": 0.6375,
-            "causality+number": 0.7,
-            "entity+number": 0.2125,
-            "causality+entity+number": 0.7125
-          },
-          "detection_rate": 0.9007164790174002,
-          "detection_by_category": {
-            "causality": 0.8166259168704156,
-            "entity": 0.9883720930232558,
-            "number": 0.9196428571428571
-          },
-          "detection_by_position": {
-            "0": 0.9204545454545454,
-            "1": 0.8926174496644296,
-            "2": 0.8868501529051988
-          },
-          "n_negatives_by_category": {
-            "causality": 409,
-            "entity": 344,
-            "number": 224
-          },
-          "margin_vs_best_negative": -0.00035144464345648885,
-          "margin_vs_best_own_perturbation": -0.00035144464345648885,
-          "variant_stats": {
-            "causality": 409,
-            "entity": 344,
-            "number": 224,
-            "blocks": 80
-          }
-        },
-        "4": {
-          "n_blocks": 80,
-          "pool_size": 1365,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.8125,
-          "xsimpp_err_hard_pool": 0.8125,
-          "xsimpp_err_own_pool": 0.8125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.8125,
-            "gold+all_perturbed": 0.8125,
-            "gold+own_perturbed": 0.8125
-          },
-          "own_pool_breakdown": {
-            "correct": 0.1875,
-            "causality": 0.625,
-            "entity": 0.0875,
-            "number": 0.1
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.725,
-            "entity": 0.14285714285714285,
-            "number": 0.2571428571428571
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 77,
-            "number": 70
-          },
-          "own_pool_chance_err": 0.937919949844393,
-          "own_pool_negatives_per_block": 16.0625,
-          "error_breakdown": {
-            "correct": 0.1875,
-            "misaligned": 0.0,
-            "causality": 0.625,
-            "entity": 0.0875,
-            "number": 0.1
-          },
-          "per_category_err": {
-            "causality": 0.725,
-            "entity": 0.1375,
-            "number": 0.225
-          },
-          "category_combos": {
-            "causality+entity": 0.7625,
-            "causality+number": 0.8,
-            "entity+number": 0.325,
-            "causality+entity+number": 0.8125
-          },
-          "detection_rate": 0.863035019455253,
-          "detection_by_category": {
-            "causality": 0.7430167597765364,
-            "entity": 0.9708520179372198,
-            "number": 0.9172185430463576
-          },
-          "detection_by_position": {
-            "0": 0.9020172910662824,
-            "1": 0.8548387096774194,
-            "2": 0.8490566037735849,
-            "3": 0.8419354838709677
-          },
-          "n_negatives_by_category": {
-            "causality": 537,
-            "entity": 446,
-            "number": 302
-          },
-          "margin_vs_best_negative": -0.0008326098322868347,
-          "margin_vs_best_own_perturbation": -0.0008326098322868347,
-          "variant_stats": {
-            "causality": 537,
-            "entity": 446,
-            "number": 302,
-            "blocks": 80
-          }
-        },
-        "5": {
-          "n_blocks": 80,
-          "pool_size": 1384,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.9,
-          "xsimpp_err_hard_pool": 0.9,
-          "xsimpp_err_own_pool": 0.9,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.9,
-            "gold+all_perturbed": 0.9,
-            "gold+own_perturbed": 0.9
-          },
-          "own_pool_breakdown": {
-            "correct": 0.1,
-            "causality": 0.725,
-            "entity": 0.0875,
-            "number": 0.0875
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.8375,
-            "entity": 0.2028985507246377,
-            "number": 0.3508771929824561
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 69,
-            "number": 57
-          },
-          "own_pool_chance_err": 0.9360038854192834,
-          "own_pool_negatives_per_block": 16.3,
-          "error_breakdown": {
-            "correct": 0.1,
-            "misaligned": 0.0,
-            "causality": 0.725,
-            "entity": 0.0875,
-            "number": 0.0875
-          },
-          "per_category_err": {
-            "causality": 0.8375,
-            "entity": 0.175,
-            "number": 0.25
-          },
-          "category_combos": {
-            "causality+entity": 0.8625,
-            "causality+number": 0.875,
-            "entity+number": 0.3625,
-            "causality+entity+number": 0.9
-          },
-          "detection_rate": 0.7906441717791411,
-          "detection_by_category": {
-            "causality": 0.6656626506024096,
-            "entity": 0.9529702970297029,
-            "number": 0.864406779661017
-          },
-          "detection_by_position": {
-            "0": 0.8248175182481752,
-            "1": 0.7883817427385892,
-            "2": 0.7908745247148289,
-            "3": 0.8015564202334631,
-            "4": 0.7472118959107806
-          },
-          "n_negatives_by_category": {
-            "causality": 664,
-            "entity": 404,
-            "number": 236
-          },
-          "margin_vs_best_negative": -0.0013219981919974089,
-          "margin_vs_best_own_perturbation": -0.0013219981919974089,
-          "variant_stats": {
-            "causality": 664,
-            "entity": 404,
-            "number": 236,
-            "blocks": 80
-          }
-        }
-      },
-      "ru": {
-        "2": {
-          "n_blocks": 80,
-          "pool_size": 710,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.4875,
-          "xsimpp_err_hard_pool": 0.4875,
-          "xsimpp_err_own_pool": 0.4875,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.4875,
-            "gold+all_perturbed": 0.4875,
-            "gold+own_perturbed": 0.4875
-          },
-          "own_pool_breakdown": {
-            "correct": 0.5125,
-            "causality": 0.325,
-            "entity": 0.0625,
-            "number": 0.1
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.3375,
-            "entity": 0.07042253521126761,
-            "number": 0.2
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 71,
-            "number": 45
-          },
-          "own_pool_chance_err": 0.8770749389499389,
-          "own_pool_negatives_per_block": 7.875,
-          "error_breakdown": {
-            "correct": 0.5125,
-            "misaligned": 0.0,
-            "causality": 0.325,
-            "entity": 0.0625,
-            "number": 0.1
-          },
-          "per_category_err": {
-            "causality": 0.3375,
-            "entity": 0.0625,
-            "number": 0.1125
-          },
-          "category_combos": {
-            "causality+entity": 0.4,
-            "causality+number": 0.425,
-            "entity+number": 0.175,
-            "causality+entity+number": 0.4875
-          },
-          "detection_rate": 0.9206349206349206,
-          "detection_by_category": {
-            "causality": 0.87109375,
-            "entity": 0.9795081967213115,
-            "number": 0.9076923076923077
-          },
-          "detection_by_position": {
-            "0": 0.9365079365079365,
-            "1": 0.9047619047619048
-          },
-          "n_negatives_by_category": {
-            "causality": 256,
-            "entity": 244,
-            "number": 130
-          },
-          "margin_vs_best_negative": 0.0002505280135665089,
-          "margin_vs_best_own_perturbation": 0.0002505280135665089,
-          "variant_stats": {
-            "causality": 256,
-            "entity": 244,
-            "number": 130,
-            "blocks": 80
-          }
-        },
-        "3": {
-          "n_blocks": 80,
-          "pool_size": 989,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.6,
-          "xsimpp_err_hard_pool": 0.6,
-          "xsimpp_err_own_pool": 0.6,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.6,
-            "gold+all_perturbed": 0.6,
-            "gold+own_perturbed": 0.6
-          },
-          "own_pool_breakdown": {
-            "correct": 0.4,
-            "causality": 0.4625,
-            "entity": 0.0625,
-            "number": 0.075
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.525,
-            "entity": 0.10144927536231885,
-            "number": 0.17543859649122806
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 69,
-            "number": 57
-          },
-          "own_pool_chance_err": 0.9111462215545034,
-          "own_pool_negatives_per_block": 11.3625,
-          "error_breakdown": {
-            "correct": 0.4,
-            "misaligned": 0.0,
-            "causality": 0.4625,
-            "entity": 0.0625,
-            "number": 0.075
-          },
-          "per_category_err": {
-            "causality": 0.525,
-            "entity": 0.0875,
-            "number": 0.125
-          },
-          "category_combos": {
-            "causality+entity": 0.55,
-            "causality+number": 0.575,
-            "entity+number": 0.2125,
-            "causality+entity+number": 0.6
-          },
-          "detection_rate": 0.8998899889988999,
-          "detection_by_category": {
-            "causality": 0.8249336870026526,
-            "entity": 0.9754601226993865,
-            "number": 0.9174757281553398
-          },
-          "detection_by_position": {
-            "0": 0.8958990536277602,
-            "1": 0.8949152542372881,
-            "2": 0.9090909090909091
-          },
-          "n_negatives_by_category": {
-            "causality": 377,
-            "entity": 326,
-            "number": 206
-          },
-          "margin_vs_best_negative": -0.00032396690221503377,
-          "margin_vs_best_own_perturbation": -0.00032396690221503377,
-          "variant_stats": {
-            "causality": 377,
-            "entity": 326,
-            "number": 206,
-            "blocks": 80
-          }
-        },
-        "4": {
-          "n_blocks": 80,
-          "pool_size": 1273,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.7375,
-          "xsimpp_err_hard_pool": 0.7375,
-          "xsimpp_err_own_pool": 0.7375,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.7375,
-            "gold+all_perturbed": 0.7375,
-            "gold+own_perturbed": 0.7375
-          },
-          "own_pool_breakdown": {
-            "correct": 0.2625,
-            "causality": 0.6,
-            "entity": 0.0625,
-            "number": 0.075
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.675,
-            "entity": 0.21333333333333335,
-            "number": 0.16666666666666666
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 75,
-            "number": 66
-          },
-          "own_pool_chance_err": 0.9328897937796974,
-          "own_pool_negatives_per_block": 14.9125,
-          "error_breakdown": {
-            "correct": 0.2625,
-            "misaligned": 0.0,
-            "causality": 0.6,
-            "entity": 0.0625,
-            "number": 0.075
-          },
-          "per_category_err": {
-            "causality": 0.675,
-            "entity": 0.2,
-            "number": 0.1375
-          },
-          "category_combos": {
-            "causality+entity": 0.7,
-            "causality+number": 0.7125,
-            "entity+number": 0.2875,
-            "causality+entity+number": 0.7375
-          },
-          "detection_rate": 0.865046102263202,
-          "detection_by_category": {
-            "causality": 0.7524752475247525,
-            "entity": 0.9565217391304348,
-            "number": 0.9343065693430657
-          },
-          "detection_by_position": {
-            "0": 0.9057750759878419,
-            "1": 0.8680555555555556,
-            "2": 0.8435374149659864,
-            "3": 0.8368794326241135
-          },
-          "n_negatives_by_category": {
-            "causality": 505,
-            "entity": 414,
-            "number": 274
-          },
-          "margin_vs_best_negative": -0.0012028947239741683,
-          "margin_vs_best_own_perturbation": -0.0012028947239741683,
-          "variant_stats": {
-            "causality": 505,
-            "entity": 414,
-            "number": 274,
-            "blocks": 80
-          }
-        },
-        "5": {
-          "n_blocks": 80,
-          "pool_size": 1231,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.9125,
-          "xsimpp_err_hard_pool": 0.9125,
-          "xsimpp_err_own_pool": 0.9125,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.9125,
-            "gold+all_perturbed": 0.9125,
-            "gold+own_perturbed": 0.9125
-          },
-          "own_pool_breakdown": {
-            "correct": 0.0875,
-            "causality": 0.675,
-            "entity": 0.125,
-            "number": 0.1125
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.8375,
-            "entity": 0.2641509433962264,
-            "number": 0.32142857142857145
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 53,
-            "number": 56
-          },
-          "own_pool_chance_err": 0.9254985963671267,
-          "own_pool_negatives_per_block": 14.3875,
-          "error_breakdown": {
-            "correct": 0.0875,
-            "misaligned": 0.0,
-            "causality": 0.675,
-            "entity": 0.125,
-            "number": 0.1125
-          },
-          "per_category_err": {
-            "causality": 0.8375,
-            "entity": 0.175,
-            "number": 0.225
-          },
-          "category_combos": {
-            "causality+entity": 0.875,
-            "causality+number": 0.8875,
-            "entity+number": 0.3625,
-            "causality+entity+number": 0.9125
-          },
-          "detection_rate": 0.8097306689834927,
-          "detection_by_category": {
-            "causality": 0.7170731707317073,
-            "entity": 0.9331210191082803,
-            "number": 0.8918918918918919
-          },
-          "detection_by_position": {
-            "0": 0.8695652173913043,
-            "1": 0.8009259259259259,
-            "2": 0.7777777777777778,
-            "3": 0.8026315789473685,
-            "4": 0.7909090909090909
-          },
-          "n_negatives_by_category": {
-            "causality": 615,
-            "entity": 314,
-            "number": 222
-          },
-          "margin_vs_best_negative": -0.0010257072281092405,
-          "margin_vs_best_own_perturbation": -0.0010257072281092405,
-          "variant_stats": {
-            "causality": 615,
-            "entity": 314,
-            "number": 222,
-            "blocks": 80
-          }
-        }
-      },
-      "zh": {
-        "2": {
-          "n_blocks": 80,
-          "pool_size": 772,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.5625,
-          "xsimpp_err_hard_pool": 0.5625,
-          "xsimpp_err_own_pool": 0.5625,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.5625,
-            "gold+all_perturbed": 0.5625,
-            "gold+own_perturbed": 0.5625
-          },
-          "own_pool_breakdown": {
-            "correct": 0.4375,
-            "causality": 0.25,
-            "entity": 0.2375,
-            "number": 0.075
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.325,
-            "entity": 0.29577464788732394,
-            "number": 0.15517241379310345
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 71,
-            "number": 58
-          },
-          "own_pool_chance_err": 0.8904549617049617,
-          "own_pool_negatives_per_block": 8.65,
-          "error_breakdown": {
-            "correct": 0.4375,
-            "misaligned": 0.0,
-            "causality": 0.25,
-            "entity": 0.2375,
-            "number": 0.075
-          },
-          "per_category_err": {
-            "causality": 0.325,
-            "entity": 0.2625,
-            "number": 0.1125
-          },
-          "category_combos": {
-            "causality+entity": 0.5,
-            "causality+number": 0.4,
-            "entity+number": 0.3375,
-            "causality+entity+number": 0.5625
-          },
-          "detection_rate": 0.8916184971098265,
-          "detection_by_category": {
-            "causality": 0.8605442176870748,
-            "entity": 0.8983050847457628,
-            "number": 0.9382716049382716
-          },
-          "detection_by_position": {
-            "0": 0.8915989159891599,
-            "1": 0.891640866873065
-          },
-          "n_negatives_by_category": {
-            "causality": 294,
-            "entity": 236,
-            "number": 162
-          },
-          "margin_vs_best_negative": -0.0005187898641452193,
-          "margin_vs_best_own_perturbation": -0.0005187898641452193,
-          "variant_stats": {
-            "causality": 294,
-            "entity": 236,
-            "number": 162,
-            "blocks": 80
-          }
-        },
-        "3": {
-          "n_blocks": 80,
-          "pool_size": 1078,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.6625,
-          "xsimpp_err_hard_pool": 0.6625,
-          "xsimpp_err_own_pool": 0.6625,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.6625,
-            "gold+all_perturbed": 0.6625,
-            "gold+own_perturbed": 0.6625
-          },
-          "own_pool_breakdown": {
-            "correct": 0.3375,
-            "causality": 0.3625,
-            "entity": 0.225,
-            "number": 0.075
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.4875,
-            "entity": 0.3055555555555556,
-            "number": 0.16176470588235295
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 72,
-            "number": 68
-          },
-          "own_pool_chance_err": 0.9221258187439496,
-          "own_pool_negatives_per_block": 12.475,
-          "error_breakdown": {
-            "correct": 0.3375,
-            "misaligned": 0.0,
-            "causality": 0.3625,
-            "entity": 0.225,
-            "number": 0.075
-          },
-          "per_category_err": {
-            "causality": 0.4875,
-            "entity": 0.275,
-            "number": 0.1375
-          },
-          "category_combos": {
-            "causality+entity": 0.625,
-            "causality+number": 0.55,
-            "entity+number": 0.3875,
-            "causality+entity+number": 0.6625
-          },
-          "detection_rate": 0.8977955911823647,
-          "detection_by_category": {
-            "causality": 0.8623853211009175,
-            "entity": 0.9072847682119205,
-            "number": 0.9461538461538461
-          },
-          "detection_by_position": {
-            "0": 0.912568306010929,
-            "1": 0.88,
-            "2": 0.8975903614457831
-          },
-          "n_negatives_by_category": {
-            "causality": 436,
-            "entity": 302,
-            "number": 260
-          },
-          "margin_vs_best_negative": -0.0004836931766476482,
-          "margin_vs_best_own_perturbation": -0.0004836931766476482,
-          "variant_stats": {
-            "causality": 436,
-            "entity": 302,
-            "number": 260,
-            "blocks": 80
-          }
-        },
-        "4": {
-          "n_blocks": 80,
-          "pool_size": 1408,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.825,
-          "xsimpp_err_hard_pool": 0.825,
-          "xsimpp_err_own_pool": 0.825,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.825,
-            "gold+all_perturbed": 0.825,
-            "gold+own_perturbed": 0.825
-          },
-          "own_pool_breakdown": {
-            "correct": 0.175,
-            "causality": 0.3625,
-            "entity": 0.3625,
-            "number": 0.1
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.5875,
-            "entity": 0.45454545454545453,
-            "number": 0.2465753424657534
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 77,
-            "number": 73
-          },
-          "own_pool_chance_err": 0.9404812909015948,
-          "own_pool_negatives_per_block": 16.6,
-          "error_breakdown": {
-            "correct": 0.175,
-            "misaligned": 0.0,
-            "causality": 0.3625,
-            "entity": 0.3625,
-            "number": 0.1
-          },
-          "per_category_err": {
-            "causality": 0.5875,
-            "entity": 0.4375,
-            "number": 0.225
-          },
-          "category_combos": {
-            "causality+entity": 0.8,
-            "causality+number": 0.6625,
-            "entity+number": 0.5375,
-            "causality+entity+number": 0.825
-          },
-          "detection_rate": 0.8569277108433735,
-          "detection_by_category": {
-            "causality": 0.8224137931034483,
-            "entity": 0.8564593301435407,
-            "number": 0.9181818181818182
-          },
-          "detection_by_position": {
-            "0": 0.8921832884097035,
-            "1": 0.8622950819672132,
-            "2": 0.8228228228228228,
-            "3": 0.8463949843260188
-          },
-          "n_negatives_by_category": {
-            "causality": 580,
-            "entity": 418,
-            "number": 330
-          },
-          "margin_vs_best_negative": -0.0011289656395092607,
-          "margin_vs_best_own_perturbation": -0.0011289656395092607,
-          "variant_stats": {
-            "causality": 580,
-            "entity": 418,
-            "number": 330,
-            "blocks": 80
-          }
-        },
-        "5": {
-          "n_blocks": 80,
-          "pool_size": 1447,
-          "xsim_err": 0.0,
-          "xsimpp_err": 0.875,
-          "xsimpp_err_hard_pool": 0.875,
-          "xsimpp_err_own_pool": 0.875,
-          "pool_ablation": {
-            "true_only": 0.0,
-            "true+perturbed": 0.875,
-            "gold+all_perturbed": 0.875,
-            "gold+own_perturbed": 0.875
-          },
-          "own_pool_breakdown": {
-            "correct": 0.125,
-            "causality": 0.425,
-            "entity": 0.325,
-            "number": 0.125
-          },
-          "own_pool_err_by_category": {
-            "causality": 0.6625,
-            "entity": 0.55,
-            "number": 0.4098360655737705
-          },
-          "own_pool_n_blocks": 80,
-          "own_pool_n_blocks_by_category": {
-            "causality": 80,
-            "entity": 60,
-            "number": 61
-          },
-          "own_pool_chance_err": 0.9389069883070974,
-          "own_pool_negatives_per_block": 17.0875,
-          "error_breakdown": {
-            "correct": 0.125,
-            "misaligned": 0.0,
-            "causality": 0.425,
-            "entity": 0.325,
-            "number": 0.125
-          },
-          "per_category_err": {
-            "causality": 0.6625,
-            "entity": 0.4125,
-            "number": 0.3125
-          },
-          "category_combos": {
-            "causality+entity": 0.8375,
-            "causality+number": 0.775,
-            "entity+number": 0.55,
-            "causality+entity+number": 0.875
-          },
-          "detection_rate": 0.8354059985369422,
-          "detection_by_category": {
-            "causality": 0.8226466575716235,
-            "entity": 0.8383233532934131,
-            "number": 0.8633333333333333
-          },
-          "detection_by_position": {
-            "0": 0.8705501618122977,
-            "1": 0.8237547892720306,
-            "2": 0.8278388278388278,
-            "3": 0.821969696969697,
-            "4": 0.8269230769230769
-          },
-          "n_negatives_by_category": {
-            "causality": 733,
-            "entity": 334,
-            "number": 300
-          },
-          "margin_vs_best_negative": -0.0012556023430079222,
-          "margin_vs_best_own_perturbation": -0.0012556023430079222,
-          "variant_stats": {
-            "causality": 733,
-            "entity": 334,
-            "number": 300,
-            "blocks": 80
-          }
-        }
-      },
-      "_mean_by_k": {
+      "mean_by_k": {
         "2": {
           "xsim_err": 0.0,
           "xsimpp_err": 0.475,

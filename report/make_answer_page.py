@@ -470,20 +470,20 @@ natif 13, avec une seule paire commune.</li>
 <div>
 <h4>Données sources</h4>
 <ul>
-<li>Q1 — <span class="mono">results/length_training/correlation_heldout.json</span></li>
-<li>Q2 — <span class="mono">results/length_training/metadoceval.json</span></li>
-<li>Q3 — <span class="mono">results/block_duel/block_duel.json</span> (duel à 5 candidats),
-<span class="mono">results/block_xsim/block_xsim_*.json</span> (duel à 1 candidat),
-<span class="mono">results/matched_core/matched_core.json</span></li>
+<li>Q1 — <span class="mono">part2_length_training/results/correlation_heldout.json</span></li>
+<li>Q2 — <span class="mono">part2_length_training/results/metadoceval.json</span></li>
+<li>Q3 — <span class="mono">part1_block_alignment/results/duel.json</span> (duel à 5 candidats),
+<span class="mono">part1_block_alignment/results/encoder_cosine_arm_*.json</span> (duel à 1 candidat),
+<span class="mono">part1_block_alignment/results/matched_core.json</span></li>
 </ul>
 </div>
 <div>
 <h4>Reproduire</h4>
 <p><span class="mono">python report/figures/make_answer_figures.py</span> → PDF + PNG dans
 <span class="mono">report/figures/answers/</span>.</p>
-<p><span class="mono">python report/make_answer_page.py</span> régénère cette page.</p>
-<p>Protocoles&nbsp;: <span class="mono">experiments/length_isolation/</span>,
-<span class="mono">experiments/length_training/</span>.</p>
+<p><span class="mono">python -m report.make_answer_page</span> régénère cette page.</p>
+<p>Protocoles&nbsp;: <span class="mono">part1_block_alignment/</span>,
+<span class="mono">part2_length_training/</span>.</p>
 </div>
 <div>
 <h4>Références</h4>

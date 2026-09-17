@@ -1,18 +1,22 @@
-#!/usr/bin/env python3
-"""Figures for the FDTEM report that do not exist elsewhere.
+"""The four figures of report/main.tex that no part produces itself.
 
-Reads results JSONs, writes PDF figures into report/figures/.
-Palette: validated categorical slots (light mode).
+    python report/figures/make_report_figures.py      -> report/figures/*.pdf (+ .png)
+
+Reads part2_length_training/results/{wave1_wandb_curve_diagnosis, wave1_correlation_heldout,
+wave1_metadoceval}.json and part1_block_alignment/results/matched_core.json.
 """
-from pathlib import Path
 import json
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-ROOT = Path(__file__).resolve().parents[2]
-OUT = Path(__file__).resolve().parent
+from common.paths import ROOT
+from part2_length_training.models import CorrelationResults, MetaDocEvalResults
+
+P1 = ROOT / "part1_block_alignment" / "results"
+P2 = ROOT / "part2_length_training" / "results"
+OUT = ROOT / "report" / "figures"
 
 BLUE, ORANGE, AQUA, YELLOW, MAGENTA = "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"
 INK, INK2, MUTED = "#0b0b0b", "#52514e", "#b9b8b3"
@@ -27,14 +31,13 @@ plt.rcParams.update({
 
 def save(fig, name):
     fig.savefig(OUT / name, bbox_inches="tight")
-    # PNG twin for the pptx deck (experiments/length_training/report/make_deck.py)
     fig.savefig((OUT / name).with_suffix(".png"), dpi=200, bbox_inches="tight")
     plt.close(fig)
     print("wrote", name)
 
 
 # ── 1. validation curves of the invalid sweeps (bell shape) ──────────────────
-diag = json.load(open(ROOT / "results/length_training/wandb_curve_diagnosis.json"))
+diag = json.load(open(P2 / "wave1_wandb_curve_diagnosis.json"))
 
 fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.6), sharey=False)
 
@@ -81,17 +84,16 @@ ax.set_title("Bio-MQM sweep (invalid, 2026-08-14)", fontsize=9)
 ax.set_xlabel("epoch")
 save(fig, "wandb_bell.pdf")
 
-# ── 2. baseline Kendall vs window size k (WMT eval portions) ─────────────────
-corr = json.load(open(ROOT / "results/length_training/correlation.json"))
+# ── 2. baseline Kendall vs window size k (WMT eval portions, wave 1 file) ─────
+corr = CorrelationResults.model_validate_json((P2 / "wave1_correlation_heldout.json").read_text())
 ks = ["1", "2", "3", "4", "6"]
 fig, ax = plt.subplots(figsize=(3.6, 2.5))
 for label, c, name in (("da-base", BLUE, "COMET-DA"),
                        ("qe-base", ORANGE, "CometKiwi")):
-    m = corr["models"][label]["_mean_by_k"]
-    ax.plot(range(len(ks)), [m[k]["kendall"] for k in ks], "-o", color=c,
-            lw=1.6, ms=4)
-    ax.plot([len(ks) + 0.5], [m["0"]["kendall"]], "s", color=c, ms=5)
-    ax.annotate(name, (len(ks) - 1, m["6"]["kendall"]),
+    m = corr.models[label].mean_by_k
+    ax.plot(range(len(ks)), [m[k].kendall for k in ks], "-o", color=c, lw=1.6, ms=4)
+    ax.plot([len(ks) + 0.5], [m["0"].kendall], "s", color=c, ms=5)
+    ax.annotate(name, (len(ks) - 1, m["6"].kendall),
                 textcoords="offset points", xytext=(-2, 6), fontsize=8,
                 color=c, ha="right")
 ax.set_xticks(list(range(len(ks))) + [len(ks) + 0.5])
@@ -101,7 +103,7 @@ ax.set_xlabel("evaluation window (segments per input)")
 save(fig, "baseline_tau_vs_k.pdf")
 
 # ── 3. MetaDocEval baselines: accuracy vs context window w ───────────────────
-mde = json.load(open(ROOT / "results/metadoceval/accuracy.json"))
+mde = MetaDocEvalResults.model_validate_json((P2 / "wave1_metadoceval.json").read_text())
 WINDOWS = ["1", "3", "6", "9"]
 G1, G2, G3 = "#6b6a66", "#93928d", "#b9b8b3"
 groups = {
@@ -120,9 +122,9 @@ NUDGE = {"kiwi": {"tense": -6, "conjunction": 3, "lexical": -3,
 fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.6), sharey=True)
 for ax, model, title in ((axes[0], "wmt22", "COMET-DA"),
                          (axes[1], "kiwi", "CometKiwi")):
-    micro = mde["models"][model]["micro"]
+    micro = mde.models[model].micro
     for cat, (c, lab) in groups.items():
-        ys = [micro[f"{cat}|w{w}"]["accuracy"] for w in WINDOWS]
+        ys = [micro[f"{cat}|w{w}"].accuracy for w in WINDOWS]
         ls = ":" if cat == "sentence_splitting" else "-"
         lw = 1.2 if c in (G1, G2, G3) else 1.6
         ax.plot(range(4), ys, ls, color=c, lw=lw, ms=3, marker="o")
@@ -141,8 +143,8 @@ axes[1].set_xlim(-0.15, 4.9)
 axes[0].set_xlim(-0.15, 3.15)
 save(fig, "metadoceval_base.pdf")
 
-# ── 4. matched-core: detection vs L, per filler, from the exact JSON ─────────
-mc = json.load(open(ROOT / "results/matched_core/matched_core.json"))
+# ── 4. matched-core: detection vs L, per filler (probe dropped; JSON kept) ───
+mc = json.load(open(P1 / "matched_core.json"))
 Ls = ["60", "120", "240", "480"]
 ENCS = [("comet:wmt22-comet-da", BLUE, "COMET"),
         ("xlmr:xlm-roberta-large", MUTED, "XLM-R"),
@@ -166,25 +168,3 @@ axes[0].set_ylabel("detection rate")
 axes[0].set_ylim(0.28, 1.02)
 axes[2].set_xlim(-0.15, 4.2)
 save(fig, "matched_core_report.pdf")
-
-# ── 5. wave-1 results: held-out Kendall vs k, arms vs baselines ──────────────
-held = json.load(open(ROOT / "results/length_training/correlation_heldout.json"))
-ks = ["1", "2", "3", "4", "6"]
-fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.6), sharey=False)
-for ax, fam, title in ((axes[0], "da", "COMET-DA"), (axes[1], "qe", "CometKiwi")):
-    for suffix, c, lab in ((f"{fam}-base", MUTED, "base"),
-                           (f"{fam}-frac000", BLUE, "frac000"),
-                           (f"{fam}-frac100", ORANGE, "frac100")):
-        m = held["models"][suffix]["_mean_by_k"]
-        ax.plot(range(len(ks)), [m[k]["kendall"] for k in ks], "-o",
-                color=c, lw=1.6, ms=4)
-        ax.plot([len(ks) + 0.5], [m["0"]["kendall"]], "s", color=c, ms=5)
-        ax.annotate(lab, (len(ks) + 0.5, m["0"]["kendall"]),
-                    textcoords="offset points", xytext=(7, 0), fontsize=7.5,
-                    color=c, va="center")
-    ax.set_xticks(list(range(len(ks))) + [len(ks) + 0.5])
-    ax.set_xticklabels([f"k={k}" for k in ks] + ["docs"])
-    ax.set_title(title, fontsize=9)
-    ax.set_xlim(-0.3, 7.0)
-axes[0].set_ylabel(r"held-out Kendall $\tau$")
-save(fig, "wave1_tau.pdf")

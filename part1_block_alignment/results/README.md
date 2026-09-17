@@ -1,107 +1,20 @@
-# block xSIM++ — hard negatives only, spaCy perturbations
+# Part 1 results — provenance
 
-Run of `experiments/length_isolation/run_xsim.py` with the two protocol changes:
-the candidate pool is **gold + single-edit hard negatives** (the other blocks'
-true targets — the classic xsim distractors — are no longer candidates), and the
-negatives come from the **spaCy backend** (real NER, morphology, parse-anchored
-negation) rather than the casing/regex heuristics.
+All JSON files are `RunResult` (`models.py`) unless stated; plots in `plots/` carry the
+JSON's stem as prefix. Encoder keys are `enc_tag` labels (`comet:wmt22-comet-da`,
+`xlmr:xlm-roberta-large`, `labse`, `e5:multilingual-e5-base`, `comet:<run>-<ckpt>`).
 
-## Configuration
+| file | date | produced by | backend | models | cited by |
+|---|---|---|---|---|---|
+| `duel.json` | 2026-07-28 | `evaluate_duel.py` (then `run_duel.py`), D ∈ {6, 5, 4}, de/es/fr/ru, k = 2..5 | heuristic | COMET-DA, XLM-R, LaBSE, E5, Bio-MQM COMET | `figures/make_figures.py` (iso_*), `report/figures/make_answer_figures.py` |
+| `comet_score.json` | 2026-09-01 | `evaluate_comet_score.py` (then `run_comet_align.py`), k = 1..5 | spacy | CometKiwi (score + cosine), COMET-DA (cosine), three part-2 arms | `figures/make_figures.py` (iso_comet_score, align_*), `report/make_status_page.py` |
+| `encoder_cosine_2026-07-16_heuristic.json` | 2026-07-16 | `evaluate_encoders.py` (then `run_xsim.py`), pre pool-ablation schema | heuristic | COMET-DA, Bio-MQM COMET, XLM-R, LaBSE, E5 | `report/main.tex` table `tab:blockxsim` |
+| `encoder_cosine_arm_frac000.json` | 2026-08-23 | same, baseline zoo + the wave-1 `mix-frac000` arm | heuristic | + `comet:mw5cryt7-…` | `report/figures/make_answer_figures.py` (q3_detection) |
+| `encoder_cosine_arm_frac100.json` | 2026-08-23 | same, the wave-1 `mix-frac100` arm alone | heuristic | `comet:4cnnyi3x-…` | same |
+| `encoder_cosine_spacy_smoke.json` | 2026-08-30 | `evaluate_encoders.py`, CPU, `--max_blocks 40`, FLORES-200 raw, de/es/fr/ru/zh | spacy | `e5:multilingual-e5-small` | the only output of the current pool-ablation code path; `report/partie1_longueur.tex` (control: error 0 on a pool of correct blocks only) |
+| `matched_core.json` | 2026-08-21 | matched-core probe, **dropped 2026-09-16** (no producer; plain dict) | — | 5 encoders, L ∈ {60, 120, 240, 480}, 4 fillers, 3 positions | `report/figures/make_report_figures.py`, `make_answer_figures.py` |
+| `matched_core_layers.json` | 2026-07-28 | per-layer variant of the same probe, **dropped** (plain dict) | — | XLM-R large, 25 layers, de/fr | `report/main.tex` (layer-wise claim) |
 
-| | |
-|---|---|
-| encoder | `e5:intfloat/multilingual-e5-small`, CPU |
-| corpus | FLORES-200 raw, `dev` + `devtest` (2009 aligned rows) |
-| languages | de, es, fr, ru, **zh** |
-| k | 2, 3, 4, 5 (non-overlapping blocks, stride = k) |
-| negatives | 2 per (block, sentence position, category) |
-| blocks | `--max_blocks 40` per split → 80 blocks per (lang, k) |
-| backend | `--perturb_backend spacy`, seed 42 |
-
-This is a **small-encoder, subsampled** run — it is not the cluster encoder zoo
-(COMET / bio-COMET / XLM-R / LaBSE / E5-base). Reproduce at full scale with
-`sbatch experiments/length_isolation/slurm/xsim.sh` (BACKEND defaults to spacy).
-With 80 blocks per cell the binomial CI on an error near 0.8 is roughly ±0.09.
-
-## Result — mean over the five languages
-
-| k | negs/block | chance | **gold+own** | gold+all | xsim | xsim++ |
-|--:|--:|--:|--:|--:|--:|--:|
-| 2 | 8.4 | 0.886 | **0.475** | 0.475 | 0.000 | 0.475 |
-| 3 | 12.2 | 0.919 | **0.657** | 0.657 | 0.000 | 0.657 |
-| 4 | 16.0 | 0.938 | **0.800** | 0.800 | 0.000 | 0.800 |
-| 5 | 16.2 | 0.936 | **0.875** | 0.875 | 0.000 | 0.875 |
-
-Per-language `gold+own` error:
-
-| | k=2 | k=3 | k=4 | k=5 |
-|---|--:|--:|--:|--:|
-| de | 0.412 | 0.600 | 0.787 | 0.875 |
-| es | 0.425 | 0.713 | 0.838 | 0.812 |
-| fr | 0.487 | 0.713 | 0.812 | 0.900 |
-| ru | 0.487 | 0.600 | 0.738 | 0.912 |
-| zh | 0.562 | 0.662 | 0.825 | 0.875 |
-
-### 1. The classic xsim distractors contribute nothing
-
-In **all 20 (language, k) cells**, `gold+own_perturbed`, `gold+all_perturbed` and
-`true+perturbed` are equal to machine precision, and the true-only pool
-(`xsim`) has error **exactly 0.000**. Picking the right *article* is trivial for
-a modern multilingual encoder at these block lengths; every error is the encoder
-preferring its own block's perturbed copy. Removing the other blocks' true
-targets is therefore free — and keeping them was measuring nothing. See
-`plots/pool_ablation.png`: three curves lie on top of each other and the classic
-xsim curve is flat on zero.
-
-### 2. Dilution, read against chance
-
-The own pool grows with k (8.4 → 16.2 negatives per block), so chance error
-rises too. Normalised skill, `(chance − err) / chance`:
-
-| k | 2 | 3 | 4 | 5 |
-|---|--:|--:|--:|--:|
-| skill | 0.464 | 0.285 | 0.147 | **0.065** |
-
-The encoder keeps less than a tenth of its headroom above chance once the edit
-sits inside a five-sentence block. `margin_vs_best_own_perturbation` turns
-**negative** from k = 3 on: on average the gold block is *further* from the query
-than its best perturbed rival. Note the pairwise `detection_rate` stays high
-(0.94 → 0.80) — one-vs-one hides what one-vs-many exposes.
-
-### 3. Causality is the failure mode; entities and numbers survive
-
-Per-category own pools (only that category's negatives, so each has its own
-chance floor):
-
-| k | causality err / chance | entity err / chance | number err / chance |
-|--:|--:|--:|--:|
-| 2 | 0.360 / 0.776 | 0.092 / 0.760 | 0.132 / 0.633 |
-| 3 | 0.550 / 0.837 | 0.131 / 0.811 | 0.176 / 0.733 |
-| 4 | 0.698 / 0.871 | 0.225 / 0.850 | 0.200 / 0.783 |
-| 5 | 0.792 / 0.893 | 0.303 / 0.832 | 0.290 / 0.742 |
-
-Negation and antonym flips are near chance by k = 5 while a swapped entity or
-digit is still caught two times out of three. Surface-token changes survive
-dilution; polarity changes do not.
-
-### 4. zh only exists because of the spaCy backend
-
-The casing heuristic yields **zero** entity negatives for uncased scripts. spaCy
-NER harvested 1180 entities across 10 labels from the Chinese corpus, so zh is a
-full participant here for the first time (2106/de, 1613/es, 1495/fr, 1353/ru).
-
-## Caveat carried over
-
-Both hard-negative pools still *grow* with k, which is why the chance line is
-plotted. For a comparison across k at a genuinely fixed candidate count, use
-`run_duel.py` — the own pool is its D = m (all-negatives) case.
-
-## Files
-
-| | |
-|---|---|
-| `block_xsim.json` | every metric, per encoder × language × k |
-| `plots/hard_negative_error.png` | headline: own/all-negative error vs k, with chance |
-| `plots/pool_ablation.png` | all four pools — the ablation of the classic distractors |
-| `plots/error_by_category.png` | own-pool error per perturbation category |
-| `plots/detection_vs_length.png`, `plots/detection_by_position.png` | pairwise detection |
+The July/August files were produced with the heuristic perturber and cannot be
+regenerated identically with the spaCy backend. The spacy smoke run is a subsampled
+validation of the code, not a cluster result.

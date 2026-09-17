@@ -66,6 +66,6 @@ unified_metric:
     validation_data:
       - ~/scratch/wmt_length_data/all_val.csv
 
-trainer: ../../../configs/trainer_wandb.yaml
-early_stopping: ../../../configs/early_stopping.yaml
-model_checkpoint: ../../../configs/model_checkpoint.yaml
+trainer: common/configs/trainer_wandb.yaml
+early_stopping: common/configs/early_stopping.yaml
+model_checkpoint: common/configs/model_checkpoint.yaml

@@ -4,8 +4,7 @@
 > language pair's slice of their mix, not on the mix, because COMET reads a
 > single file per epoch and the dataloader was never rebuilt. Arm rankings from
 > those runs track training-set size, not composition, and must not be reported.
-> The defect, the fix and the corrected protocol are in
-> [`experiments/length_training/README.md`](../experiments/length_training/README.md).
+> The defect, the fix and the corrected protocol are in [`README.md`](README.md).
 > The WMT sweep described there (36 arms) supersedes the 28-arm Bio-MQM grid below.
 
 
@@ -37,17 +36,16 @@
 >   metric, which is what makes the controlled arms' effect sizes readable.
 > * **RQ9 (alignment by the metric).** Retrieval on the experiment-2 blocks with
 >   the COMET score in place of the encoder cosine
->   (`experiments/length_isolation/run_comet_align.py`), reference-free.
+>   (`part1_block_alignment/evaluate_comet_score.py`), reference-free.
 >
 > Operational changes: mixes for the pure arms need
 > `make_mixtures.py --total_policy pure`; arms are chained across the 2-day wall
-> clock with `RESUME=auto`. See
-> [`experiments/length_training/README.md`](../experiments/length_training/README.md).
+> clock with `RESUME=auto`. See [`README.md`](README.md).
 
 Status: **running** (DA arms since 2026-08-14, QE arms submitted 2026-08-17;
 four-arm long-budget grid from 2026-08-29).
-Companion docs: `docs/RETRAIN_AND_BLOCK_XSIM.md` (original DA design),
-cluster runbook for operations. This document is the full experimental
+Companion docs: `docs/design_history.md` (original DA design),
+`docs/cluster_runbook.md` for operations. This document is the full experimental
 protocol covering **both** base metrics and all evaluation lenses.
 
 ---
@@ -160,17 +158,17 @@ Decision table:
 
 ## 6. Operations
 
-- Kiwi arms: `MODEL=qe VARIANT=mix MIX=fracNNN FROZEN={0,1} sbatch
-  scripts/slurm_retrain_comet.sh` (unfrozen arms with
-  `--exclude=gpu001,gpu004,gpu011,gpu014` — ≤16 GB GPUs OOM at unfreeze).
-  Config: `configs/models/comet_kiwi_paragraph_continue.yaml`
-  (`layer_transformation: softmax` — the released kiwi hparams'
-  `sparsemax_patch` resolves to softmax under comet ≥ 2.2.4, issue #244).
+*(Historical: the commands below are those of the Bio-MQM grid. The current
+entry points are `slurm/launch_arms.sh`, `slurm/train.sh`, `slurm/eval_validation.sh`
+and `slurm/eval_metadoceval.sh`; see README.md.)*
+
+- Kiwi arms: `MODEL=qe MIX=fracNNN FROZEN={0,1} sbatch slurm/train.sh` (unfrozen
+  arms with `--exclude=gpu001,gpu004,gpu011,gpu014` — ≤16 GB GPUs OOM at unfreeze).
+  Config: `configs/comet_qe.yaml` (`layer_transformation: softmax` — the released
+  kiwi hparams' `sparsemax_patch` resolves to softmax under comet ≥ 2.2.4, issue #244).
 - Evaluations are cached per model — rerun cheaply as arms finish:
-  `SWEEP=1 sbatch scripts/slurm_metadoceval.sh` (auto-discovers both
-  `mix-*` and `kiwi-mix-*` arms);
-  `scripts/eval_length_correlation.py --data_dir ~/scratch/paragraph_mqm`
-  (dev lens) and `--data_dir ~/scratch/paragraph_mqm_heldout` (test lens).
+  `sbatch slurm/eval_metadoceval.sh` (auto-discovers both `mix-*` and `kiwi-mix-*`
+  arms); `eval_validation.py --lens val` (dev lens) and `--lens heldout` (test lens).
 - Wave discipline: frac000/frac100 × frozen/unfrozen first per family;
   remaining 10 arms only after a clean first validation cycle.
 - **License**: any published kiwi fine-tune must be CC-BY-NC-SA-4.0
