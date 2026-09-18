@@ -8,6 +8,9 @@ venv/
 .pytest_cache/
 .vscode/
 
+# secrets
+.env
+
 # data, caches and logs are never committed; result JSONs and figures are
 data/
 part*/data/
