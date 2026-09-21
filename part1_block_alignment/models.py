@@ -103,6 +103,27 @@ class CandidatePool(DataModel):
         Path(path).write_text(self.model_dump_json(indent=2), encoding="utf-8")
 
 
+class PerturbedBlock(DataModel):
+    """One row of the every-sentence dataset (perturb_every_sentence.py): a k-sentence
+    block, its reference and distractors perturbed in every sentence.
+
+    Rows of one window share `window` across k and languages; distractor d at k+1 is
+    distractor d at k plus one perturbed sentence."""
+
+    id: str                                         # <lang>-w<window>-k<k>
+    lang_pair: str                                  # en-de
+    window: int
+    k: int
+    split: str
+    url: str
+    rows: list[int]                                 # FLORES rows of the split, in order
+    source: str                                     # the English block: the query
+    source_n_tokens: int                            # tokens of `source`, special tokens excluded
+    reference: str
+    distractors: list[str]
+    categories: list[list[str]]                     # [d][j]: category of sentence j of distractor d
+
+
 # ── per-cell metrics ──────────────────────────────────────────────────────────
 class PoolMetrics(ResultModel):
     """One (encoder, lang, k) cell of evaluate_encoders; older files lack some fields."""
@@ -166,6 +187,24 @@ class ScoreMetrics(ResultModel):
     variant_stats: dict[str, int] = {}
 
 
+class DecisionMetrics(ResultModel):
+    """Reference vs D distractors, averaged over every D-subset of a window's distractors."""
+
+    n_used: int | None = None                       # windows with at least D distractors
+    coverage: float | None = None
+    success: float | None = None                    # A(D) = mean C(w, D) / C(m, D)
+    success_ci: list[float] | None = None           # 95 %, articles resampled
+    mean_rank: float | None = None                  # R(D) = mean 1 + D (m - w) / m
+
+
+class EverySentenceMetrics(ResultModel):
+    n_windows: int | None = None
+    pairwise_win: float | None = None               # mean w / m
+    ties: int | None = None                         # distractors scored exactly like the reference
+    mean_source_tokens: float | None = None
+    by_D: dict[str, DecisionMetrics] = {}
+
+
 # ── mean over languages ───────────────────────────────────────────────────────
 def _mean_values(values: list):
     """Counts (int) are summed, rates (float) averaged, None skipped, dicts recursed."""
@@ -218,6 +257,15 @@ class ScoreCells(ModelCells):
     mean_by_k: dict[str, ScoreMetrics] = {}
 
 
+class ConditionCells(ResultModel):
+    by_lang: dict[str, dict[str, EverySentenceMetrics]] = {}
+    mean_by_k: dict[str, EverySentenceMetrics] = {}
+
+
+class EverySentenceCells(ModelCells):
+    conditions: dict[str, ConditionCells] = {}      # every_sentence | first_sentence
+
+
 class RunResult(ResultModel):
     experiment: str
     timestamp: str
@@ -245,3 +293,7 @@ class DuelRunResult(RunResult):
 
 class ScoreRunResult(RunResult):
     models: dict[str, ScoreCells] = {}
+
+
+class EverySentenceRunResult(RunResult):
+    models: dict[str, EverySentenceCells] = {}

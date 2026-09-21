@@ -10,7 +10,8 @@ from pathlib import Path
 import pytest
 
 from common.paths import ROOT
-from part1_block_alignment.models import DuelRunResult, EncoderRunResult, ScoreRunResult
+from part1_block_alignment.models import (DuelRunResult, EncoderRunResult, EverySentenceRunResult,
+                                          ScoreRunResult)
 from part2_length_training.models import CorrelationResults, LengthProfileResults, MetaDocEvalResults
 
 P1 = ROOT / "part1_block_alignment" / "results"
@@ -19,6 +20,7 @@ P2 = ROOT / "part2_length_training" / "results"
 CASES = [
     (P1 / "duel.json", DuelRunResult),
     (P1 / "comet_score.json", ScoreRunResult),
+    (P1 / "every_sentence.json", EverySentenceRunResult),
     (P1 / "encoder_cosine_2026-07-16_heuristic.json", EncoderRunResult),
     (P1 / "encoder_cosine_arm_frac000.json", EncoderRunResult),
     (P1 / "encoder_cosine_arm_frac100.json", EncoderRunResult),

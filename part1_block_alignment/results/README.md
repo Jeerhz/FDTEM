@@ -8,6 +8,7 @@ JSON's stem as prefix. Encoder keys are `enc_tag` labels (`comet:wmt22-comet-da`
 |---|---|---|---|---|---|
 | `duel.json` | 2026-07-28 | `evaluate_duel.py` (then `run_duel.py`), D ∈ {6, 5, 4}, de/es/fr/ru, k = 2..5 | heuristic | COMET-DA, XLM-R, LaBSE, E5, Bio-MQM COMET | `figures/make_figures.py` (iso_*), `report/figures/make_answer_figures.py` |
 | `comet_score.json` | 2026-09-01 | `evaluate_comet_score.py` (then `run_comet_align.py`), k = 1..5 | spacy | CometKiwi (score + cosine), COMET-DA (cosine), three part-2 arms | `figures/make_figures.py` (iso_comet_score, align_*), `report/make_status_page.py` |
+| `every_sentence.json` | 2026-09-18 | `evaluate_every_sentence.py`, job 5421518, D = 1..6, de/es/fr/ru, k = 1..5, 141 five-segment windows, conditions `every_sentence` / `first_sentence`; dataset = HF `AdleBenSalem/flores-plusplus-blocks` (gated) | spacy | CometKiwi + `kiwi-mix-frac000agg` (score); COMET-DA, XLM-R, LaBSE, E5, Bio-MQM COMET, `mix-frac000agg` (cosine) | — |
 | `encoder_cosine_2026-07-16_heuristic.json` | 2026-07-16 | `evaluate_encoders.py` (then `run_xsim.py`), pre pool-ablation schema | heuristic | COMET-DA, Bio-MQM COMET, XLM-R, LaBSE, E5 | `report/main.tex` table `tab:blockxsim` |
 | `encoder_cosine_arm_frac000.json` | 2026-08-23 | same, baseline zoo + the wave-1 `mix-frac000` arm | heuristic | + `comet:mw5cryt7-…` | `report/figures/make_answer_figures.py` (q3_detection) |
 | `encoder_cosine_arm_frac100.json` | 2026-08-23 | same, the wave-1 `mix-frac100` arm alone | heuristic | `comet:4cnnyi3x-…` | same |

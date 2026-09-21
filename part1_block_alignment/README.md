@@ -22,13 +22,18 @@ evaluate_encoders.py     cosine retrieval on four nested pools        -> results
 evaluate_duel.py         gold vs D own negatives, closed form         -> results/duel.json
 evaluate_comet_score.py  COMET score vs encoder cosine, same pools    -> results/comet_score.json
 figures/make_figures.py  the nine report figures                      -> figures/
+
+perturb_every_sentence.py   windows, every sentence perturbed         -> data/every_sentence_<backend>_<lang>.jsonl
+evaluate_every_sentence.py  every sentence vs first sentence, D = 1..6 -> results/every_sentence.json
+upload_every_sentence.py    the dataset on the Hub, gated like FLORES+
 ```
 
 `data/` is not committed: `sbatch part1_block_alignment/slurm/build_pools.sh` rebuilds
 it on CPU (`python -m part1_block_alignment.perturb --dry_run` prints coverage and
 example negatives without writing anything). The models are in `models.py`:
 `FloresCorpus` (common), `Block`, `Candidate`, `CandidatePool` (the dataset an
-evaluation loads), and the `RunResult` written by every evaluation.
+evaluation loads), `PerturbedBlock` (a row of the every-sentence dataset), and the
+`RunResult` written by every evaluation.
 
 ## Perturbation backends
 
@@ -77,6 +82,36 @@ own negatives, chance 0.5, broken down by category and by position of the pertur
 sentence) and a **shortlist** (gold vs 2 of its own negatives, chance 1/3; a block that
 cannot supply two is skipped, never padded, and the coverage is reported).
 
+## One error per sentence: holding the error share
+
+With one perturbed sentence per block the error share falls as 1/k, so the dilution of
+the error and the model's own handling of length are confounded. `perturb_every_sentence.py`
+perturbs **every** sentence of a distractor: one error per sentence at every k.
+
+- **Windows.** Non-overlapping runs of max(k) = 5 sentences of one article (141 over
+  dev + devtest); the k-block is the window's first k sentences, so every k is measured on
+  the same windows.
+- **Types.** Distractor d perturbs sentence j with `CATEGORIES[(d + j) % 3]`, so neighbouring
+  sentences carry different types; a sentence that does not admit it takes the next
+  category in that order, never an edit that another distractor already took there.
+- **Nesting.** A perturbation depends only on the sentence, j and d: distractor d at k+1 is
+  distractor d at k plus one perturbed sentence, so longer blocks carry exactly the errors
+  of the shorter ones.
+- **D.** A window keeps up to 6 distractors, those whose first sentence differs from all
+  earlier ones (distinct from k = 1 on). `evaluate_every_sentence.py` scores every D in
+  1..6 at once, averaging over all C(m, D) subsets as the duel does; a window with m < D is
+  skipped and the coverage reported. Chance is 1/(D+1).
+- **Control.** The same distractors with only their first sentence perturbed
+  (`first_sentence`): the single-edit protocol on the same windows. It coincides with
+  `every_sentence` at k = 1; the gap between the two is the dilution, what is left of the
+  fall of `every_sentence` with k is the model's own.
+
+Each row of the dataset is one (language pair, window, k) with the English `source`, its
+`reference`, the `distractors`, their per-sentence `categories` and `source_n_tokens`
+(XLM-R tokens of the English block). `upload_every_sentence.py` publishes the same files;
+the repository is gated with the FLORES+ conditions, which forbid re-hosting FLORES+ text
+where crawlers can reach it.
+
 ## Run
 
 ```bash
@@ -85,6 +120,10 @@ sbatch part1_block_alignment/slurm/evaluate_encoders.sh      # dilution curve, f
 sbatch part1_block_alignment/slurm/evaluate_duel.sh          # fixed-pool control
 sbatch part1_block_alignment/slurm/evaluate_comet_score.sh   # score vs cosine
 python -m part1_block_alignment.figures.make_figures         # figures/iso_*, align_*
+
+sbatch part1_block_alignment/slurm/build_every_sentence.sh     # every-sentence dataset (CPU)
+sbatch part1_block_alignment/slurm/evaluate_every_sentence.sh  # D = 1..6, both conditions
+python -m part1_block_alignment.upload_every_sentence          # AdleBenSalem/flores-plusplus-blocks
 ```
 
 Every script is `python -m part1_block_alignment.<script> --help`. Encoders are named
@@ -98,7 +137,8 @@ in part 2 to test a length-trained encoder (`RETRAIN_CKPT`, `QE_CKPT`, `DA_CKPT`
 | `models.py` | `Block`, `Candidate`, `CandidatePool`, the metric cells and `RunResult` |
 | `load_flores.py` · `build_blocks.py` · `perturb.py` · `perturb_spacy.py` | the data pipeline |
 | `evaluate_encoders.py` · `evaluate_duel.py` · `evaluate_comet_score.py` | the three evaluations |
-| `slurm/` | one job per script above, plus `build_pools.sh` |
+| `perturb_every_sentence.py` · `evaluate_every_sentence.py` · `upload_every_sentence.py` | one error per sentence: dataset, evaluation, Hub |
+| `slurm/` | one job per script above, plus `build_pools.sh` and `build_every_sentence.sh` |
 | `results/` | committed JSON + plots, see `results/README.md` for provenance |
 | `figures/make_figures.py` | the report figures (French labels) |
 

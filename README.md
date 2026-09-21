@@ -7,7 +7,7 @@ library they share.
 
 | part | package | question | entry points |
 |---|---|---|---|
-| 1 | [`part1_block_alignment/`](part1_block_alignment/README.md) | Concatenate FLORES+ sentences into blocks of k sentences and add one xSIM++ perturbation to one sentence: can an encoder (cosine) or a metric (COMET score) still tell the reference block from the perturbed one as k grows? | `load_flores` → `build_blocks` → `perturb` → `evaluate_encoders` / `evaluate_duel` / `evaluate_comet_score` |
+| 1 | [`part1_block_alignment/`](part1_block_alignment/README.md) | Concatenate FLORES+ sentences into blocks of k sentences and add one xSIM++ perturbation to one sentence: can an encoder (cosine) or a metric (COMET score) still tell the reference block from the perturbed one as k grows? | `load_flores` → `build_blocks` → `perturb` → `evaluate_encoders` / `evaluate_duel` / `evaluate_comet_score`; one error per sentence: `perturb_every_sentence` → `evaluate_every_sentence` |
 | 2 | [`part2_length_training/`](part2_length_training/README.md) | Continue COMET-DA / CometKiwi on training mixes that differ only in composition (sentences, concatenated windows, native documents): what does it buy on validation, held-out and MetaDocEval? | `load_wmt_pools` → `make_mixtures` → `train` → `eval_validation` / `eval_length_profile` / `eval_metadoceval` / `analyze` |
 | 3 | [`part3_biomed_finetune/`](part3_biomed_finetune/README.md) | Fine-tune COMET on Bio-MQM (biomedical MQM annotations) and compare it with the published model per language pair. | `load_bio_mqm` → `slurm/finetune.sh` → `evaluate` → `upload_to_huggingface` |
 
